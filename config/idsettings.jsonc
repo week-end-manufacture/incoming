@@ -1,7 +1,36 @@
 {
-    "src_path":"",
-    "dst_path":"",
-    "queue_format":"YYYY-MM-DD"
-    // comment test //
-    
+                                                                                                    /*
+ _______                             __               _____  __       
+|_     _|.-----.----.-----.--------.|__|.-----.-----.|     \|__|.----.
+ _|   |_ |     |  __|  _  |        ||  ||     |  _  ||  --  |  ||   _|
+|_______||__|__|____|_____|__|__|__||__||__|__|___  ||_____/|__||__|  
+                                              |_____|                 
+                                                                                                    */
+// === Settings ===
+
+    // == Path settings ==
+    // Put your path. e.g." C:\\Users\\user\\Downloads\\"
+        "src_path":"", 
+        "dst_path":"",
+    //  = Encoder settings =
+        "deafult_encoder_is_hb":true, // TRUE: Handbrake, FALSE: FFmpeg
+        "handbrake_presets_path": "./config/handbrake_preset.json",
+        "ffmpeg": null, // not implemented yet.
+
+    // == Filterd file processing settings ==
+    // Add file extension's dictionary filter that you want to filter and send them to process.
+        "video_processing_ext_dict":[".asf", ".avi", ".flv", ".mkv", ".mov", ".mp4", ".mpeg", ".ts", ".webm", ".wmv", ".m4v", ".mpg", ".ts", ".mts", ".m2ts", ".vob", ".evo"], 
+        "image_processing_ext_dict":[".jpg",".jpeg",".png",".gif",".bmp",".tiff",".webp"], 
+        "archive_processing_ext_dict":[".zip",".7z",".rar"],
+
+    // == Sorting settings ==
+        "dst_dir_date_format":"YYYY-MM-DDTHH-mm-ss",
+        "dst_dir_prefix_boolean": false,
+        "dst_dir_prefix":"",
+        "dst_dir_suffix_boolean":false,
+        "dst_dir_suffix":"",
+            
+    // == General settings ==
+        "remove_not_filterd_src_files":false, // TRUE: Move other files, FALSE: Copy other files.
+        "delete_src_file_":false
 }

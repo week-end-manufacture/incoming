@@ -1,6 +1,5 @@
 import argparse
 
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--src_dir_path", help="Source directory path", action="store")

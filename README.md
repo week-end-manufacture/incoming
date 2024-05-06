@@ -65,7 +65,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://unluckystrike.com)
+[![Product Name Screen Shot][product-screenshot]](https://github.com/week-end-manufacture/IncomingDir)
 
 Developers grow up struggling with various problems. This project aims to write a narrative about the process of solving these difficulties and learning through them.
 

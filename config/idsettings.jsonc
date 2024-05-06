@@ -1,7 +1,30 @@
 {
-    "src_path":"",
-    "dst_path":"",
-    "queue_format":"YYYY-MM-DD"
-    // comment test //
+    // === IncomingDir settings ===
+
+    // == Path settings ==
+    // Put source path e.g." C:\\Users\\user\\Downloads\\"
+    "src_path":"", 
+    "dst_path":"", 
+    "log_path":"", // 
+
+    // == Filterd File processing settings ==
+    // Add video extensions that you want to process
+    "video_processing_ext_dic":[".asf", ".avi", ".flv", ".mkv", ".mov", ".mp4", ".mpeg", ".ts", ".webm", ".wmv", ".m4v", ".mpg", ".ts", ".mts", ".m2ts", ".vob", ".evo"], 
+    "handbrake_presets_path": "./config/handbrake_preset.json",
+    // Add image extensions that you want to process
+    "image_processing_ext_dic":[".jpg",".jpeg",".png",".gif",".bmp",".tiff",".webp"], 
+    // Add archive extensions that you want to process
+    "archive_processing_ext":[".zip",".7z",".rar"],
+
+    // == Sorting settings ==
+    "dst_dir_date_format":"YYYY-MM-DDTHH-mm-ss",
+    "dst_dir_prefix_boolean": false,
+    "dst_dir_prefix":"",
+    "dst_dir_suffix_boolean":false,
+    "dst_dir_suffix":"",
     
+    
+    // == General settings ==
+    "remove_not_filterd_src_files":false, // true: Just move other files, false: Copy other files
+    "delete_src_file_":false,
 }

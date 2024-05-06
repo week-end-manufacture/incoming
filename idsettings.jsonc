@@ -1,0 +1,6 @@
+{
+    "src_path":"",
+    "dst_path":"",
+    //dir 생성 규칙//
+    "queue_format":"YYYY-MM-DD",
+}

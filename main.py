@@ -19,12 +19,12 @@
 #   e.g. incomingdir.py
 # 1. file.py 모듈 data/src/src_dir 
 
-import json5
+import json
 
 # jsonc 파일을 읽어서 설정값을 반환한다.
 def load_settings():
-    with open('idsettings.jsonc', 'r') as json_file:
-        settings = json5.load(json_file)
+    with open('idsettings.json', 'r') as json_file:
+        settings = json.load(json_file)
     return settings
 
 # main 함수

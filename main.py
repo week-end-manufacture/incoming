@@ -1,4 +1,5 @@
 import argparse
+import load_settings
 
 def main():
     parser = argparse.ArgumentParser()
@@ -9,21 +10,17 @@ def main():
 
     
     if (args.src_dir_path != None and args.dst_dir_path != None):
-        print(args.src_dir_path)
-        print(args.dst_dir_path)
+        print(args(src_dir_path))
+        print(args(dst_dir_path))
 
         if (args.user_ext != None):
             print(args.user_ext)
     else:
         print("preset use")
 
-    #settings = load_settings()
-    #src_path = settings.get('src_path')
-    #dst_path = settings.get('dst_path')
-
-    #if src_path == dst_path:
-    #    print("src_path와 dst_path는 같을 수 없습니다.")
-    #    return
+idset = load_settings.from_jsonc() # "idset" is a dictionary
+src_dir_path = idset["src_dir_path"]
+dst_dir_path = idset["dst_dir_path"]
 
 if __name__ == "__main__":
     main()

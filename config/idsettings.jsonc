@@ -10,10 +10,10 @@
 
     // == Path settings ==
     // Put your path. e.g." C:\\Users\\user\\Downloads\\"
-        "src_path":"", 
-        "dst_path":"",
+        "src_dir_path":"~/data copy/src", 
+        "dst_dir_path":"~/data copy/dst",
     //  = Encoder settings =
-        "deafult_encoder_is_hb":true, // TRUE: Handbrake, FALSE: FFmpeg
+        "deafult_encoder_is_hb":true, // 'true': Handbrake, 'flase': FFmpeg
         "handbrake_presets_path": "./config/handbrake_preset.json",
         "ffmpeg": null, // not implemented yet.
 
@@ -31,6 +31,6 @@
         "dst_dir_suffix":"",
             
     // == General settings ==
-        "remove_not_filterd_src_files":false, // TRUE: Move other files, FALSE: Copy other files.
+        "remove_not_filterd_src_files":false, // 'true': Move other files, 'false': Copy other files.
         "delete_src_file_":false
 }

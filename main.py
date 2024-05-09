@@ -2,10 +2,16 @@ import argparse
 import env
 
 def main():
-    parser = argparse.ArgumentParser()
+    idset = env.from_jsonc() # "idset" is a dictionary
+    src_dir_path = idset["src_dir_path"]
+    dst_dir_path = idset["dst_dir_path"]
+    incoming_version = idset["version"]
+
+    parser = argparse.ArgumentParser(prog='incoming')
     parser.add_argument("-s", "--src_dir_path", help="Source directory path", action="store")
     parser.add_argument("-d", "--dst_dir_path", help="Destination directory path", action="store")
     parser.add_argument("-e", "--user_ext", help="Extention list", action="store")
+    parser.add_argument("-v", "--version", help="Version", action="version", version=incoming_version)
     args = parser.parse_args()
 
     

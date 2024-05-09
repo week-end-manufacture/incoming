@@ -9,6 +9,7 @@
 // === Settings ===
 
     // == Path settings ==
+        "version":"0.00.1",
     // Put your path. e.g." C:\\Users\\user\\Downloads\\"
         "src_dir_path":"~/data copy/src", 
         "dst_dir_path":"~/data copy/dst",

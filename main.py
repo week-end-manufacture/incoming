@@ -1,11 +1,11 @@
 import argparse
-import env
+import ic_env
 
 def main():
-    idset = env.from_jsonc() # "idset" is a dictionary
-    src_dir_path = idset["src_dir_path"]
-    dst_dir_path = idset["dst_dir_path"]
-    incoming_version = idset["version"]
+    iset = ic_env.settings() # "iset" is a dictionary
+    src_dir_path = iset["src_dir_path"]
+    dst_dir_path = iset["dst_dir_path"]
+    incoming_version = iset["version"]
 
     parser = argparse.ArgumentParser(prog='incoming')
     parser.add_argument("-s", "--src_dir_path", help="Source directory path", action="store")
@@ -23,10 +23,6 @@ def main():
             print(args.user_ext)
     else:
         print("preset use")
-
-idset = env.from_jsonc() # "idset" is a dictionary
-src_dir_path = idset["src_dir_path"]
-dst_dir_path = idset["dst_dir_path"]
 
 if __name__ == "__main__":
     main()

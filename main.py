@@ -1,5 +1,5 @@
 import argparse
-import load_settings
+import env
 
 def main():
     parser = argparse.ArgumentParser()
@@ -18,7 +18,7 @@ def main():
     else:
         print("preset use")
 
-idset = load_settings.from_jsonc() # "idset" is a dictionary
+idset = env.from_jsonc() # "idset" is a dictionary
 src_dir_path = idset["src_dir_path"]
 dst_dir_path = idset["dst_dir_path"]
 

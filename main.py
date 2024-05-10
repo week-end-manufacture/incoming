@@ -2,10 +2,10 @@ import os
 import argparse
 from pathlib import Path
 
-import ic_preprocessing
+from ic_preprocessing import *
 
 def main():
-    pre_processiong = ic_preprocessing.PreProcessing()
+    pre_processiong = PreProcessing()
     ic_settings = pre_processiong.open_ic_settings()
 
     src_dir_path = ic_settings["src_dir_path"]
@@ -53,7 +53,7 @@ def main():
         else:
             print("!!!COPY CAT!!!")
 
-            src_ic_file = []
+            src_ic_filelist = []
 
             for (src_path, src_dir, src_filelist) in os.walk(src_dir_path):
                 for (idx, src_file) in enumerate(src_filelist):
@@ -67,9 +67,11 @@ def main():
                     print("===================================")
 
                     if (cur_ext in filtered_video_ext_dict):
-                        src_ic_file.append(ic_preprocessing.IcFile(src_path, src_file,cur_ext, ic_preprocessing.IcType.VIDEO))
+                        src_ic_filelist.append(IcFile(src_path, src_file,cur_ext, IcType.VIDEO))
 
-            print(src_ic_file)
+            print(src_ic_filelist)
+
+            print("FILE LENGTH: %d" % len(src_ic_filelist))
 
 
 if __name__ == "__main__":

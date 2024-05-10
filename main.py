@@ -1,17 +1,18 @@
 import argparse
-import ic_env
+import ic_preprocessing
 
 def main():
-    iset = ic_env.settings() # "iset" is a dictionary
-    src_dir_path = iset["src_dir_path"]
-    dst_dir_path = iset["dst_dir_path"]
-    incoming_version = iset["version"]
+    pre_processiong = ic_preprocessing.PreProcessing()
+    ic_settings = pre_processiong.open_settings() # "iset" is a dictionary
+    src_dir_path = ic_settings["src_dir_path"]
+    dst_dir_path = ic_settings["dst_dir_path"]
+    incoming_version = ic_settings["version"]
 
     parser = argparse.ArgumentParser(prog='incoming')
     parser.add_argument("-s", "--src_dir_path", help="Source directory path", action="store")
     parser.add_argument("-d", "--dst_dir_path", help="Destination directory path", action="store")
     parser.add_argument("-e", "--user_ext", help="Extention list", action="store")
-    parser.add_argument("-v", "--version", help="Version", action="version", version=incoming_version)
+    parser.add_argument("-v", "--version", help="Version", action="version", version='%(prog)s ' + incoming_version)
     args = parser.parse_args()
 
     

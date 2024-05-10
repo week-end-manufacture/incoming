@@ -13,23 +13,23 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/week-end-manufacture/IncomingDir">
+  <a href="https://github.com/week-end-manufacture/incoming">
     <img src="images/logo.jpeg" alt="Logo" width="360" height="360">
   </a>
 
-  <h3 align="center">Incoming Dir</h3>
+  <h3 align="center">incoming</h3>
 
   <p align="center">
     Quantize your files prjoect
     <br />
-    <a href="https://github.com/week-end-manufacture/IncomingDir"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/week-end-manufacture/incoming"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/week-end-manufacture/IncomingDir">View Project</a>
+    <a href="https://github.com/week-end-manufacture/incoming">View Project</a>
     ·
-    <a href="https://github.com/week-end-manufacture/IncomingDir/issues">Report Bug</a>
+    <a href="https://github.com/week-end-manufacture/incoming/issues">Report Bug</a>
     ·
-    <a href="https://github.com/week-end-manufacture/IncomingDir/issues">Request Feature</a>
+    <a href="https://github.com/week-end-manufacture/incoming/issues">Request Feature</a>
   </p>
 </div>
 
@@ -65,7 +65,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://github.com/week-end-manufacture/IncomingDir)
+[![Product Name Screen Shot][product-screenshot]](https://github.com/week-end-manufacture/incoming)
 
 Developers grow up struggling with various problems. This project aims to write a narrative about the process of solving these difficulties and learning through them.
 
@@ -104,7 +104,7 @@ Perform the following procedure to install the required package.
 
 1. Clone the repo
    ```sh
-   git clone https://github.com/week-end-manufacture/IncomingDir.git
+   git clone https://github.com/week-end-manufacture/incoming.git
    ```
 2. Install Python packages
    ```sh
@@ -119,7 +119,7 @@ Perform the following procedure to install the required package.
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-_For more examples, please refer to the [Documentation](https://unluckystrike.com/swagger)_
+_For more examples, please refer to the [Documentation](https://github.com/week-end-manufacture/incoming)_
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -130,7 +130,7 @@ _For more examples, please refer to the [Documentation](https://unluckystrike.co
 
 - [] Create new issues.
 
-See the [open issues](https://github.com/JoHyukJun/unlucky-strike/issues) for a full list of proposed features (and known issues).
+See the [open issues](https://github.com/week-end-manufacture/incoming/issues) for a full list of proposed features (and known issues).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -181,7 +181,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 WEEK END MANUFACTURE
 
-Project Link: [https://github.com/week-end-manufacture/IncomingDir](https://github.com/week-end-manufacture/IncomingDir)
+Project Link: [https://github.com/week-end-manufacture/incoming](https://github.com/week-end-manufacture/incoming)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -198,18 +198,18 @@ Project Link: [https://github.com/week-end-manufacture/IncomingDir](https://gith
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/week-end-manufacture/IncomingDir.svg?style=for-the-badge
-[contributors-url]: https://github.com/week-end-manufacture/IncomingDir/graphs/contributors
-[activity-shield]: https://img.shields.io/github/commit-activity/m/week-end-manufacture/IncomingDir.svg?style=for-the-badge
-[activity-url]: https://github.com/week-end-manufacture/IncomingDir/pulse
-[forks-shield]: https://img.shields.io/github/forks/week-end-manufacture/IncomingDir.svg?style=for-the-badge
-[forks-url]: https://github.com/week-end-manufacture/IncomingDir/network/members
-[stars-shield]: https://img.shields.io/github/stars/week-end-manufacture/IncomingDir.svg?style=for-the-badge
-[stars-url]: https://github.com/week-end-manufacture/IncomingDir/stargazers
-[issues-shield]: https://img.shields.io/github/issues/week-end-manufacture/IncomingDir.svg?style=for-the-badge
-[issues-url]: https://github.com/week-end-manufacture/IncomingDir/issues
-[license-shield]: https://img.shields.io/github/license/week-end-manufacture/IncomingDir.svg?style=for-the-badge
-[license-url]: https://github.com/week-end-manufacture/IncomingDir/blob/master/LICENSE
+[contributors-shield]: https://img.shields.io/github/contributors/week-end-manufacture/incoming.svg?style=for-the-badge
+[contributors-url]: https://github.com/week-end-manufacture/incoming/graphs/contributors
+[activity-shield]: https://img.shields.io/github/commit-activity/m/week-end-manufacture/incoming.svg?style=for-the-badge
+[activity-url]: https://github.com/week-end-manufacture/incoming/pulse
+[forks-shield]: https://img.shields.io/github/forks/week-end-manufacture/incoming.svg?style=for-the-badge
+[forks-url]: https://github.com/week-end-manufacture/incoming/network/members
+[stars-shield]: https://img.shields.io/github/stars/week-end-manufacture/incoming.svg?style=for-the-badge
+[stars-url]: https://github.com/week-end-manufacture/incoming/stargazers
+[issues-shield]: https://img.shields.io/github/issues/week-end-manufacture/incoming.svg?style=for-the-badge
+[issues-url]: https://github.com/week-end-manufacture/incoming/issues
+[license-shield]: https://img.shields.io/github/license/week-end-manufacture/incoming.svg?style=for-the-badge
+[license-url]: https://github.com/week-end-manufacture/incoming/blob/master/LICENSE
 [product-screenshot]: images/screenshot.png
 [Python]: https://img.shields.io/badge/python-000000?style=for-the-badge&logo=python&logoColor=white
 [Python-url]: https://www.python.org

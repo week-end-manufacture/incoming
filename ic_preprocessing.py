@@ -17,11 +17,32 @@ class PreProcessing:
             iset = json.load(json_file)
         return iset
     
+    def print_video_icfile(self, icfile_list):
+        for (idx, icfile) in enumerate(icfile_list):
+            if (icfile.type == IcType.VIDEO):
+                print("===================================")
+                print("=VIDEO ICFILE======================")
+                print("PATH: %s" % icfile.path)
+                print("FILENAME: %s" % icfile.filename)
+                print("EXTENSION: %s" % icfile.extension)
+                print("===================================")
+
+    def print_image_icfile(self, icfile_list):
+        for (idx, icfile) in enumerate(icfile_list):
+            if (icfile.type == IcType.IMAGE):
+                print("===================================")
+                print("=IMAGE ICFILE======================")
+                print("PATH: %s" % icfile.path)
+                print("FILENAME: %s" % icfile.filename)
+                print("EXTENSION: %s" % icfile.extension)
+                print("===================================")
+    
 
 @unique
 class IcType(Enum):
     VIDEO = 1
-    IMANGE = 2
+    IMAGE = 2
+    ARCHIVE = 3
 
 @dataclass
 class IcFile:

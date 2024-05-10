@@ -37,6 +37,8 @@ def main():
         ic_default = pre_processiong.open_ic_default()
 
         filtered_video_ext_dict = ic_default["filterd_all_ext_dict"]["filtered_video_ext_dict"]
+        filtered_image_ext_dict = ic_default["filterd_all_ext_dict"]["filtered_image_ext_dict"]
+        filtered_archive_ext_dict = ic_default["filterd_all_ext_dict"]["filtered_archive_ext_dict"]
 
         print("filtered_video_ext_dict", filtered_video_ext_dict)
 
@@ -53,7 +55,7 @@ def main():
         else:
             print("!!!COPY CAT!!!")
 
-            src_ic_filelist = []
+            src_icfilelist = []
 
             for (src_path, src_dir, src_filelist) in os.walk(src_dir_path):
                 for (idx, src_file) in enumerate(src_filelist):
@@ -67,11 +69,18 @@ def main():
                     print("===================================")
 
                     if (cur_ext in filtered_video_ext_dict):
-                        src_ic_filelist.append(IcFile(src_path, src_file,cur_ext, IcType.VIDEO))
+                        src_icfilelist.append(IcFile(src_path, src_file,cur_ext, IcType.VIDEO))
+                    elif (cur_ext in filtered_image_ext_dict):
+                        src_icfilelist.append(IcFile(src_path, src_file,cur_ext, IcType.IMAGE))
+                    elif (cur_ext in filtered_archive_ext_dict):
+                        src_icfilelist.append(IcFile(src_path, src_file,cur_ext, IcType.ARCHIVE))
 
-            print(src_ic_filelist)
+            print(src_icfilelist)
 
-            print("FILE LENGTH: %d" % len(src_ic_filelist))
+            print("FILE LENGTH: %d" % len(src_icfilelist))
+
+            pre_processiong.print_video_icfile(src_icfilelist)
+            pre_processiong.print_image_icfile(src_icfilelist)
 
 
 if __name__ == "__main__":

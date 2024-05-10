@@ -1,7 +1,7 @@
 import os
 import shutil
 from datetime import datetime
-import ic_env #main.py 에서 했으면 여긴 안해도 돼나?
+import ic_preprocessing #main.py 에서 했으면 여긴 안해도 돼나?
 
 class FilesGonna: 
     def __init__(self, src_dir, dst_dir):
@@ -22,7 +22,7 @@ class FilesGonna:
                 shutil.copy2(src_file_path, target_file_path)
         
 
-idset = ic_env.from_jsonc()
+idset = ic_preprocessing.from_jsonc()
 src_dir = idset["src_dir_path"]
 dst_dir = idset["dst_dir_path"]
 filterd_ext = idset["filterd_ext_dict"]

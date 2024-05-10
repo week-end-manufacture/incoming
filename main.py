@@ -1,8 +1,9 @@
 import argparse
-import ic_env
+import ic_preprocessing
 
 def main():
-    ic_settings = ic_env.open_settings() # "iset" is a dictionary
+    pre_processiong = ic_preprocessing.PreProcessing()
+    ic_settings = pre_processiong.open_settings() # "iset" is a dictionary
     src_dir_path = ic_settings["src_dir_path"]
     dst_dir_path = ic_settings["dst_dir_path"]
     incoming_version = ic_settings["version"]

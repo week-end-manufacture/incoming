@@ -34,6 +34,12 @@ def main():
         print("SRC_DIR_PATH:[%s]" % src_dir_path)
         print("DST_DIR_PATH:[%s]" % dst_dir_path)
 
+        ic_default = pre_processiong.open_ic_default()
+
+        filtered_video_ext_dict = ic_default["filterd_all_ext_dict"]["filtered_video_ext_dict"]
+
+        print("filtered_video_ext_dict", filtered_video_ext_dict)
+
         if (src_dir_path == dst_dir_path):
             print("!!!SAME PATH PROCEDURE ACTIVATE!!!")
 
@@ -47,13 +53,23 @@ def main():
         else:
             print("!!!COPY CAT!!!")
 
+            src_ic_file = []
+
             for (src_path, src_dir, src_filelist) in os.walk(src_dir_path):
                 for (idx, src_file) in enumerate(src_filelist):
+                    cur_ext = Path(src_file).suffix
+
                     print("===================================")
                     print("PATH: %s" % src_path)
                     print("DIRECTORY: %s" % src_dir)
                     print("FILENAME: %s" % src_file)
+                    print("EXTENSION: %s" % cur_ext)
                     print("===================================")
+
+                    if (cur_ext in filtered_video_ext_dict):
+                        src_ic_file.append(ic_preprocessing.IcFile(src_path, src_file,cur_ext, ic_preprocessing.IcType.VIDEO))
+
+            print(src_ic_file)
 
 
 if __name__ == "__main__":

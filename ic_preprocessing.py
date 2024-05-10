@@ -1,5 +1,6 @@
 import json
 from dataclasses import dataclass, field
+from enum import Enum, unique
 
 
 class PreProcessing:
@@ -12,13 +13,19 @@ class PreProcessing:
         return iset
 
     def open_ic_default(self):
-        with open('./config/ic-preset/ic_settings.json', 'r') as json_file:
+        with open('./config/ic-preset/ic_default.json', 'r') as json_file:
             iset = json.load(json_file)
         return iset
     
 
+@unique
+class IcType(Enum):
+    VIDEO = 1
+    IMANGE = 2
+
 @dataclass
-class IncFile:
+class IcFile:
     path: str
     filename: str
     extension: str
+    type: IcType

@@ -20,8 +20,8 @@ class PreProcessing:
             iset = json.load(json_file)
         return iset
     
-    def open_ic_user_preset(self, user_preset):
-        with open('./config/ic-preset/' + user_preset, 'r') as json_file:
+    def open_ic_preset(self, user_preset):
+        with open('./config/ic-preset/' + user_preset + '.json', 'r') as json_file:
             iset = json.load(json_file)
         return iset
     
@@ -118,6 +118,18 @@ class PreProcessing:
                 print("SIZE: %s" % self.convert_size(icfile.size))
                 print("===================================")
 
+    def print_not_filtered_icfile(self, icfile_list):
+        for (idx, icfile) in enumerate(icfile_list):
+            if (icfile.icexttype == IcType.NOT_FILTERED):
+                print("===================================")
+                print("=NOT FILTERED ICFILE================")
+                print("ABSOLUTE PATH: %s" % icfile.abs_path)
+                print("RELATIVE PATH: %s" % icfile.rel_path)
+                print("FILENAME: %s" % icfile.filename)
+                print("EXTENSION: %s" % icfile.extension)
+                print("SIZE: %s" % self.convert_size(icfile.size))
+                print("===================================")
+
     def get_video_icfile(self, icfile_list):
         retval = []
 
@@ -141,6 +153,15 @@ class PreProcessing:
 
         for (idx, icfile) in enumerate(icfile_list):
             if (icfile.icexttype == IcType.ARCHIVE):
+                retval.append(icfile)  
+
+        return retval
+    
+    def get_not_filtered_icfile(self, icfile_list):
+        retval = []
+
+        for (idx, icfile) in enumerate(icfile_list):
+            if (icfile.icexttype == IcType.NOT_FILTERED):
                 retval.append(icfile)  
 
         return retval

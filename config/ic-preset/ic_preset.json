@@ -1,28 +1,31 @@
 {
-
 "filterd_all_ext_dict":{
 "filtered_video_ext_dict":[".asf", ".avi", ".flv", ".mkv", ".mov", ".mp4", ".mpeg", ".ts", ".webm", ".wmv", ".m4v", ".mpg", ".ts", ".mts", ".m2ts", ".vob", ".evo"], 
-"filtered_image_ext_dict":[".jpg",".jpeg",".png",".gif",".bmp",".tiff",".webp"]
+"filtered_image_ext_dict":[".jpg",".jpeg",".png",".bmp",".tiff",".tif"]
 },
 "video_process":{
-    "deafult_encoder_is_hb":null,
-    "handbrake_presets_path": "./config/handbrake_preset.json",
+    "deafult_encoder_is_HandBrake":null,
+    "HandBrake_presets_path": "./config/handbrake_preset.json",
     "ffmpeg": false,
-    "output_format":"mp4",
-    "output_quality":"23"
+    "ffmpeg_output_format":"",
+    "ffmpeg_output_quality":""
 },
-"imamge_process":{
+"image_process":{
     "output_format":"jpg",
     "output_quality":"85",
-    "remove_metadata":"flase",
-    "assign_untagged_icc_profile_to_sRGB":"true"
+    "assign_untagged_icc_profile_to_sRGB":"true",
+    "remove_all_exif_data":"flase",
+    "remove_only_gps_exif_data":"false"
 },
+"archive_process":{
+    "compress_after_process":"false"
+},
+
 "dst_dir_date_format":"YYYY-MM-DDTHH-mm-ss",
 "dst_dir_prefix_boolean": false,
 "dst_dir_prefix":"",
 "dst_dir_suffix_boolean":false,
 "dst_dir_suffix":"",
-
 "remove_not_filterd_src_files":false,
 "delete_src_file_":false
 }

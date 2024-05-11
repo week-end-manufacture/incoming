@@ -91,6 +91,7 @@ def main():
             pre_processiong.print_video_icfile(src_icfilelist)
             pre_processiong.print_image_icfile(src_icfilelist)
             pre_processiong.print_archive_icfile(src_icfilelist)
+            pre_processiong.print_not_filtered_icfile(src_icfilelist)
 
 
 if __name__ == "__main__":

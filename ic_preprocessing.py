@@ -1,4 +1,5 @@
 import json
+import math
 from dataclasses import dataclass, field
 from enum import Enum, unique
 
@@ -25,6 +26,7 @@ class PreProcessing:
                 print("PATH: %s" % icfile.path)
                 print("FILENAME: %s" % icfile.filename)
                 print("EXTENSION: %s" % icfile.extension)
+                print("SIZE: %s" % self.convert_size(icfile.size))
                 print("===================================")
 
     def print_image_icfile(self, icfile_list):
@@ -35,6 +37,7 @@ class PreProcessing:
                 print("PATH: %s" % icfile.path)
                 print("FILENAME: %s" % icfile.filename)
                 print("EXTENSION: %s" % icfile.extension)
+                print("SIZE: %s" % self.convert_size(icfile.size))
                 print("===================================")
 
     def print_image_icfile(self, icfile_list):
@@ -45,6 +48,7 @@ class PreProcessing:
                 print("PATH: %s" % icfile.path)
                 print("FILENAME: %s" % icfile.filename)
                 print("EXTENSION: %s" % icfile.extension)
+                print("SIZE: %s" % self.convert_size(icfile.size))
                 print("===================================")
 
     def get_video_icfile(self, icfile_list):
@@ -74,6 +78,17 @@ class PreProcessing:
 
         return retval
     
+    def convert_size(self, size_bytes):
+        if size_bytes == 0:
+            return "0B"
+        
+        size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+        i = int(math.floor(math.log(size_bytes, 1024)))
+        p = math.pow(1024, i)
+        s = round(size_bytes / p, 2)
+
+        return "%s %s" % (s, size_name[i])
+    
 
 @unique
 class IcType(Enum):
@@ -88,3 +103,4 @@ class IcFile:
     filename: str
     extension: str
     ictype: IcType
+    size: int

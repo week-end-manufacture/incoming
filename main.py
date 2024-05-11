@@ -59,21 +59,24 @@ def main():
 
             for (src_path, src_dir, src_filelist) in os.walk(src_dir_path):
                 for (idx, src_file) in enumerate(src_filelist):
+                    abs_path = src_path + '/' + src_file
                     cur_ext = Path(src_file).suffix
+                    cur_size = os.path.getsize(abs_path)
 
                     print("===================================")
                     print("PATH: %s" % src_path)
                     print("DIRECTORY: %s" % src_dir)
                     print("FILENAME: %s" % src_file)
                     print("EXTENSION: %s" % cur_ext)
+                    print("SIZE: %d" % cur_size)
                     print("===================================")
 
                     if (cur_ext in filtered_video_ext_dict):
-                        src_icfilelist.append(IcFile(src_path, src_file,cur_ext, IcType.VIDEO))
+                        src_icfilelist.append(IcFile(src_path, src_file, cur_ext, IcType.VIDEO, cur_size))
                     elif (cur_ext in filtered_image_ext_dict):
-                        src_icfilelist.append(IcFile(src_path, src_file,cur_ext, IcType.IMAGE))
+                        src_icfilelist.append(IcFile(src_path, src_file, cur_ext, IcType.IMAGE, cur_size))
                     elif (cur_ext in filtered_archive_ext_dict):
-                        src_icfilelist.append(IcFile(src_path, src_file,cur_ext, IcType.ARCHIVE))
+                        src_icfilelist.append(IcFile(src_path, src_file, cur_ext, IcType.ARCHIVE, cur_size))
 
             print(src_icfilelist)
 

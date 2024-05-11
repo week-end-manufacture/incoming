@@ -30,7 +30,7 @@ def main():
         if (args.user_ext != None):
             print(args.user_ext)
     elif (args.user_preset != None):
-        ic_preset = pre_processiong.open_ic_preset(args.user_prest)
+        ic_preset = pre_processiong.open_ic_preset(args.user_preset)
     else:
         print("!!!DEFAULT USE!!!")
         print("SRC_DIR_PATH:[%s]" % src_dir_path)

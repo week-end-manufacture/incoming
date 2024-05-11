@@ -34,7 +34,7 @@ def main():
         print("SRC_DIR_PATH:[%s]" % src_dir_path)
         print("DST_DIR_PATH:[%s]" % dst_dir_path)
 
-        ic_preset = pre_processiong.open_ic_preset(args.user_preset)
+        ic_preset = pre_processiong.open_ic_user_preset(args.user_preset)
 
         filtered_video_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_video_ext_dict"]
         filtered_image_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_image_ext_dict"]
@@ -65,7 +65,7 @@ def main():
         print("SRC_DIR_PATH:[%s]" % src_dir_path)
         print("DST_DIR_PATH:[%s]" % dst_dir_path)
 
-        ic_preset = pre_processiong.open_ic_preset()
+        ic_preset = pre_processiong.open_ic_default_preset()
 
         filtered_video_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_video_ext_dict"]
         filtered_image_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_image_ext_dict"]

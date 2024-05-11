@@ -15,12 +15,12 @@ class PreProcessing:
             iset = json.load(json_file)
         return iset
 
-    def open_ic_preset(self):
+    def open_ic_default_preset(self):
         with open('./config/ic-preset/ic_preset.json', 'r') as json_file:
             iset = json.load(json_file)
         return iset
     
-    def open_ic_preset(self, user_preset):
+    def open_ic_user_preset(self, user_preset):
         with open('./config/ic-preset/' + user_preset, 'r') as json_file:
             iset = json.load(json_file)
         return iset

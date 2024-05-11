@@ -36,6 +36,43 @@ class PreProcessing:
                 print("FILENAME: %s" % icfile.filename)
                 print("EXTENSION: %s" % icfile.extension)
                 print("===================================")
+
+    def print_image_icfile(self, icfile_list):
+        for (idx, icfile) in enumerate(icfile_list):
+            if (icfile.type == IcType.ARCHIVE):
+                print("===================================")
+                print("=ARCHIVE ICFILE======================")
+                print("PATH: %s" % icfile.path)
+                print("FILENAME: %s" % icfile.filename)
+                print("EXTENSION: %s" % icfile.extension)
+                print("===================================")
+
+    def get_video_icfile(self, icfile_list):
+        retval = []
+
+        for (idx, icfile) in enumerate(icfile_list):
+            if (icfile.type == IcType.VIDEO):
+                retval.append(icfile)  
+
+        return retval
+    
+    def get_image_icfile(self, icfile_list):
+        retval = []
+
+        for (idx, icfile) in enumerate(icfile_list):
+            if (icfile.type == IcType.IMAGE):
+                retval.append(icfile)  
+
+        return retval
+    
+    def get_archive_icfile(self, icfile_list):
+        retval = []
+
+        for (idx, icfile) in enumerate(icfile_list):
+            if (icfile.type == IcType.ARCHIVE):
+                retval.append(icfile)  
+
+        return retval
     
 
 @unique

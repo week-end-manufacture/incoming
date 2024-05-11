@@ -38,7 +38,7 @@ def main():
 
         filtered_video_ext_dict = ic_default["filterd_all_ext_dict"]["filtered_video_ext_dict"]
         filtered_image_ext_dict = ic_default["filterd_all_ext_dict"]["filtered_image_ext_dict"]
-        filtered_archive_ext_dict = ic_default["filterd_all_ext_dict"]["filtered_archive_ext_dict"]
+        filtered_archive_ext_dict = ["zip", "rar", "7z"]
 
         print("filtered_video_ext_dict", filtered_video_ext_dict)
 

@@ -23,7 +23,8 @@ class PreProcessing:
             if (icfile.icexttype == IcType.VIDEO):
                 print("===================================")
                 print("=VIDEO ICFILE======================")
-                print("PATH: %s" % icfile.path)
+                print("ABSOLUTE PATH: %s" % icfile.abs_path)
+                print("RELATIVE PATH: %s" % icfile.rel_path)
                 print("FILENAME: %s" % icfile.filename)
                 print("EXTENSION: %s" % icfile.extension)
                 print("SIZE: %s" % self.convert_size(icfile.size))
@@ -34,7 +35,8 @@ class PreProcessing:
             if (icfile.icexttype == IcType.IMAGE):
                 print("===================================")
                 print("=IMAGE ICFILE======================")
-                print("PATH: %s" % icfile.path)
+                print("ABSOLUTE PATH: %s" % icfile.abs_path)
+                print("RELATIVE PATH: %s" % icfile.rel_path)
                 print("FILENAME: %s" % icfile.filename)
                 print("EXTENSION: %s" % icfile.extension)
                 print("SIZE: %s" % self.convert_size(icfile.size))
@@ -45,7 +47,8 @@ class PreProcessing:
             if (icfile.icexttype == IcType.ARCHIVE):
                 print("===================================")
                 print("=ARCHIVE ICFILE======================")
-                print("PATH: %s" % icfile.path)
+                print("ABSOLUTE PATH: %s" % icfile.abs_path)
+                print("RELATIVE PATH: %s" % icfile.rel_path)
                 print("FILENAME: %s" % icfile.filename)
                 print("EXTENSION: %s" % icfile.extension)
                 print("SIZE: %s" % self.convert_size(icfile.size))
@@ -101,7 +104,8 @@ class IcType(Enum):
 
 @dataclass
 class IcFile:
-    path: str
+    abs_path: str
+    rel_path: str
     filename: str
     extension: str
     ictype: IcType

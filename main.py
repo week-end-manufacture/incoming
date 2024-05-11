@@ -61,6 +61,7 @@ def main():
                     abs_path = src_path + '/' + src_file
                     cur_ext = Path(src_file).suffix
                     cur_size = os.path.getsize(abs_path)
+                    rel_path = src_path.replace(src_dir_path, '')
 
                     print("===================================")
                     print("PATH: %s" % src_path)
@@ -72,6 +73,7 @@ def main():
 
                     if (cur_ext in filtered_video_ext_dict):
                         src_icfilelist.append(IcFile(src_path,
+                                                     rel_path,
                                                      src_file,
                                                      cur_ext,
                                                      IcType.INCOMING,
@@ -79,6 +81,7 @@ def main():
                                                      cur_size))
                     elif (cur_ext in filtered_image_ext_dict):
                         src_icfilelist.append(IcFile(src_path,
+                                                     rel_path,
                                                      src_file,
                                                      cur_ext,
                                                      IcType.INCOMING,
@@ -86,6 +89,7 @@ def main():
                                                      cur_size))
                     elif (cur_ext in filtered_archive_ext_dict):
                         src_icfilelist.append(IcFile(src_path,
+                                                     rel_path,
                                                      src_file,
                                                      cur_ext,
                                                      IcType.INCOMING,

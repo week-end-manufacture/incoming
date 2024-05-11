@@ -33,7 +33,7 @@ def main():
         print("SRC_DIR_PATH:[%s]" % src_dir_path)
         print("DST_DIR_PATH:[%s]" % dst_dir_path)
 
-        ic_default = pre_processiong.open_ic_default()
+        ic_preset = pre_processiong.open_ic_preset() # $ ic -p "프리셋이름" 에 대응하는 ./config/ic-preset/프리셋이름.json 가져오는 함수필요할듯
 
         filtered_video_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_video_ext_dict"]
         filtered_image_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_image_ext_dict"]

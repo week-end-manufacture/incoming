@@ -1,12 +1,25 @@
 {
-"deafult_encoder_is_hb":null,
-"handbrake_presets_path": "./config/handbrake_preset.json",
-"ffmpeg": false,
 
 "filterd_all_ext_dict":{
 "filtered_video_ext_dict":[".asf", ".avi", ".flv", ".mkv", ".mov", ".mp4", ".mpeg", ".ts", ".webm", ".wmv", ".m4v", ".mpg", ".ts", ".mts", ".m2ts", ".vob", ".evo"], 
-"filtered_image_ext_dict":[".jpg",".jpeg",".png",".gif",".bmp",".tiff",".webp"], 
-"filtered_archive_ext_dict":[".zip",".7z",".rar"]
+"filtered_image_ext_dict":[".jpg",".jpeg",".png",".gif",".bmp",".tiff",".webp"]
+},
+"video_process":{
+    "deafult_encoder_is_hb":null,
+    "handbrake_presets_path": "./config/handbrake_preset.json",
+    "ffmpeg": false,
+    "output_format":"mp4",
+    "output_quality":"23",
+    "remove_metadata":"true",
+    "assign_missing_icc_profile_policy":"true",
+    "video_assgign_icc_":"sRGB"
+},
+"imamge_process":{
+    "output_format":"jpg",
+    "output_quality":"85",
+    "remove_metadata":"flase",
+    "assign_missing_icc_profile_policy":"true",
+    "image_assgign_icc_":"sRGB"
 },
 "dst_dir_date_format":"YYYY-MM-DDTHH-mm-ss",
 "dst_dir_prefix_boolean": false,

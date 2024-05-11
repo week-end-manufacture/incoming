@@ -33,10 +33,10 @@ def main():
         print("SRC_DIR_PATH:[%s]" % src_dir_path)
         print("DST_DIR_PATH:[%s]" % dst_dir_path)
 
-        ic_default = pre_processiong.open_ic_default()
+        ic_preset = pre_processiong.open_ic_preset()
 
-        filtered_video_ext_dict = ic_default["filterd_all_ext_dict"]["filtered_video_ext_dict"]
-        filtered_image_ext_dict = ic_default["filterd_all_ext_dict"]["filtered_image_ext_dict"]
+        filtered_video_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_video_ext_dict"]
+        filtered_image_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_image_ext_dict"]
         filtered_archive_ext_dict = ["zip", "rar", "7z"]
 
         print("filtered_video_ext_dict", filtered_video_ext_dict)

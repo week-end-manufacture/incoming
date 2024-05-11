@@ -9,17 +9,13 @@
     "handbrake_presets_path": "./config/handbrake_preset.json",
     "ffmpeg": false,
     "output_format":"mp4",
-    "output_quality":"23",
-    "remove_metadata":"true",
-    "assign_missing_icc_profile_policy":"true",
-    "video_assgign_icc_":"sRGB"
+    "output_quality":"23"
 },
 "imamge_process":{
     "output_format":"jpg",
     "output_quality":"85",
     "remove_metadata":"flase",
-    "assign_missing_icc_profile_policy":"true",
-    "image_assgign_icc_":"sRGB"
+    "assign_untagged_icc_profile_to_sRGB":"true"
 },
 "dst_dir_date_format":"YYYY-MM-DDTHH-mm-ss",
 "dst_dir_prefix_boolean": false,

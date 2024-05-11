@@ -18,6 +18,7 @@ def main():
     parser = argparse.ArgumentParser(prog='incoming')
     parser.add_argument("-s", "--src_dir_path", help="Source directory path", action="store")
     parser.add_argument("-d", "--dst_dir_path", help="Destination directory path", action="store")
+    parser.add_argument("-p", "--user_preset", help="User preset", action="store")
     parser.add_argument("-e", "--user_ext", help="Extention list", action="store")
     parser.add_argument("-v", "--version", help="Version", action="version", version='%(prog)s ' + incoming_version)
     args = parser.parse_args()
@@ -28,12 +29,14 @@ def main():
 
         if (args.user_ext != None):
             print(args.user_ext)
+    elif (args.user_preset != None):
+        ic_preset = pre_processiong.open_ic_preset(args.user_prest)
     else:
         print("!!!DEFAULT USE!!!")
         print("SRC_DIR_PATH:[%s]" % src_dir_path)
         print("DST_DIR_PATH:[%s]" % dst_dir_path)
 
-        ic_preset = pre_processiong.open_ic_preset() # $ ic -p "프리셋이름" 에 대응하는 ./config/ic-preset/프리셋이름.json 가져오는 함수필요할듯
+        ic_preset = pre_processiong.open_ic_preset()
 
         filtered_video_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_video_ext_dict"]
         filtered_image_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_image_ext_dict"]
@@ -44,65 +47,13 @@ def main():
         if (src_dir_path == dst_dir_path):
             print("!!!SAME PATH PROCEDURE ACTIVATE!!!")
 
-            for (src_path, src_dir, src_file) in os.walk(src_dir_path):
-                for (idx, src_file) in enumerate(src_filelist):
-                    print("===================================")
-                    print("PATH: %s" % src_path)
-                    print("DIRECTORY: %s" % src_dir)
-                    print("FILENAME: %s" % src_file)
-                    print("===================================")
         else:
             print("!!!COPY CAT!!!")
 
-            src_icfilelist = []
-
-            for (src_path, src_dir, src_filelist) in os.walk(src_dir_path):
-                for (idx, src_file) in enumerate(src_filelist):
-                    abs_path = src_path + '/' + src_file
-                    cur_ext = Path(src_file).suffix
-                    cur_size = os.path.getsize(abs_path)
-                    rel_path = src_path.replace(src_dir_path, '')
-
-                    print("===================================")
-                    print("PATH: %s" % src_path)
-                    print("DIRECTORY: %s" % src_dir)
-                    print("FILENAME: %s" % src_file)
-                    print("EXTENSION: %s" % cur_ext)
-                    print("SIZE: %d" % cur_size)
-                    print("===================================")
-
-                    if (cur_ext in filtered_video_ext_dict):
-                        src_icfilelist.append(IcFile(src_path,
-                                                     rel_path,
-                                                     src_file,
-                                                     cur_ext,
-                                                     IcType.INCOMING,
-                                                     IcType.VIDEO,
-                                                     cur_size))
-                    elif (cur_ext in filtered_image_ext_dict):
-                        src_icfilelist.append(IcFile(src_path,
-                                                     rel_path,
-                                                     src_file,
-                                                     cur_ext,
-                                                     IcType.INCOMING,
-                                                     IcType.IMAGE,
-                                                     cur_size))
-                    elif (cur_ext in filtered_archive_ext_dict):
-                        src_icfilelist.append(IcFile(src_path,
-                                                     rel_path,
-                                                     src_file,
-                                                     cur_ext,
-                                                     IcType.INCOMING,
-                                                     IcType.ARCHIVE,
-                                                     cur_size))
-                    else:
-                        src_icfilelist.append(IcFile(src_path,
-                                                     rel_path,
-                                                     src_file,
-                                                     cur_ext,
-                                                     IcType.INCOMING,
-                                                     IcType.NOT_FILTERED,
-                                                     cur_size))
+            src_icfilelist = pre_processiong.ic_serach(src_dir_path,
+                                                     filtered_video_ext_dict,
+                                                     filtered_image_ext_dict,
+                                                     filtered_archive_ext_dict)
 
             print(src_icfilelist)
 

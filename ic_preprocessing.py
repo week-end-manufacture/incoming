@@ -1,5 +1,7 @@
 import json
 import math
+import os
+from pathlib import Path
 from dataclasses import dataclass, field
 from enum import Enum, unique, auto
 
@@ -17,6 +19,68 @@ class PreProcessing:
         with open('./config/ic-preset/ic_preset.json', 'r') as json_file:
             iset = json.load(json_file)
         return iset
+    
+    def open_ic_preset(self, user_preset):
+        with open('./config/ic-preset/' + user_preset, 'r') as json_file:
+            iset = json.load(json_file)
+        return iset
+    
+    def ic_serach(self,
+                  src_dir_path,
+                  filtered_video_ext_dict,
+                  filtered_image_ext_dict,
+                  filtered_archive_ext_dict):
+        src_icfilelist = []
+
+        for (src_path, src_dir, src_filelist) in os.walk(src_dir_path):
+                for (idx, src_file) in enumerate(src_filelist):
+                    abs_path = src_path + '/' + src_file
+                    cur_ext = Path(src_file).suffix
+                    cur_size = os.path.getsize(abs_path)
+                    rel_path = src_path.replace(src_dir_path, '')
+
+                    print("===================================")
+                    print("PATH: %s" % src_path)
+                    print("DIRECTORY: %s" % src_dir)
+                    print("FILENAME: %s" % src_file)
+                    print("EXTENSION: %s" % cur_ext)
+                    print("SIZE: %d" % cur_size)
+                    print("===================================")
+
+                    if (cur_ext in filtered_video_ext_dict):
+                        src_icfilelist.append(IcFile(src_path,
+                                                     rel_path,
+                                                     src_file,
+                                                     cur_ext,
+                                                     IcType.INCOMING,
+                                                     IcType.VIDEO,
+                                                     cur_size))
+                    elif (cur_ext in filtered_image_ext_dict):
+                        src_icfilelist.append(IcFile(src_path,
+                                                     rel_path,
+                                                     src_file,
+                                                     cur_ext,
+                                                     IcType.INCOMING,
+                                                     IcType.IMAGE,
+                                                     cur_size))
+                    elif (cur_ext in filtered_archive_ext_dict):
+                        src_icfilelist.append(IcFile(src_path,
+                                                     rel_path,
+                                                     src_file,
+                                                     cur_ext,
+                                                     IcType.INCOMING,
+                                                     IcType.ARCHIVE,
+                                                     cur_size))
+                    else:
+                        src_icfilelist.append(IcFile(src_path,
+                                                     rel_path,
+                                                     src_file,
+                                                     cur_ext,
+                                                     IcType.INCOMING,
+                                                     IcType.NOT_FILTERED,
+                                                     cur_size))
+                        
+        return src_icfilelist
     
     def print_video_icfile(self, icfile_list):
         for (idx, icfile) in enumerate(icfile_list):
@@ -95,12 +159,12 @@ class PreProcessing:
 
 @unique
 class IcType(Enum):
-    VIDEO = auto()
-    IMAGE = auto()
-    ARCHIVE = auto()
-    NOT_FILTERED = auto()
-    INCOMING = auto()
-    OUTGOING = auto()
+    VIDEO = 1
+    IMAGE = 2
+    ARCHIVE = 3
+    NOT_FILTERED = 4
+    INCOMING = 5
+    OUTGOING = 6
 
 
 @dataclass

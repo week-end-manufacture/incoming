@@ -22,7 +22,6 @@ def main():
     parser.add_argument("-v", "--version", help="Version", action="version", version='%(prog)s ' + incoming_version)
     args = parser.parse_args()
 
-    
     if (args.src_dir_path != None and args.dst_dir_path != None):
         print(args(src_dir_path))
         print(args(dst_dir_path))
@@ -99,6 +98,7 @@ def main():
 
             pre_processiong.print_video_icfile(src_icfilelist)
             pre_processiong.print_image_icfile(src_icfilelist)
+            pre_processiong.print_archive_icfile(src_icfilelist)
 
 
 if __name__ == "__main__":

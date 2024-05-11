@@ -40,7 +40,7 @@ class PreProcessing:
                 print("SIZE: %s" % self.convert_size(icfile.size))
                 print("===================================")
 
-    def print_image_icfile(self, icfile_list):
+    def print_archive_icfile(self, icfile_list):
         for (idx, icfile) in enumerate(icfile_list):
             if (icfile.icexttype == IcType.ARCHIVE):
                 print("===================================")
@@ -56,7 +56,7 @@ class PreProcessing:
 
         for (idx, icfile) in enumerate(icfile_list):
             if (icfile.icexttype == IcType.VIDEO):
-                retval.append(icfile)  
+                retval.append(icfile)
 
         return retval
     

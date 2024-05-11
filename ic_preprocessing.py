@@ -19,7 +19,7 @@ class PreProcessing:
     
     def print_video_icfile(self, icfile_list):
         for (idx, icfile) in enumerate(icfile_list):
-            if (icfile.type == IcType.VIDEO):
+            if (icfile.ictype == IcType.VIDEO):
                 print("===================================")
                 print("=VIDEO ICFILE======================")
                 print("PATH: %s" % icfile.path)
@@ -29,7 +29,7 @@ class PreProcessing:
 
     def print_image_icfile(self, icfile_list):
         for (idx, icfile) in enumerate(icfile_list):
-            if (icfile.type == IcType.IMAGE):
+            if (icfile.ictype == IcType.IMAGE):
                 print("===================================")
                 print("=IMAGE ICFILE======================")
                 print("PATH: %s" % icfile.path)
@@ -39,7 +39,7 @@ class PreProcessing:
 
     def print_image_icfile(self, icfile_list):
         for (idx, icfile) in enumerate(icfile_list):
-            if (icfile.type == IcType.ARCHIVE):
+            if (icfile.ictype == IcType.ARCHIVE):
                 print("===================================")
                 print("=ARCHIVE ICFILE======================")
                 print("PATH: %s" % icfile.path)
@@ -51,7 +51,7 @@ class PreProcessing:
         retval = []
 
         for (idx, icfile) in enumerate(icfile_list):
-            if (icfile.type == IcType.VIDEO):
+            if (icfile.ictype == IcType.VIDEO):
                 retval.append(icfile)  
 
         return retval
@@ -60,7 +60,7 @@ class PreProcessing:
         retval = []
 
         for (idx, icfile) in enumerate(icfile_list):
-            if (icfile.type == IcType.IMAGE):
+            if (icfile.ictype == IcType.IMAGE):
                 retval.append(icfile)  
 
         return retval
@@ -69,7 +69,7 @@ class PreProcessing:
         retval = []
 
         for (idx, icfile) in enumerate(icfile_list):
-            if (icfile.type == IcType.ARCHIVE):
+            if (icfile.ictype == IcType.ARCHIVE):
                 retval.append(icfile)  
 
         return retval
@@ -81,9 +81,10 @@ class IcType(Enum):
     IMAGE = 2
     ARCHIVE = 3
 
+
 @dataclass
 class IcFile:
     path: str
     filename: str
     extension: str
-    type: IcType
+    ictype: IcType

@@ -72,11 +72,26 @@ def main():
                     print("===================================")
 
                     if (cur_ext in filtered_video_ext_dict):
-                        src_icfilelist.append(IcFile(src_path, src_file, cur_ext, IcType.VIDEO, cur_size))
+                        src_icfilelist.append(IcFile(src_path,
+                                                     src_file,
+                                                     cur_ext,
+                                                     IcType.INCOMING,
+                                                     IcType.VIDEO,
+                                                     cur_size))
                     elif (cur_ext in filtered_image_ext_dict):
-                        src_icfilelist.append(IcFile(src_path, src_file, cur_ext, IcType.IMAGE, cur_size))
+                        src_icfilelist.append(IcFile(src_path,
+                                                     src_file,
+                                                     cur_ext,
+                                                     IcType.INCOMING,
+                                                     IcType.IMAGE,
+                                                     cur_size))
                     elif (cur_ext in filtered_archive_ext_dict):
-                        src_icfilelist.append(IcFile(src_path, src_file, cur_ext, IcType.ARCHIVE, cur_size))
+                        src_icfilelist.append(IcFile(src_path,
+                                                     src_file,
+                                                     cur_ext,
+                                                     IcType.INCOMING,
+                                                     IcType.ARCHIVE,
+                                                     cur_size))
 
             print(src_icfilelist)
 

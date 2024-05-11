@@ -1,7 +1,7 @@
 import json
 import math
 from dataclasses import dataclass, field
-from enum import Enum, unique
+from enum import Enum, unique, auto
 
 
 class PreProcessing:
@@ -46,7 +46,7 @@ class PreProcessing:
         for (idx, icfile) in enumerate(icfile_list):
             if (icfile.icexttype == IcType.ARCHIVE):
                 print("===================================")
-                print("=ARCHIVE ICFILE======================")
+                print("=ARCHIVE ICFILE====================")
                 print("ABSOLUTE PATH: %s" % icfile.abs_path)
                 print("RELATIVE PATH: %s" % icfile.rel_path)
                 print("FILENAME: %s" % icfile.filename)
@@ -95,11 +95,12 @@ class PreProcessing:
 
 @unique
 class IcType(Enum):
-    VIDEO = 1
-    IMAGE = 2
-    ARCHIVE = 3
-    INCOMING = 4
-    OUTGOING = 5
+    VIDEO = auto()
+    IMAGE = auto()
+    ARCHIVE = auto()
+    NOT_FILTERED = auto()
+    INCOMING = auto()
+    OUTGOING = auto()
 
 
 @dataclass

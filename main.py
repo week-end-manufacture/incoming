@@ -33,7 +33,7 @@ def main():
         print("SRC_DIR_PATH:[%s]" % src_dir_path)
         print("DST_DIR_PATH:[%s]" % dst_dir_path)
 
-        ic_default = pre_processiong.open_ic_default()
+        ic_default = pre_processiong.open_ic_prest()
 
         filtered_video_ext_dict = ic_default["filterd_all_ext_dict"]["filtered_video_ext_dict"]
         filtered_image_ext_dict = ic_default["filterd_all_ext_dict"]["filtered_image_ext_dict"]
@@ -94,6 +94,14 @@ def main():
                                                      cur_ext,
                                                      IcType.INCOMING,
                                                      IcType.ARCHIVE,
+                                                     cur_size))
+                    else:
+                        src_icfilelist.append(IcFile(src_path,
+                                                     rel_path,
+                                                     src_file,
+                                                     cur_ext,
+                                                     IcType.INCOMING,
+                                                     IcType.NOT_FILTERED,
                                                      cur_size))
 
             print(src_icfilelist)

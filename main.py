@@ -15,6 +15,8 @@ def main():
     dst_dir_path = ic_settings["dst_dir_path"]
     incoming_version = ic_settings["version"]
 
+    filtered_archive_ext_dict = [".zip", ".rar", ".7z"]
+
     ic_logger.debug("!!!START ICOMING PROGRAM!!!")
 
     """
@@ -54,7 +56,6 @@ def main():
 
         filtered_video_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_video_ext_dict"]
         filtered_image_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_image_ext_dict"]
-        filtered_archive_ext_dict = ["zip", "rar", "7z"]
 
         print("filtered_video_ext_dict", filtered_video_ext_dict)
 
@@ -85,7 +86,6 @@ def main():
 
         filtered_video_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_video_ext_dict"]
         filtered_image_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_image_ext_dict"]
-        filtered_archive_ext_dict = ["zip", "rar", "7z"]
 
         print("filtered_video_ext_dict", filtered_video_ext_dict)
 

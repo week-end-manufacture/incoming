@@ -32,33 +32,35 @@ class PreProcessing:
         with open('./config/ic-preset/' + user_preset + '.json', 'r') as json_file:
             iset = json.load(json_file)
         return iset
-    
-    def is_image(self, file_path):
-        try:
-            Image.open(file_path)
-            return True
-        except IOError:
-            return False
         
     def extract_if_contains_images(self,
+                                   abs_path,
                                    src_path,
-                                   archive_type):
+                                   basename,
+                                   archive_type,
+                                   filtered_image_ext_dict):
         image_count = 0
 
         if archive_type == '.zip':
-            with zipfile.ZipFile(src_path, 'r') as archive:
+            with zipfile.ZipFile(abs_path, 'r') as archive:
                 for file in archive.namelist():
-                    if self.is_image(file):
+                    cur_ext = Path(file).suffix
+
+                    if (cur_ext in filtered_image_ext_dict):
                         image_count += 1
         elif archive_type == '.rar':
-            with rarfile.RarFile(src_path, 'r') as archive:
+            with rarfile.RarFile(abs_path, 'r') as archive:
                 for file in archive.namelist():
-                    if self.is_image(file):
+                    cur_ext = Path(file).suffix
+                    
+                    if (cur_ext in filtered_image_ext_dict):
                         image_count += 1
         elif archive_type == '.7z':
-            with py7zr.SevenZipFile(src_path, mode='r') as archive:
+            with py7zr.SevenZipFile(abs_path, mode='r') as archive:
                 for file in archive.getnames():
-                    if self.is_image(file):
+                    cur_ext = Path(file).suffix
+                    
+                    if (cur_ext in filtered_image_ext_dict):
                         image_count += 1
 
         if image_count >= 2:
@@ -68,14 +70,26 @@ class PreProcessing:
                 os.makedirs(tmp_path)
 
             if archive_type == '.zip':
-                with zipfile.ZipFile(src_path, 'r') as archive:
-                    archive.extractall()
+                dst_path = os.path.join(tmp_path, Path(basename).stem + '_zip')
+                if not os.path.exists(dst_path):
+                    os.makedirs(dst_path)
+
+                with zipfile.ZipFile(abs_path, 'r') as archive:
+                    archive.extractall(dst_path)
             elif archive_type == '.rar':
-                with rarfile.RarFile(src_path, 'r') as archive:
-                    archive.extractall()
+                dst_path = os.path.join(tmp_path, Path(basename).stem + '_zip')
+                if not os.path.exists(dst_path):
+                    os.makedirs(dst_path)
+
+                with rarfile.RarFile(abs_path, 'r') as archive:
+                    archive.extractall(dst_path)
             elif archive_type == '.7z':
-                with py7zr.SevenZipFile(src_path, mode='r') as archive:
-                    archive.extractall()
+                dst_path = os.path.join(tmp_path, Path(basename).stem + '_zip')
+                if not os.path.exists(dst_path):
+                    os.makedirs(dst_path)
+
+                with py7zr.SevenZipFile(abs_path, mode='r') as archive:
+                    archive.extractall(dst_path)
 
             self.ic_logger.info("OK EXTRACT ARCHIVE FILE")
 
@@ -87,14 +101,21 @@ class PreProcessing:
 
     def ic_unzipper(self,
                     src_dir_path,
+                    filtered_image_ext_dict,
                     filtered_archive_ext_dict):
         for (src_path, src_dir, src_filelist) in os.walk(src_dir_path):
             for (idx, src_file) in enumerate(src_filelist):
                 abs_path = src_path + '/' + src_file
+                cur_basename = os.path.basename(src_file)
                 cur_ext = Path(src_file).suffix
+
+                print("UNZIPPER CUR_EXT:" + cur_ext)
+
+                print(filtered_archive_ext_dict)
+
                 
-                if (cur_ext == filtered_archive_ext_dict):
-                    self.extract_if_contains_images(abs_path, cur_ext)
+                if (cur_ext in filtered_archive_ext_dict):
+                    self.extract_if_contains_images(abs_path, src_path, cur_basename, cur_ext, filtered_image_ext_dict)
 
         
     def ic_serach(self,
@@ -104,7 +125,7 @@ class PreProcessing:
                   filtered_archive_ext_dict):
         src_icfilelist = []
 
-        self.ic_unzipper(src_dir_path, filtered_archive_ext_dict)
+        self.ic_unzipper(src_dir_path, filtered_image_ext_dict, filtered_archive_ext_dict)
 
         for (src_path, src_dir, src_filelist) in os.walk(src_dir_path):
                 for (idx, src_file) in enumerate(src_filelist):

@@ -50,8 +50,9 @@ class PreProcessing:
                         image_count += 1
         elif archive_type == '.rar':
             with rarfile.RarFile(abs_path, 'r') as archive:
-                for file in archive.namelist():
-                    cur_ext = Path(file).suffix
+                for f in archive.infolist():
+                    print(f.filename)
+                    cur_ext = Path(f.filename).suffix
                     
                     if (cur_ext in filtered_image_ext_dict):
                         image_count += 1
@@ -77,14 +78,14 @@ class PreProcessing:
                 with zipfile.ZipFile(abs_path, 'r') as archive:
                     archive.extractall(dst_path)
             elif archive_type == '.rar':
-                dst_path = os.path.join(tmp_path, Path(basename).stem + '_zip')
+                dst_path = os.path.join(tmp_path, Path(basename).stem + '_rar')
                 if not os.path.exists(dst_path):
                     os.makedirs(dst_path)
 
                 with rarfile.RarFile(abs_path, 'r') as archive:
                     archive.extractall(dst_path)
             elif archive_type == '.7z':
-                dst_path = os.path.join(tmp_path, Path(basename).stem + '_zip')
+                dst_path = os.path.join(tmp_path, Path(basename).stem + '_7z')
                 if not os.path.exists(dst_path):
                     os.makedirs(dst_path)
 

@@ -1,9 +1,14 @@
 import json
 import math
 import os
+import zipfile
+import rarfile
+import py7zr
+
 from pathlib import Path
 from dataclasses import dataclass, field
 from enum import Enum, unique, auto
+from PIL import Image
 
 from ic_log import *
 
@@ -28,12 +33,73 @@ class PreProcessing:
             iset = json.load(json_file)
         return iset
     
+    def is_image(self, file_path):
+        try:
+            Image.open(file_path)
+            return True
+        except IOError:
+            return False
+        
+    def extract_if_contains_images(self,
+                                   src_path,
+                                   archive_type):
+        image_count = 0
+
+        if archive_type == '.zip':
+            with zipfile.ZipFile(src_path, 'r') as archive:
+                for file in archive.namelist():
+                    if self.is_image(file):
+                        image_count += 1
+        elif archive_type == '.rar':
+            with rarfile.RarFile(src_path, 'r') as archive:
+                for file in archive.namelist():
+                    if self.is_image(file):
+                        image_count += 1
+        elif archive_type == '.7z':
+            with py7zr.SevenZipFile(src_path, mode='r') as archive:
+                for file in archive.getnames():
+                    if self.is_image(file):
+                        image_count += 1
+
+        if image_count >= 2:
+            if archive_type == '.zip':
+                with zipfile.ZipFile(src_path, 'r') as archive:
+                    archive.extractall()
+            elif archive_type == '.rar':
+                with rarfile.RarFile(src_path, 'r') as archive:
+                    archive.extractall()
+            elif archive_type == '.7z':
+                with py7zr.SevenZipFile(src_path, mode='r') as archive:
+                    archive.extractall()
+
+            self.ic_logger.info("OK EXTRACT ARCHIVE FILE")
+
+            return (1)
+        else:
+            self.ic_logger.info("UNDER IMAGE FILE COUNT IN ARCHIVE")
+
+            return (-1)
+
+    def ic_unzipper(self,
+                    src_dir_path,
+                    filtered_archive_ext_dict):
+        for (src_path, src_dir, src_filelist) in os.walk(src_dir_path):
+            for (idx, src_file) in enumerate(src_filelist):
+                abs_path = src_path + '/' + src_file
+                cur_ext = Path(src_file).suffix
+                
+                if (cur_ext == filtered_archive_ext_dict):
+                    self.extract_if_contains_images(abs_path, cur_ext)
+
+        
     def ic_serach(self,
                   src_dir_path,
                   filtered_video_ext_dict,
                   filtered_image_ext_dict,
                   filtered_archive_ext_dict):
         src_icfilelist = []
+
+        self.ic_unzipper(src_dir_path, filtered_archive_ext_dict)
 
         for (src_path, src_dir, src_filelist) in os.walk(src_dir_path):
                 for (idx, src_file) in enumerate(src_filelist):
@@ -88,50 +154,50 @@ class PreProcessing:
     def print_video_icfile(self, icfile_list):
         for (idx, icfile) in enumerate(icfile_list):
             if (icfile.icexttype == IcType.VIDEO):
-                print("===================================")
-                print("=VIDEO ICFILE======================")
-                print("ABSOLUTE PATH: %s" % icfile.abs_path)
-                print("RELATIVE PATH: %s" % icfile.rel_path)
-                print("FILENAME: %s" % icfile.filename)
-                print("EXTENSION: %s" % icfile.extension)
-                print("SIZE: %s" % self.convert_size(icfile.size))
-                print("===================================")
+                self.ic_logger.info("===================================")
+                self.ic_logger.info("=VIDEO ICFILE======================")
+                self.ic_logger.info("ABSOLUTE PATH: %s" % icfile.abs_path)
+                self.ic_logger.info("RELATIVE PATH: %s" % icfile.rel_path)
+                self.ic_logger.info("FILENAME: %s" % icfile.filename)
+                self.ic_logger.info("EXTENSION: %s" % icfile.extension)
+                self.ic_logger.info("SIZE: %s" % self.convert_size(icfile.size))
+                self.ic_logger.info("===================================")
 
     def print_image_icfile(self, icfile_list):
         for (idx, icfile) in enumerate(icfile_list):
             if (icfile.icexttype == IcType.IMAGE):
-                print("===================================")
-                print("=IMAGE ICFILE======================")
-                print("ABSOLUTE PATH: %s" % icfile.abs_path)
-                print("RELATIVE PATH: %s" % icfile.rel_path)
-                print("FILENAME: %s" % icfile.filename)
-                print("EXTENSION: %s" % icfile.extension)
-                print("SIZE: %s" % self.convert_size(icfile.size))
-                print("===================================")
+                self.ic_logger.info("===================================")
+                self.ic_logger.info("=IMAGE ICFILE======================")
+                self.ic_logger.info("ABSOLUTE PATH: %s" % icfile.abs_path)
+                self.ic_logger.info("RELATIVE PATH: %s" % icfile.rel_path)
+                self.ic_logger.info("FILENAME: %s" % icfile.filename)
+                self.ic_logger.info("EXTENSION: %s" % icfile.extension)
+                self.ic_logger.info("SIZE: %s" % self.convert_size(icfile.size))
+                self.ic_logger.info("===================================")
 
     def print_archive_icfile(self, icfile_list):
         for (idx, icfile) in enumerate(icfile_list):
             if (icfile.icexttype == IcType.ARCHIVE):
-                print("===================================")
-                print("=ARCHIVE ICFILE====================")
-                print("ABSOLUTE PATH: %s" % icfile.abs_path)
-                print("RELATIVE PATH: %s" % icfile.rel_path)
-                print("FILENAME: %s" % icfile.filename)
-                print("EXTENSION: %s" % icfile.extension)
-                print("SIZE: %s" % self.convert_size(icfile.size))
-                print("===================================")
+                self.ic_logger.info("===================================")
+                self.ic_logger.info("=ARCHIVE ICFILE====================")
+                self.ic_logger.info("ABSOLUTE PATH: %s" % icfile.abs_path)
+                self.ic_logger.info("RELATIVE PATH: %s" % icfile.rel_path)
+                self.ic_logger.info("FILENAME: %s" % icfile.filename)
+                self.ic_logger.info("EXTENSION: %s" % icfile.extension)
+                self.ic_logger.info("SIZE: %s" % self.convert_size(icfile.size))
+                self.ic_logger.info("===================================")
 
     def print_not_filtered_icfile(self, icfile_list):
         for (idx, icfile) in enumerate(icfile_list):
             if (icfile.icexttype == IcType.NOT_FILTERED):
-                print("===================================")
-                print("=NOT FILTERED ICFILE================")
-                print("ABSOLUTE PATH: %s" % icfile.abs_path)
-                print("RELATIVE PATH: %s" % icfile.rel_path)
-                print("FILENAME: %s" % icfile.filename)
-                print("EXTENSION: %s" % icfile.extension)
-                print("SIZE: %s" % self.convert_size(icfile.size))
-                print("===================================")
+                self.ic_logger.info("===================================")
+                self.ic_logger.info("=NOT FILTERED ICFILE================")
+                self.ic_logger.info("ABSOLUTE PATH: %s" % icfile.abs_path)
+                self.ic_logger.info("RELATIVE PATH: %s" % icfile.rel_path)
+                self.ic_logger.info("FILENAME: %s" % icfile.filename)
+                self.ic_logger.info("EXTENSION: %s" % icfile.extension)
+                self.ic_logger.info("SIZE: %s" % self.convert_size(icfile.size))
+                self.ic_logger.info("===================================")
 
     def get_video_icfile(self, icfile_list):
         retval = []

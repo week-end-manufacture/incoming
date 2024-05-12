@@ -32,6 +32,11 @@ def main():
         src_dir_path = args(src_dir_path)
         dst_dir_path = args(dst_dir_path)
 
+        if (not os.path.exists(src_dir_path) or not os.path.exists(src_dir_path)):
+            ic_logger.warning("INVALID PATH")
+
+            return (-1)
+
         print("SRC_DIR_PATH:[%s]" % src_dir_path)
         print("DST_DIR_PATH:[%s]" % dst_dir_path)
 
@@ -39,8 +44,11 @@ def main():
             print(args.user_ext)
     elif (args.user_preset != None):
         print("!!!USER PRESET USE!!!")
-        print("SRC_DIR_PATH:[%s]" % src_dir_path)
-        print("DST_DIR_PATH:[%s]" % dst_dir_path)
+
+        if (not os.path.exists(src_dir_path) or not os.path.exists(src_dir_path)):
+            ic_logger.warning("INVALID PATH")
+
+            return (-1)
 
         ic_preset = pre_processiong.open_ic_user_preset(args.user_preset)
 

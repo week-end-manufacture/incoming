@@ -24,8 +24,11 @@ def main():
     args = parser.parse_args()
 
     if (args.src_dir_path != None and args.dst_dir_path != None):
-        print(args(src_dir_path))
-        print(args(dst_dir_path))
+        src_dir_path = args(src_dir_path)
+        dst_dir_path = args(dst_dir_path)
+
+        print("SRC_DIR_PATH:[%s]" % src_dir_path)
+        print("DST_DIR_PATH:[%s]" % dst_dir_path)
 
         if (args.user_ext != None):
             print(args.user_ext)

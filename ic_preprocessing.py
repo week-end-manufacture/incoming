@@ -180,12 +180,12 @@ class PreProcessing:
 
 @unique
 class IcType(Enum):
-    VIDEO = 1
-    IMAGE = 2
-    ARCHIVE = 3
-    NOT_FILTERED = 4
-    INCOMING = 5
-    OUTGOING = 6
+    VIDEO = auto()
+    IMAGE = auto()
+    ARCHIVE = auto()
+    NOT_FILTERED = auto()
+    INCOMING = auto()
+    OUTGOING = auto()
 
 
 @dataclass

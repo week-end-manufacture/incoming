@@ -1,2 +1,13 @@
-json5==0.9.25
+Brotli==1.1.0
+colorlog==6.8.2
+inflate64==1.0.0
+multivolumefile==0.2.3
 pillow==10.3.0
+psutil==5.9.8
+py7zr==0.21.0
+pybcj==1.0.2
+pycryptodomex==3.20.0
+pyppmd==1.1.0
+pyzstd==0.15.10
+rarfile==4.2
+texttable==1.7.0

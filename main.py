@@ -62,13 +62,27 @@ def main():
         if (src_dir_path == dst_dir_path):
             print("!!!SAME PATH PROCEDURE ACTIVATE!!!")
 
+            src_icfilelist = pre_processiong.ic_serach(src_dir_path,
+                                                       dst_dir_path,
+                                                       filtered_video_ext_dict,
+                                                       filtered_image_ext_dict,
+                                                       filtered_archive_ext_dict)
+
+            print(src_icfilelist)
+
+            print("FILE LENGTH: %d" % len(src_icfilelist))
+
+            pre_processiong.print_video_icfile(src_icfilelist)
+            pre_processiong.print_image_icfile(src_icfilelist)
+            pre_processiong.print_archive_icfile(src_icfilelist)
         else:
             print("!!!COPY CAT!!!")
 
             src_icfilelist = pre_processiong.ic_serach(src_dir_path,
-                                                     filtered_video_ext_dict,
-                                                     filtered_image_ext_dict,
-                                                     filtered_archive_ext_dict)
+                                                       dst_dir_path,
+                                                       filtered_video_ext_dict,
+                                                       filtered_image_ext_dict,
+                                                       filtered_archive_ext_dict)
 
             print(src_icfilelist)
 
@@ -92,13 +106,30 @@ def main():
         if (src_dir_path == dst_dir_path):
             print("!!!SAME PATH PROCEDURE ACTIVATE!!!")
 
+            src_icfilelist = pre_processiong.ic_serach(src_dir_path,
+                                                       dst_dir_path,
+                                                       filtered_video_ext_dict,
+                                                       filtered_image_ext_dict,
+                                                       filtered_archive_ext_dict)
+
+            print(src_icfilelist)
+
+            print("FILE LENGTH: %d" % len(src_icfilelist))
+
+            pre_processiong.print_video_icfile(src_icfilelist)
+            pre_processiong.print_image_icfile(src_icfilelist)
+            pre_processiong.print_archive_icfile(src_icfilelist)
+            pre_processiong.print_not_filtered_icfile(src_icfilelist)
+
+            pre_processiong.create_dummy_icfilelist(src_icfilelist)
         else:
             print("!!!COPY CAT!!!")
 
             src_icfilelist = pre_processiong.ic_serach(src_dir_path,
-                                                     filtered_video_ext_dict,
-                                                     filtered_image_ext_dict,
-                                                     filtered_archive_ext_dict)
+                                                       dst_dir_path,
+                                                       filtered_video_ext_dict,
+                                                       filtered_image_ext_dict,
+                                                       filtered_archive_ext_dict)
 
             print(src_icfilelist)
 

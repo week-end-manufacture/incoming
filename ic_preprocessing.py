@@ -62,6 +62,11 @@ class PreProcessing:
                         image_count += 1
 
         if image_count >= 2:
+            tmp_path = os.path.join(src_path, 'outgoing_archive')
+
+            if not os.path.exists(tmp_path):
+                os.makedirs(tmp_path)
+
             if archive_type == '.zip':
                 with zipfile.ZipFile(src_path, 'r') as archive:
                     archive.extractall()

@@ -5,10 +5,13 @@ from pathlib import Path
 from dataclasses import dataclass, field
 from enum import Enum, unique, auto
 
+from ic_log import *
+
 
 class PreProcessing:
     def __init__(self) -> None:
-        pass
+        self.ic_logger_instance = IcLogger()
+        self.ic_logger = self.ic_logger_instance.init_logger(__name__)
 
     def open_ic_settings(self):
         with open('./config/ic_settings.json', 'r') as json_file:
@@ -39,13 +42,13 @@ class PreProcessing:
                     cur_size = os.path.getsize(abs_path)
                     rel_path = src_path.replace(src_dir_path, '')
 
-                    print("===================================")
-                    print("PATH: %s" % src_path)
-                    print("DIRECTORY: %s" % src_dir)
-                    print("FILENAME: %s" % src_file)
-                    print("EXTENSION: %s" % cur_ext)
-                    print("SIZE: %d" % cur_size)
-                    print("===================================")
+                    self.ic_logger.debug("===================================")
+                    self.ic_logger.debug("PATH: %s" % src_path)
+                    self.ic_logger.debug("DIRECTORY: %s" % src_dir)
+                    self.ic_logger.debug("FILENAME: %s" % src_file)
+                    self.ic_logger.debug("EXTENSION: %s" % cur_ext)
+                    self.ic_logger.debug("SIZE: %d" % cur_size)
+                    self.ic_logger.debug("===================================")
 
                     if (cur_ext in filtered_video_ext_dict):
                         src_icfilelist.append(IcFile(src_path,

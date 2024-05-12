@@ -3,14 +3,19 @@ import argparse
 from pathlib import Path
 
 from ic_preprocessing import *
+from ic_log import *
 
 def main():
     pre_processiong = PreProcessing()
+    ic_logger_instance = IcLogger()
+    ic_logger = ic_logger_instance.init_logger(__name__)
     ic_settings = pre_processiong.open_ic_settings()
 
     src_dir_path = ic_settings["src_dir_path"]
     dst_dir_path = ic_settings["dst_dir_path"]
     incoming_version = ic_settings["version"]
+
+    ic_logger.debug("!!!START ICOMING PROGRAM!!!")
 
     """
         명령어 설정

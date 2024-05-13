@@ -1,5 +1,20 @@
 {
 "version":"0.00.1",
-"src_dir_path":"/Volumes/JO004THI001/JO004THI001/jo-data/test", 
-"dst_dir_path":"/Volumes/JO004THI001/JO004THI001/jo-data/test"
+
+"src_dir_path":"/Users/leejunho/Documents/demo/sample_files copy", 
+"dst_dir_path":"/Users/leejunho/Documents/demo/sample_files copy",
+
+"open_dst_dir_when_done":false,
+
+"logging":{
+    "create_log_dst_dir_toggle":true,
+    "log_filename":"incoming.log",
+    "custom_log_file_path":""
+},
+"output_filename_appending":{
+    "prefix_toggle": false,
+    "prefix":"",
+    "suffix_toggle":false,
+    "suffix":""
+}
 }

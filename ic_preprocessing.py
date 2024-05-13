@@ -288,6 +288,8 @@ class PreProcessing:
                 len = dst_icfile.write(dummy)
                 dst_icfile.close()
 
+                dst_icfile.ictype = IcType.OUTGOING
+
 @unique
 class IcType(Enum):
     VIDEO = auto()

@@ -25,13 +25,13 @@ class PreProcessing:
 
     def open_ic_default_preset(self):
         with open('./config/ic-preset/ic_preset.json', 'r') as json_file:
-            idps = json.load(json_file)
-        return idps
+            ipre = json.load(json_file)
+        return ipre
     
     def open_ic_user_preset(self, user_preset):
         with open('./config/ic-preset/' + user_preset + '.json', 'r') as json_file:
-            iups = json.load(json_file)
-        return iups
+            ipre = json.load(json_file)
+        return ipre
         
     def extract_if_contains_images(self,
                                    abs_path,

@@ -1,9 +1,9 @@
 {
 "version":"0.00.1",
 
-"src_dir_path":"/Users/leejunho/Documents/demo/sample_files copy", 
-"dst_dir_path":"/Users/leejunho/Documents/demo/sample_files copy",
-
+"src_dir_path":"", 
+"dst_dir_path":"",
+"default_preset_path":"./config/ic-preset/ic_preset.json",
 "open_dst_dir_when_done":false,
 
 "logging":{

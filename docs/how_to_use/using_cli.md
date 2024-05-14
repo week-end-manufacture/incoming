@@ -6,6 +6,19 @@ has_children: true
 permalink: /docs/using-cli
 ---
 
+## Processing Example
+```bash
+> incoming
+```
+Starting incoming program. Depending on the setting value of `ic_settings.json` files
+```bash
+> incoming --opensettings
+```
+
+```bash
+> incoming -i "your/source/path" -o "your/destination/path"
+```
+
 # Command line reference
 
 To make it as easy as possible to write documentation in plain Markdown, most UI components are styled using default Markdown elements with few additional CSS classes needed.

@@ -24,7 +24,9 @@ class PreProcessing:
         return iset
 
     def open_ic_default_preset(self):
-        with open('./config/ic-preset/ic_preset.json', 'r') as json_file:
+        settings = self.open_ic_settings()
+        default_preset_path = settings["default_preset_path"]
+        with open(default_preset_path, 'r') as json_file:
             ipre = json.load(json_file)
         return ipre
     

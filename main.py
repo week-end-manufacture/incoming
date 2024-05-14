@@ -25,13 +25,17 @@ def main():
         명령어 설정
     """
     parser = argparse.ArgumentParser(prog='incoming')
-    parser.add_argument("-s", "--src_dir_path", help="Source directory path", action="store")
-    parser.add_argument("-d", "--dst_dir_path", help="Destination directory path", action="store")
+    parser.add_argument("-i", "--src_dir_path", help="Source directory path", action="store")
+    parser.add_argument("-o", "--dst_dir_path", help="Destination directory path", action="store")
     parser.add_argument("-p", "--user_preset", help="User preset", action="store")
+    parser.add_argument("-d", "--dummy", help="Create dummy file", action="store_true")
     parser.add_argument("-e", "--user_ext", help="Extention list", action="store")
     parser.add_argument("-v", "--version", help="Version", action="version", version='%(prog)s ' + incoming_version)
     args = parser.parse_args()
 
+    """
+        MAIN LOGIC
+    """
     if (args.src_dir_path != None and args.dst_dir_path != None):
         src_dir_path = args(src_dir_path)
         dst_dir_path = args(dst_dir_path)
@@ -123,7 +127,8 @@ def main():
             pre_processiong.print_archive_icfile(src_icfilelist)
             pre_processiong.print_not_filtered_icfile(src_icfilelist)
 
-            pre_processiong.create_dummy_icfilelist(src_icfilelist)
+            if (args.dummy):
+                pre_processiong.create_dummy_icfilelist(src_icfilelist)
         else:
             print("!!!COPY CAT!!!")
 

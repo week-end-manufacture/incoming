@@ -12,7 +12,6 @@ def main():
     ic_logger = ic_logger_instance.init_logger(__name__)
     ic_settings = pre_processiong.open_ic_settings()
 
-    ic_imgae = ImageProcessor()
 
     src_dir_path = ic_settings["src_dir_path"]
     dst_dir_path = ic_settings["dst_dir_path"]

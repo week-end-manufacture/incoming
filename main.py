@@ -29,7 +29,6 @@ def main():
     parser.add_argument("-o", "--dst_dir_path", help="Destination directory path", action="store")
     parser.add_argument("-p", "--user_preset", help="User preset", action="store")
     parser.add_argument("-d", "--dummy", help="Create dummy file", action="store_true")
-    parser.add_argument("-e", "--user_ext", help="Extention list", action="store")
     parser.add_argument("-v", "--version", help="Version", action="version", version='%(prog)s ' + incoming_version)
     args = parser.parse_args()
 
@@ -48,8 +47,6 @@ def main():
         ic_logger.info("SRC_DIR_PATH:[%s]" % src_dir_path)
         ic_logger.info("DST_DIR_PATH:[%s]" % dst_dir_path)
 
-        if (args.user_ext != None):
-            ic_logger.info(args.user_ext)
     elif (args.user_preset != None):
         ic_logger.info("!!!USER PRESET USE!!!")
         ic_logger.info("=IC PREPROCESSING START=")

@@ -1,8 +1,11 @@
 from PIL import Image, ImageCms
 
 class ImageProcessor:
-    def __init__(self, image_path):
-        self.image = Image.open(image_path)
+    def __init__(self):
+        pass
+
+    def image_open(self, image_path):
+        return Image.open(image_path)
 
     def image_process(self):
         if self.preset['image_process_toggle']:

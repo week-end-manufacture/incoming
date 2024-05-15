@@ -6,36 +6,40 @@ from ic_preprocessing import *
 class ImageProcessor:
     def __init__(self, image_icfile, ic_image_preset):
         self.image_icfile = image_icfile
-        self.iamge_preset = ic_image_preset
+        self.image_preset = ic_image_preset
 
     def image_open(self, image_path):
         return Image.open(image_path)
+    
+    def image_mode_converter(self, ic_image):
+        retval = ic_image
+
+        if (self.image_preset["output_ext"] == ".jpg" and ic_image.mode == "RGBA"):
+            retval = retval.convert('RGB')
+        elif (self.image_preset["output_ext"] == ".png" and ic_image.mode == "RGB"):
+            retval = retval.convert('RGBA')
+
+        return retval
 
     def ic_image_process(self):
-        if self.iamge_preset['image_process_toggle']:
+        if self.image_preset['image_process_toggle']:
             src_image_abs_path = os.path.join(self.image_icfile.src_path, self.image_icfile.filename)
-            dst_image_abs_path = os.path.join(self.image_icfile.dst_path, self.image_icfile.filename)
+            dst_image_abs_path = os.path.join(self.image_icfile.dst_path, Path(self.image_icfile.filename).stem + self.image_preset["output_ext"])
             dst_image_path = self.image_icfile.dst_path
 
             ic_image = self.image_open(src_image_abs_path)
 
-            if self.iamge_preset['assign_untagged_icc_profile_to_sRGB']:
-                ic_image_profile = self.assign_untagged_icc_profile_to_sRGB(ic_image)
+            ic_image = self.image_mode_converter(ic_image)
 
-            """
-            if self.iamge_preset['remove_only_gps_exif_data']:
-                self.remove_only_gps_exif_data()
+            if self.image_preset['remove_only_gps_exif_data']:
+                ic_image = self.remove_only_gps_exif_data(ic_image)
 
-            if self.iamge_preset['remove_all_exif_data']:
-                self.remove_all_exif_data()
-            """
-
-            print("ic_image_profile: %s" % ic_image_profile)
+            if self.image_preset['remove_all_exif_data']:
+                ic_image = self.remove_all_exif_data(ic_image)
 
             self.save_processed_image(ic_image,
                                       dst_image_abs_path,
-                                      dst_image_path,
-                                      ic_image_profile)
+                                      dst_image_path)
 
     def assign_untagged_icc_profile_to_sRGB(self, ic_image):
         retval = None
@@ -51,17 +55,27 @@ class ImageProcessor:
             return retval
 
     def remove_only_gps_exif_data(self, ic_image):
-        if 'exif' in self.image.info:
-            exif_dict = Image._getexif(self.image)
+        retval = ic_image
+
+        if 'exif' in retval.info:
+            exif_dict = Image._getexif(retval)
             if 34853 in exif_dict:  # "34853" is a pointer to the GPS information IFD
                 del exif_dict[34853]
-            self.image.info['exif'] = Image._makeexif(exif_dict)
+            retval.info['exif'] = Image._makeexif(exif_dict)
+
+        return retval
 
     def remove_all_exif_data(self, ic_image):
-        self.image.info.pop('exif', None)
+        retval = ic_image
 
-    def save_processed_image(self, ic_image, dst_image_abs_path, dst_image_path, ic_image_profile):
+        retval.info.pop('exif', None)
+
+        return retval
+
+    def save_processed_image(self, ic_image, dst_image_abs_path, dst_image_path):
         if not os.path.exists(dst_image_path):
             os.makedirs(dst_image_path)
 
-        ic_image.save(dst_image_abs_path, icc_profile=ic_image_profile, quality=85)
+        print("dst_image_abs_path:%s" % dst_image_abs_path)
+
+        ic_image.save(dst_image_abs_path, quality=self.image_preset["output_quality"])

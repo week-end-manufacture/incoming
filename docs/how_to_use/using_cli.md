@@ -7,6 +7,10 @@ permalink: /docs/using-cli
 ---
 
 # CLI Example
+`src_dir_path` = input =  -i
+<br>
+`dst_dir_path` = output = -o
+
 ## Case 1. `src_dir_path` = `dst_dir_path`
 ### 1.1. Directory(Folder)
 If your input is a directory path and `src_dir_path` = `dst_dir_path`, Here.
@@ -39,8 +43,9 @@ Go to 1.1.1.
 >
 #### 1.1.3.
 ```bash
-$ incoming -o "
+~/ic_demo/input_path/ $ incoming -o "~/ic_demo/output_path"
 ```
+
 >
 ### 1.2. Single File
 You can also convert single file.

@@ -23,9 +23,7 @@ class PreProcessing:
             iset = json.load(json_file)
         return iset
 
-    def open_ic_default_preset(self):
-        settings = self.open_ic_settings()
-        default_preset_path = settings["default_preset_path"]
+    def open_ic_default_preset(self, default_preset_path):
         with open(default_preset_path, 'r') as json_file:
             ipre = json.load(json_file)
         return ipre
@@ -110,7 +108,7 @@ class PreProcessing:
             for (idx, src_file) in enumerate(src_filelist):
                 abs_path = src_path + '/' + src_file
                 cur_basename = os.path.basename(src_file)
-                cur_ext = Path(src_file).suffix
+                cur_ext = Path(src_file).suffix.lower()
 
                 if (cur_ext in filtered_archive_ext_dict):
                     self.extract_if_contains_images(abs_path, src_path, cur_basename, cur_ext, filtered_image_ext_dict)
@@ -134,7 +132,7 @@ class PreProcessing:
         for (src_path, src_dir, src_filelist) in os.walk(src_dir_path):
                 for (idx, src_file) in enumerate(src_filelist):
                     src_abs_path = src_path + '/' + src_file
-                    cur_ext = Path(src_file).suffix
+                    cur_ext = Path(src_file).suffix.lower()
                     cur_size = os.path.getsize(src_abs_path)
                     rel_path = src_path.replace(src_dir_path, '')
                     cur_dst_path = os.path.join(dst_dir_path, rel_path[1:])
@@ -230,7 +228,7 @@ class PreProcessing:
                 self.ic_logger.info("SIZE: %s" % self.convert_size(icfile.size))
                 self.ic_logger.info("===================================")
 
-    def get_video_icfile(self, icfile_list):
+    def get_video_icfilelist(self, icfile_list):
         retval = []
 
         for (idx, icfile) in enumerate(icfile_list):
@@ -239,7 +237,7 @@ class PreProcessing:
 
         return retval
     
-    def get_image_icfile(self, icfile_list):
+    def get_image_icfilelist(self, icfile_list):
         retval = []
 
         for (idx, icfile) in enumerate(icfile_list):
@@ -248,7 +246,7 @@ class PreProcessing:
 
         return retval
     
-    def get_archive_icfile(self, icfile_list):
+    def get_archive_icfilelist(self, icfile_list):
         retval = []
 
         for (idx, icfile) in enumerate(icfile_list):
@@ -257,7 +255,7 @@ class PreProcessing:
 
         return retval
     
-    def get_not_filtered_icfile(self, icfile_list):
+    def get_not_filtered_icfilelist(self, icfile_list):
         retval = []
 
         for (idx, icfile) in enumerate(icfile_list):
@@ -290,7 +288,7 @@ class PreProcessing:
                 len = dst_icfile.write(dummy)
                 dst_icfile.close()
 
-                dst_icfile.ictype = IcType.OUTGOING
+                dst_icfile.ictype = IcType.DUMMY
 
 @unique
 class IcType(Enum):
@@ -300,6 +298,7 @@ class IcType(Enum):
     NOT_FILTERED = auto()
     INCOMING = auto()
     OUTGOING = auto()
+    DUMMY = auto()
 
 
 @dataclass

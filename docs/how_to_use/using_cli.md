@@ -6,18 +6,58 @@ has_children: true
 permalink: /docs/using-cli
 ---
 
-## Processing Example
+# CLI Example
+`src_dir_path` = input =  -i
+<br>
+`dst_dir_path` = output = -o
+
+## Case 1. `src_dir_path` = `dst_dir_path`
+### 1.1. Directory(Folder)
+If your input is a directory path and `src_dir_path` = `dst_dir_path`, Here.
+>
+#### 1.1.1. 
 ```bash
-> incoming
+# Only input without output
+$ incoming -i "~/ic_demo/input_path"
 ```
-Starting incoming program. Depending on the setting value of `ic_settings.json` files
+or
 ```bash
-> incoming --opensettings
+# If you set "src_dir_path" == "dst_dir_path" on `ic_settings.json`
+$ incoming
+```
+Result
+```
+~/ic_demo
+    /input_path
+    /input_path-ic
+```
+- $ic will make directory in `src_dir_path`'s parent.
+- set name {prefix} + {`src_dir_path`'s name} + {suffix}. 
+- The suffinx named '-ic' is setted by default. You can change in `ic_settings.json`
+>
+#### 1.1.2.
+```bash
+$ incoming -i "~/ic_demo/input_path" -o "~/ic_demo/input_path"
+```
+Go to 1.1.1.
+>
+#### 1.1.3.
+```bash
+~/ic_demo/input_path/ $ incoming -o "~/ic_demo/output_path"
 ```
 
+>
+### 1.2. Single File
+You can also convert single file.
+>
+#### 1.2.1. 
 ```bash
-> incoming -i "your/source/path" -o "your/destination/path"
+# single files
 ```
+
+## Case #2. Source path ≠ Destination path
+
+
 
 # Command line reference
 

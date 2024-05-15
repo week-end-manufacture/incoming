@@ -19,10 +19,10 @@ class ImageProcessor:
 
             ic_image = self.image_open(src_image_abs_path)
 
-            """
             if self.iamge_preset['assign_untagged_icc_profile_to_sRGB']:
-                self.assign_untagged_icc_profile_to_sRGB()
+                ic_image_profile = self.assign_untagged_icc_profile_to_sRGB(ic_image)
 
+            """
             if self.iamge_preset['remove_only_gps_exif_data']:
                 self.remove_only_gps_exif_data()
 
@@ -30,15 +30,25 @@ class ImageProcessor:
                 self.remove_all_exif_data()
             """
 
-            self.save_processed_image(ic_image, dst_image_abs_path, dst_image_path)
+            print("ic_image_profile: %s" % ic_image_profile)
+
+            self.save_processed_image(ic_image,
+                                      dst_image_abs_path,
+                                      dst_image_path,
+                                      ic_image_profile)
 
     def assign_untagged_icc_profile_to_sRGB(self, ic_image):
-        retval: Image = None
+        retval = None
 
-        srgb_profile = ImageCms.createProfile("sRGB")
-        retval = ImageCms.profileToProfile(ic_image, srgb_profile, outputMode='RGB')
+        retval = ic_image.info.get("icc_profile")
 
-        return retval
+        if (retval == None):
+            srgb_profile = ImageCms.createProfile("sRGB")
+            retval = ImageCms.ImageCmsProfile(srgb_profile).tobytes()
+
+            return retval
+        else:
+            return retval
 
     def remove_only_gps_exif_data(self, ic_image):
         if 'exif' in self.image.info:
@@ -50,8 +60,8 @@ class ImageProcessor:
     def remove_all_exif_data(self, ic_image):
         self.image.info.pop('exif', None)
 
-    def save_processed_image(self, ic_image, dst_image_abs_path, dst_image_path):
+    def save_processed_image(self, ic_image, dst_image_abs_path, dst_image_path, ic_image_profile):
         if not os.path.exists(dst_image_path):
             os.makedirs(dst_image_path)
 
-        ic_image.save(dst_image_abs_path, quality=85)
+        ic_image.save(dst_image_abs_path, icc_profile=ic_image_profile, quality=85)

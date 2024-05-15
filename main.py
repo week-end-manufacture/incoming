@@ -163,9 +163,10 @@ def main():
 
         image_icfilelist = pre_processiong.get_image_icfilelist(src_icfilelist)
 
-        for (idx, image_icfile) in image_icfilelist:
+        for (idx, image_icfile) in enumerate(image_icfilelist):
             ic_image_processor = ImageProcessor(image_icfile, ic_image_preset)
 
+            ic_image_processor.ic_image_process()
 
 
 if __name__ == "__main__":

@@ -6,18 +6,21 @@ has_children: true
 permalink: /docs/using-cli
 ---
 
-## Processing Example
-```bash
-> incoming
+# Processing Example
+## Case #1. Source path = Destination path
+
+
+
+## Case #2. Source path ≠ Destination path
+    ewwe
 ```
-Starting incoming program. Depending on the setting value of `ic_settings.json` files
-```bash
-> incoming --opensettings
+dsdsd
 ```
 
 ```bash
-> incoming -i "your/source/path" -o "your/destination/path"
+> incoming
 ```
+
 
 # Command line reference
 

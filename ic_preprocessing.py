@@ -108,7 +108,7 @@ class PreProcessing:
             for (idx, src_file) in enumerate(src_filelist):
                 abs_path = src_path + '/' + src_file
                 cur_basename = os.path.basename(src_file)
-                cur_ext = Path(src_file).suffix
+                cur_ext = Path(src_file).suffix.lower()
 
                 if (cur_ext in filtered_archive_ext_dict):
                     self.extract_if_contains_images(abs_path, src_path, cur_basename, cur_ext, filtered_image_ext_dict)
@@ -132,7 +132,7 @@ class PreProcessing:
         for (src_path, src_dir, src_filelist) in os.walk(src_dir_path):
                 for (idx, src_file) in enumerate(src_filelist):
                     src_abs_path = src_path + '/' + src_file
-                    cur_ext = Path(src_file).suffix
+                    cur_ext = Path(src_file).suffix.lower()
                     cur_size = os.path.getsize(src_abs_path)
                     rel_path = src_path.replace(src_dir_path, '')
                     cur_dst_path = os.path.join(dst_dir_path, rel_path[1:])

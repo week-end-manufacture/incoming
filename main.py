@@ -52,7 +52,7 @@ def main():
             ic_logger.info(args.user_ext)
     elif (args.user_preset != None):
         ic_logger.info("!!!USER PRESET USE!!!")
-        ic_logger.info("=IC PREPROCESSING START=======================================")
+        ic_logger.info("=IC PREPROCESSING START=")
 
         if (not os.path.exists(src_dir_path) or not os.path.exists(src_dir_path)):
             ic_logger.warning("INVALID PATH")
@@ -64,11 +64,11 @@ def main():
         filtered_video_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_video_ext_dict"]
         filtered_image_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_image_ext_dict"]
 
-        ic_logger.info("=IC PREPROCESSING END=======================================")
+        ic_logger.info("=IC PREPROCESSING END=")
 
         if (src_dir_path == dst_dir_path):
             ic_logger.info("!!!SAME PATH PROCEDURE ACTIVATE!!!")
-            ic_logger.info("=IC PREPROCESSING START=======================================")
+            ic_logger.info("=IC PREPROCESSING START=")
 
             src_icfilelist = pre_processiong.ic_serach(src_dir_path,
                                                        dst_dir_path,
@@ -81,10 +81,10 @@ def main():
             pre_processiong.print_video_icfile(src_icfilelist)
             pre_processiong.print_image_icfile(src_icfilelist)
             pre_processiong.print_archive_icfile(src_icfilelist)
-            ic_logger.info("=IC PREPROCESSING END=======================================")
+            ic_logger.info("=IC PREPROCESSING END=")
         else:
             ic_logger.info("!!!COPY CAT!!!")
-            ic_logger.info("=IC PREPROCESSING START=======================================")
+            ic_logger.info("=IC PREPROCESSING START=")
 
             src_icfilelist = pre_processiong.ic_serach(src_dir_path,
                                                        dst_dir_path,
@@ -97,13 +97,13 @@ def main():
             pre_processiong.print_video_icfile(src_icfilelist)
             pre_processiong.print_image_icfile(src_icfilelist)
             pre_processiong.print_archive_icfile(src_icfilelist)
-            ic_logger.info("=IC PREPROCESSING END=======================================")
+            ic_logger.info("=IC PREPROCESSING END=")
     else:
         """
             IC PREPROCESS
         """
         ic_logger.info("!!!DEFAULT PRESET USE!!!")
-        ic_logger.info("=IC PREPROCESSING START=======================================")
+        ic_logger.info("=IC PREPROCESSING START=")
 
         ic_logger.info("SRC_DIR_PATH:[%s]" % src_dir_path)
         ic_logger.info("DST_DIR_PATH:[%s]" % dst_dir_path)
@@ -149,12 +149,12 @@ def main():
             pre_processiong.print_archive_icfile(src_icfilelist)
             pre_processiong.print_not_filtered_icfile(src_icfilelist)
 
-        ic_logger.info("=IC PREPROCESSING END=======================================")
+        ic_logger.info("=IC PREPROCESSING END=")
 
         """
             IC IMAGE PROCESS
         """
-        ic_logger.info("=IC IMAGE PROCESS START=======================================")
+        ic_logger.info("=IC IMAGE PROCESS START=")
 
         image_icfilelist = pre_processiong.get_image_icfilelist(src_icfilelist)
 
@@ -162,6 +162,8 @@ def main():
             ic_image_processor = ImageProcessor(image_icfile, ic_image_preset)
 
             ic_image_processor.ic_image_process()
+
+        ic_logger.info("=IC IMAGE PROCESS END=")
 
 
 if __name__ == "__main__":

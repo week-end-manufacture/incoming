@@ -64,8 +64,6 @@ def main():
         filtered_video_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_video_ext_dict"]
         filtered_image_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_image_ext_dict"]
 
-        ic_logger.info("filtered_video_ext_dict", filtered_video_ext_dict)
-
         ic_logger.info("=IC PREPROCESSING END=======================================")
 
         if (src_dir_path == dst_dir_path):
@@ -117,9 +115,6 @@ def main():
         filtered_video_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_video_ext_dict"]
         filtered_image_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_image_ext_dict"]
         ic_image_preset = ic_preset["image_process"]
-
-
-        ic_logger.info("filtered_video_ext_dict", filtered_video_ext_dict)
 
         if (src_dir_path == dst_dir_path):
             ic_logger.info("!!!SAME PATH PROCEDURE ACTIVATE!!!")

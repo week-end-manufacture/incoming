@@ -3,6 +3,7 @@ from PIL import Image, ImageCms
 
 from ic_preprocessing import *
 
+
 class ImageProcessor:
     def __init__(self, image_icfile, ic_image_preset):
         self.image_icfile = image_icfile
@@ -75,7 +76,5 @@ class ImageProcessor:
     def save_processed_image(self, ic_image, dst_image_abs_path, dst_image_path):
         if not os.path.exists(dst_image_path):
             os.makedirs(dst_image_path)
-
-        print("dst_image_abs_path:%s" % dst_image_abs_path)
 
         ic_image.save(dst_image_abs_path, quality=self.image_preset["output_quality"])

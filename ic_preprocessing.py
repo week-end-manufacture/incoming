@@ -228,7 +228,7 @@ class PreProcessing:
                 self.ic_logger.info("SIZE: %s" % self.convert_size(icfile.size))
                 self.ic_logger.info("===================================")
 
-    def get_video_icfile(self, icfile_list):
+    def get_video_icfilelist(self, icfile_list):
         retval = []
 
         for (idx, icfile) in enumerate(icfile_list):
@@ -237,7 +237,7 @@ class PreProcessing:
 
         return retval
     
-    def get_image_icfile(self, icfile_list):
+    def get_image_icfilelist(self, icfile_list):
         retval = []
 
         for (idx, icfile) in enumerate(icfile_list):
@@ -246,7 +246,7 @@ class PreProcessing:
 
         return retval
     
-    def get_archive_icfile(self, icfile_list):
+    def get_archive_icfilelist(self, icfile_list):
         retval = []
 
         for (idx, icfile) in enumerate(icfile_list):
@@ -255,7 +255,7 @@ class PreProcessing:
 
         return retval
     
-    def get_not_filtered_icfile(self, icfile_list):
+    def get_not_filtered_icfilelist(self, icfile_list):
         retval = []
 
         for (idx, icfile) in enumerate(icfile_list):
@@ -288,7 +288,7 @@ class PreProcessing:
                 len = dst_icfile.write(dummy)
                 dst_icfile.close()
 
-                dst_icfile.ictype = IcType.OUTGOING
+                dst_icfile.ictype = IcType.DUMMY
 
 @unique
 class IcType(Enum):
@@ -298,6 +298,7 @@ class IcType(Enum):
     NOT_FILTERED = auto()
     INCOMING = auto()
     OUTGOING = auto()
+    DUMMY = auto()
 
 
 @dataclass

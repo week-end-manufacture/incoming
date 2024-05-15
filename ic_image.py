@@ -1,14 +1,17 @@
 from PIL import Image, ImageCms
 
+from ic_preprocessing import *
+
 class ImageProcessor:
-    def __init__(self):
-        pass
+    def __init__(self, image_icfile, ic_image_preset):
+        self.image_icfile = image_icfile
+        self.iamge_prest = ic_image_preset
 
     def image_open(self, image_path):
         return Image.open(image_path)
 
-    def image_process(self):
-        if self.preset['image_process_toggle']:
+    def ic_image_process(self):
+        if self.iamge_prest['image_process_toggle']:
             self.assign_untagged_icc_profile_to_sRGB()
             self.remove_only_gps_exif_data()
             self.remove_all_exif_data()

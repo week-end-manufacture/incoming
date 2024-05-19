@@ -41,6 +41,8 @@ class ImageProcessor:
             self.save_processed_image(ic_image,
                                       dst_image_abs_path,
                                       dst_image_path)
+            
+            return True
 
     def assign_untagged_icc_profile_to_sRGB(self, ic_image):
         retval = None

@@ -179,6 +179,17 @@ class PreProcessing:
                         
         return src_icfilelist
     
+    def print_all_icfile(self, icfile_list):
+        for (idx, icfile) in enumerate(icfile_list):
+            self.ic_logger.info("===================================")
+            self.ic_logger.info("=ICFILE======================")
+            self.ic_logger.info("SRC PATH: %s" % icfile.src_path)
+            self.ic_logger.info("DST PATH: %s" % icfile.dst_path)
+            self.ic_logger.info("FILENAME: %s" % icfile.filename)
+            self.ic_logger.info("EXTENSION: %s" % icfile.extension)
+            self.ic_logger.info("SIZE: %s" % self.convert_size(icfile.size))
+            self.ic_logger.info("===================================")
+
     def print_video_icfile(self, icfile_list):
         for (idx, icfile) in enumerate(icfile_list):
             if (icfile.icexttype == IcType.VIDEO):
@@ -226,6 +237,54 @@ class PreProcessing:
                 self.ic_logger.info("EXTENSION: %s" % icfile.extension)
                 self.ic_logger.info("SIZE: %s" % self.convert_size(icfile.size))
                 self.ic_logger.info("===================================")
+
+    def is_video_icfile(self, icfile):
+        if (icfile.icexttype == IcType.VIDEO):
+            return True
+        else:
+            return False
+        
+    def is_image_icfile(self, icfile):
+        if (icfile.icexttype == IcType.IMAGE):
+            return True
+        else:
+            return False
+        
+    def is_archive_icfile(self, icfile):
+        if (icfile.icexttype == IcType.ARCHIVE):
+            return True
+        else:
+            return False
+        
+    def is_not_filtered_icfile(self, icfile):
+        if (icfile.icexttype == IcType.NOT_FILTERED):
+            return True
+        else:
+            return False
+        
+    def is_incoming_icfile(self, icfile):
+        if (icfile.ictype == IcType.INCOMING):
+            return True
+        else:
+            return False
+        
+    def is_outgoing_icfile(self, icfile):
+        if (icfile.ictype == IcType.OUTGOING):
+            return True
+        else:
+            return False
+        
+    def is_deleted_icfile(self, icfile):
+        if (icfile.ictype == IcType.DELETED):
+            return True
+        else:
+            return False
+    
+    def is_dummy_icfile(self, icfile):
+        if (icfile.ictype == IcType.DUMMY):
+            return True
+        else:
+            return False
 
     def get_video_icfilelist(self, icfile_list):
         retval = []
@@ -297,6 +356,7 @@ class IcType(Enum):
     NOT_FILTERED = auto()
     INCOMING = auto()
     OUTGOING = auto()
+    DELETED = auto()
     DUMMY = auto()
 
 

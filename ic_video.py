@@ -24,6 +24,8 @@ class VideoProcessor:
                 self.encode_with_handbrake(src_video_abs_path, dst_video_abs_path, dst_video_path, hb_preset_path)
             else:
                 self.encode_with_ffmpeg(src_video_abs_path, dst_video_abs_path)
+
+            return True
             
     def encode_with_handbrake(self, src_video_abs_path, dst_video_abs_path, dst_video_path, hb_preset_path):
         if not os.path.exists(dst_video_path):

@@ -121,6 +121,12 @@ class PreProcessing:
         src_icfilelist = []
 
         if (os.path.isfile(src_dir_path)):
+            src_abs_path = src_path + '/' + src_file
+            cur_ext = Path(src_file).suffix.lower()
+            cur_size = os.path.getsize(src_abs_path)
+            rel_path = src_path.replace(src_dir_path, '')
+            cur_dst_path = os.path.join(dst_dir_path, rel_path[1:])
+
             if (cur_ext in filtered_video_ext_dict):
                 src_icfilelist.append(IcFile(src_path,
                                                 cur_dst_path,
@@ -137,22 +143,8 @@ class PreProcessing:
                                                 IcType.INCOMING,
                                                 IcType.IMAGE,
                                                 cur_size))
-            elif (cur_ext in filtered_archive_ext_dict):
-                src_icfilelist.append(IcFile(src_path,
-                                                cur_dst_path,
-                                                src_file,
-                                                cur_ext,
-                                                IcType.INCOMING,
-                                                IcType.ARCHIVE,
-                                                cur_size))
             else:
-                src_icfilelist.append(IcFile(src_path,
-                                                cur_dst_path,
-                                                src_file,
-                                                cur_ext,
-                                                IcType.INCOMING,
-                                                IcType.NOT_FILTERED,
-                                                cur_size))
+                return False
             return src_icfilelist
 
         self.ic_unzipper(src_dir_path, filtered_image_ext_dict, filtered_archive_ext_dict)

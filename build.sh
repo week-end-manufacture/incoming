@@ -1,1 +1,1 @@
-pyinstaller main.spec
+pyinstaller main.py -n incoming

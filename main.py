@@ -5,6 +5,7 @@ from pathlib import Path
 from ic_preprocessing import *
 from ic_log import *
 from ic_image import *
+from ic_video import *
 
 def main():
     pre_processiong = PreProcessing()
@@ -121,9 +122,9 @@ def main():
             video_icfilelist = pre_processiong.get_video_icfilelist(src_icfilelist)
 
             for (idx, video_icfile) in enumerate(video_icfilelist):
-                ic_image_processor = ImageProcessor(image_icfile, ic_video_preset)
+                ic_video_processor = VideoProcessor(video_icfile, ic_video_preset)
 
-                ic_image_processor.ic_video_process()
+                ic_video_processor.ic_video_process()
 
             ic_logger.info("=IC VIDEO PROCESS END=")
         else:

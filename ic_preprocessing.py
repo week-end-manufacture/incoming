@@ -19,17 +19,21 @@ class PreProcessing:
         self.ic_logger = self.ic_logger_instance.init_logger(__name__)
 
     def open_ic_settings(self):
-        with open('./config/ic_settings.json', 'r') as json_file:
+        home_path = os.path.expanduser('~')
+        ic_set_path = os.path.join(home_path, '.config/incoming/config/ic_settings.json')
+        with open(ic_set_path, 'r') as json_file:
             iset = json.load(json_file)
         return iset
 
     def open_ic_default_preset(self, default_preset_path):
-        with open(default_preset_path, 'r') as json_file:
+        home_path = os.path.expanduser('~')
+        with open(os.path.join(home_path, default_preset_path), 'r') as json_file:
             ipre = json.load(json_file)
         return ipre
     
     def open_ic_user_preset(self, user_preset):
-        with open('./config/ic-preset/' + user_preset + '.json', 'r') as json_file:
+        home_path = os.path.expanduser('~')
+        with open(os.path.join(home_path, '.config/incoming/config/ic-preset/' + user_preset + '.json'), 'r') as json_file:
             ipre = json.load(json_file)
         return ipre
         

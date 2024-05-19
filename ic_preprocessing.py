@@ -121,14 +121,18 @@ class PreProcessing:
         src_icfilelist = []
 
         if (os.path.isfile(src_dir_path)):
-            src_abs_path = src_dir_path
+            src_abs_path = os.path.abspath(src_dir_path)
+            src_abs_dir_path = os.path.dirname(src_abs_path)
+            src_file = os.path.basename(src_abs_path)
             cur_ext = Path(src_dir_path).suffix.lower()
             cur_size = os.path.getsize(src_abs_path)
             rel_path = '/'
-            cur_dst_path = os.path.join(dst_dir_path, rel_path[1:])
+            cur_dst_path = os.path.join(os.path.abspath(dst_dir_path), rel_path[1:])
+
+            print(src_file)
 
             if (cur_ext in filtered_video_ext_dict):
-                src_icfilelist.append(IcFile(src_path,
+                src_icfilelist.append(IcFile(src_abs_dir_path,
                                                 cur_dst_path,
                                                 src_file,
                                                 cur_ext,
@@ -136,7 +140,7 @@ class PreProcessing:
                                                 IcType.VIDEO,
                                                 cur_size))
             elif (cur_ext in filtered_image_ext_dict):
-                src_icfilelist.append(IcFile(src_path,
+                src_icfilelist.append(IcFile(src_abs_dir_path,
                                                 cur_dst_path,
                                                 src_file,
                                                 cur_ext,

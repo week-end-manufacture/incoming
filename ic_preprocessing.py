@@ -120,6 +120,41 @@ class PreProcessing:
                   filtered_archive_ext_dict):
         src_icfilelist = []
 
+        if (os.path.isfile(src_dir_path)):
+            if (cur_ext in filtered_video_ext_dict):
+                src_icfilelist.append(IcFile(src_path,
+                                                cur_dst_path,
+                                                src_file,
+                                                cur_ext,
+                                                IcType.INCOMING,
+                                                IcType.VIDEO,
+                                                cur_size))
+            elif (cur_ext in filtered_image_ext_dict):
+                src_icfilelist.append(IcFile(src_path,
+                                                cur_dst_path,
+                                                src_file,
+                                                cur_ext,
+                                                IcType.INCOMING,
+                                                IcType.IMAGE,
+                                                cur_size))
+            elif (cur_ext in filtered_archive_ext_dict):
+                src_icfilelist.append(IcFile(src_path,
+                                                cur_dst_path,
+                                                src_file,
+                                                cur_ext,
+                                                IcType.INCOMING,
+                                                IcType.ARCHIVE,
+                                                cur_size))
+            else:
+                src_icfilelist.append(IcFile(src_path,
+                                                cur_dst_path,
+                                                src_file,
+                                                cur_ext,
+                                                IcType.INCOMING,
+                                                IcType.NOT_FILTERED,
+                                                cur_size))
+            return src_icfilelist
+
         self.ic_unzipper(src_dir_path, filtered_image_ext_dict, filtered_archive_ext_dict)
 
         if (src_dir_path == dst_dir_path):

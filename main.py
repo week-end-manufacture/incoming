@@ -53,7 +53,8 @@ def main():
             ic_logger.info("=IC PREPROCESSING START=")
 
             ic_preset = pre_processiong.open_ic_user_preset(args.user_preset)
-
+            ic_image_preset = ic_preset["image_process"]
+            ic_video_preset = ic_preset["video_process"]
             filtered_video_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_video_ext_dict"]
             filtered_image_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_image_ext_dict"]
 
@@ -111,6 +112,20 @@ def main():
                 ic_image_processor.ic_image_process()
 
             ic_logger.info("=IC IMAGE PROCESS END=")
+
+            """
+                IC VIDEO PROCESS
+            """
+            ic_logger.info("=IC VIDEO PROCESS START=")
+
+            video_icfilelist = pre_processiong.get_video_icfilelist(src_icfilelist)
+
+            for (idx, video_icfile) in enumerate(video_icfilelist):
+                ic_image_processor = ImageProcessor(image_icfile, ic_video_preset)
+
+                ic_image_processor.ic_video_process()
+
+            ic_logger.info("=IC VIDEO PROCESS END=")
         else:
             """
                 IC PREPROCESS
@@ -122,9 +137,10 @@ def main():
                 IC PRESET LOADING
             """
             ic_preset = pre_processiong.open_ic_default_preset(ic_settings["default_preset_path"])
+            ic_image_preset = ic_preset["image_process"]
+            ic_video_preset = ic_preset["video_process"]
             filtered_video_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_video_ext_dict"]
             filtered_image_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_image_ext_dict"]
-            ic_image_preset = ic_preset["image_process"]
 
             if (src_dir_path == dst_dir_path):
                 ic_logger.info("!!!SAME PATH PROCEDURE ACTIVATE!!!")

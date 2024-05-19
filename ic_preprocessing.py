@@ -121,10 +121,10 @@ class PreProcessing:
         src_icfilelist = []
 
         if (os.path.isfile(src_dir_path)):
-            src_abs_path = src_path + '/' + src_file
+            src_abs_path = src_dir_path
             cur_ext = Path(src_file).suffix.lower()
             cur_size = os.path.getsize(src_abs_path)
-            rel_path = src_path.replace(src_dir_path, '')
+            rel_path = '/'
             cur_dst_path = os.path.join(dst_dir_path, rel_path[1:])
 
             if (cur_ext in filtered_video_ext_dict):

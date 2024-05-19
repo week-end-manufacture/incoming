@@ -39,7 +39,7 @@ class IcLogger:
         streamHandler.setFormatter(streamFormatter)
         fileHandler.setFormatter(fileFormatter)
 
-        ic_logger.addHandler(streamHandler)
+        #ic_logger.addHandler(streamHandler)
         ic_logger.addHandler(fileHandler)
 
         ic_logger.setLevel(logging.DEBUG)

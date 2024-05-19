@@ -1,1 +1,1 @@
-pyinstaller main.py -n incoming --onefile
+pyinstaller --clean -n incoming --onedir --contents-directory "." --add-data "./config/ic-preset/ic_preset.json:./config/ic-preset" --add-data "./config/handbrake_preset.json:./config" --add-data "./config/ic_settings.json:./config" main.py

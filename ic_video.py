@@ -1,51 +1,64 @@
 import subprocess
 
 from ic_preprocessing import *
-
-incoming = IcFile["src_path"]
-outgoing = IcFile["dst_path"]
-hb_preset = None #?
-
-def encode_with_handbrake(incoming, outgoing, hb_preset_path):
-
-    command = ["HandBrakeCLI", "-i", incoming, "-o", outgoing, "--preset-import-file", hb_preset_path]
-    subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-
-def encode_with_ffmpeg(incoming, outgoing): # "custom_batch_command_input_toggle":"true" 이면 사용자가 직접 입력한 커맨드를 사용, $in $out으로 문자열 검출해서 대치
+from ic_log import *
 
 
-    
-    print("# Custom ffmpeg opttion detected.\n  '$in','$out' will be replaced with the input and output file paths.\n   You must provide extesions at last.\n   e.g. $in -c:v libx264 -crf 23 -c:a aac -b:a 128k -strict -2) $out.mp4\n")
-    input("incoming >> ffmpeg ")
+class VideoProcessor:
+    def __init__(self, video_icfile, ic_video_preset):
+        self.ic_logger_instance = IcLogger()
+        self.ic_logger = self.ic_logger_instance.init_logger(__name__)
 
-    command = ["ffmpeg", "-i", incoming, outgoing]
-    subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        self.video_icfile = video_icfile
+        self.video_preset = ic_video_preset
 
+    def ic_video_process(self):
+        if self.video_preset['video_process_toggle']:
+            src_video_abs_path = os.path.join(self.video_icfile.src_path, self.video_icfile.filename)
+            dst_video_abs_path = os.path.join(self.video_icfile.dst_path, Path(self.video_icfile.filename).stem + self.video_preset["output_video_ext"])
+            dst_video_path = self.video_icfile.dst_path
 
-'''
-import subprocess
+            if (self.video_preset["deafult_encoder_is_HandBrake"] == None):
+                hb_preset_path = self.video_preset["HandBrake_presets_path"]
 
-# 커맨드라인 명령을 나타내는 문자열의 리스트
-command = ["handbrakecli", "--version"]
+                self.encode_with_handbrake(src_video_abs_path, dst_video_abs_path, dst_video_path, hb_preset_path)
+            else:
+                self.encode_with_ffmpeg(src_video_abs_path, dst_video_abs_path)
 
-# subprocess.check_output을 사용하여 명령의 출력을 얻
-output = subprocess.check_output(command)
+            return True
+            
+    def encode_with_handbrake(self, src_video_abs_path, dst_video_abs_path, dst_video_path, hb_preset_path):
+        if not os.path.exists(dst_video_path):
+            os.makedirs(dst_video_path)
 
-# 출력을 디코딩하여 출력
-print(output.decode())
-==
-import subprocess
+        print(src_video_abs_path)
 
-# 커맨드라인 명령을 나타내는 문자열의 리스트
-command = ["HandBrakeCLI", "--version"]
+        command = ["HandBrakeCLI", "-i", src_video_abs_path, "-o", dst_video_abs_path, "--preset-import-file", hb_preset_path]
 
-# subprocess.Popen을 사용하여 새로운 프로세스 생성
-process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        handbrake_process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 
-# communicate 메서드를 사용하여 출력과 오류 메시지를 얻음
-stdout, stderr = process.communicate()
+        while True:
+            output = handbrake_process.stdout.readline()
+            if output == '' and handbrake_process.poll() is not None:
+                break
+            if output:
+                print(output.strip())
+                self.ic_logger.info(output)
 
-# 출력과 오류 메시지를 출력
-print(stdout)
-#print(stderr)
-'''
+    def encode_with_ffmpeg(self, src_video_abs_path, dst_image_abs_path, dst_video_path):
+        if not os.path.exists(dst_video_path):
+            os.makedirs(dst_video_path)
+
+        print("# Custom ffmpeg opttion detected.\n  '$in','$out' will be replaced with the input and output file paths.\n   You must provide extesions at last.\n   e.g. $in -c:v libx264 -crf 23 -c:a aac -b:a 128k -strict -2) $out.mp4\n")
+        input("incoming >> ffmpeg ")
+
+        command = ["ffmpeg", "-i", src_video_abs_path, dst_image_abs_path]
+        ffmpeg_process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+
+        while True:
+            output = ffmpeg_process.stdout.readline()
+            if output == '' and ffmpeg_process.poll() is not None:
+                break
+            if output:
+                print(output.strip())
+                self.ic_logger.info(output)

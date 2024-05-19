@@ -19,17 +19,21 @@ class PreProcessing:
         self.ic_logger = self.ic_logger_instance.init_logger(__name__)
 
     def open_ic_settings(self):
-        with open('./config/ic_settings.json', 'r') as json_file:
+        home_path = os.path.expanduser('~')
+        ic_set_path = os.path.join(home_path, '.config/incoming/config/ic_settings.json')
+        with open(ic_set_path, 'r') as json_file:
             iset = json.load(json_file)
         return iset
 
     def open_ic_default_preset(self, default_preset_path):
-        with open(default_preset_path, 'r') as json_file:
+        home_path = os.path.expanduser('~')
+        with open(os.path.join(home_path, default_preset_path), 'r') as json_file:
             ipre = json.load(json_file)
         return ipre
     
     def open_ic_user_preset(self, user_preset):
-        with open('./config/ic-preset/' + user_preset + '.json', 'r') as json_file:
+        home_path = os.path.expanduser('~')
+        with open(os.path.join(home_path, '.config/incoming/config/ic-preset/' + user_preset + '.json'), 'r') as json_file:
             ipre = json.load(json_file)
         return ipre
         
@@ -51,7 +55,6 @@ class PreProcessing:
         elif archive_type == '.rar':
             with rarfile.RarFile(abs_path, 'r') as archive:
                 for f in archive.infolist():
-                    print(f.filename)
                     cur_ext = Path(f.filename).suffix
                     
                     if (cur_ext in filtered_image_ext_dict):
@@ -121,6 +124,37 @@ class PreProcessing:
                   filtered_archive_ext_dict):
         src_icfilelist = []
 
+        if (os.path.isfile(src_dir_path)):
+            src_abs_path = os.path.abspath(src_dir_path)
+            src_abs_dir_path = os.path.dirname(src_abs_path)
+            src_file = os.path.basename(src_abs_path)
+            cur_ext = Path(src_dir_path).suffix.lower()
+            cur_size = os.path.getsize(src_abs_path)
+            rel_path = '/'
+            cur_dst_path = os.path.join(os.path.abspath(dst_dir_path), rel_path[1:])
+
+            print(src_file)
+
+            if (cur_ext in filtered_video_ext_dict):
+                src_icfilelist.append(IcFile(src_abs_dir_path,
+                                                cur_dst_path,
+                                                src_file,
+                                                cur_ext,
+                                                IcType.INCOMING,
+                                                IcType.VIDEO,
+                                                cur_size))
+            elif (cur_ext in filtered_image_ext_dict):
+                src_icfilelist.append(IcFile(src_abs_dir_path,
+                                                cur_dst_path,
+                                                src_file,
+                                                cur_ext,
+                                                IcType.INCOMING,
+                                                IcType.IMAGE,
+                                                cur_size))
+            else:
+                return False
+            return src_icfilelist
+
         self.ic_unzipper(src_dir_path, filtered_image_ext_dict, filtered_archive_ext_dict)
 
         if (src_dir_path == dst_dir_path):
@@ -180,6 +214,17 @@ class PreProcessing:
                         
         return src_icfilelist
     
+    def print_all_icfile(self, icfile_list):
+        for (idx, icfile) in enumerate(icfile_list):
+            self.ic_logger.info("===================================")
+            self.ic_logger.info("=ICFILE======================")
+            self.ic_logger.info("SRC PATH: %s" % icfile.src_path)
+            self.ic_logger.info("DST PATH: %s" % icfile.dst_path)
+            self.ic_logger.info("FILENAME: %s" % icfile.filename)
+            self.ic_logger.info("EXTENSION: %s" % icfile.extension)
+            self.ic_logger.info("SIZE: %s" % self.convert_size(icfile.size))
+            self.ic_logger.info("===================================")
+
     def print_video_icfile(self, icfile_list):
         for (idx, icfile) in enumerate(icfile_list):
             if (icfile.icexttype == IcType.VIDEO):
@@ -227,6 +272,54 @@ class PreProcessing:
                 self.ic_logger.info("EXTENSION: %s" % icfile.extension)
                 self.ic_logger.info("SIZE: %s" % self.convert_size(icfile.size))
                 self.ic_logger.info("===================================")
+
+    def is_video_icfile(self, icfile):
+        if (icfile.icexttype == IcType.VIDEO):
+            return True
+        else:
+            return False
+        
+    def is_image_icfile(self, icfile):
+        if (icfile.icexttype == IcType.IMAGE):
+            return True
+        else:
+            return False
+        
+    def is_archive_icfile(self, icfile):
+        if (icfile.icexttype == IcType.ARCHIVE):
+            return True
+        else:
+            return False
+        
+    def is_not_filtered_icfile(self, icfile):
+        if (icfile.icexttype == IcType.NOT_FILTERED):
+            return True
+        else:
+            return False
+        
+    def is_incoming_icfile(self, icfile):
+        if (icfile.ictype == IcType.INCOMING):
+            return True
+        else:
+            return False
+        
+    def is_outgoing_icfile(self, icfile):
+        if (icfile.ictype == IcType.OUTGOING):
+            return True
+        else:
+            return False
+        
+    def is_deleted_icfile(self, icfile):
+        if (icfile.ictype == IcType.DELETED):
+            return True
+        else:
+            return False
+    
+    def is_dummy_icfile(self, icfile):
+        if (icfile.ictype == IcType.DUMMY):
+            return True
+        else:
+            return False
 
     def get_video_icfilelist(self, icfile_list):
         retval = []
@@ -298,6 +391,7 @@ class IcType(Enum):
     NOT_FILTERED = auto()
     INCOMING = auto()
     OUTGOING = auto()
+    DELETED = auto()
     DUMMY = auto()
 
 

@@ -41,6 +41,8 @@ class ImageProcessor:
             self.save_processed_image(ic_image,
                                       dst_image_abs_path,
                                       dst_image_path)
+            
+            return True
 
     def assign_untagged_icc_profile_to_sRGB(self, ic_image):
         retval = None
@@ -77,4 +79,6 @@ class ImageProcessor:
         if not os.path.exists(dst_image_path):
             os.makedirs(dst_image_path)
 
-        ic_image.save(dst_image_abs_path, quality=self.image_preset["output_quality"])
+        output_quality = self.image_preset["output_quality"]
+
+        ic_image.save(dst_image_abs_path, quality=output_quality)

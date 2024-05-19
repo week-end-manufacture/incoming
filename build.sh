@@ -1,1 +1,1 @@
-pyinstaller main.spec
+pyinstaller --clean -n incoming --onefile main.py

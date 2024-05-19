@@ -197,6 +197,20 @@ def main():
                 ic_image_processor.ic_image_process()
 
             ic_logger.info("=IC IMAGE PROCESS END=")
+
+            """
+                IC VIDEO PROCESS
+            """
+            ic_logger.info("=IC VIDEO PROCESS START=")
+
+            video_icfilelist = pre_processiong.get_video_icfilelist(src_icfilelist)
+
+            for (idx, video_icfile) in enumerate(video_icfilelist):
+                ic_video_processor = VideoProcessor(video_icfile, ic_video_preset)
+
+                ic_video_processor.ic_video_process()
+
+            ic_logger.info("=IC VIDEO PROCESS END=")
     else:
         if (args.user_preset != None):
             ic_logger.info("!!!USER PRESET USE!!!")
@@ -263,6 +277,20 @@ def main():
                 ic_image_processor.ic_image_process()
 
             ic_logger.info("=IC IMAGE PROCESS END=")
+
+            """
+                IC VIDEO PROCESS
+            """
+            ic_logger.info("=IC VIDEO PROCESS START=")
+
+            video_icfilelist = pre_processiong.get_video_icfilelist(src_icfilelist)
+
+            for (idx, video_icfile) in enumerate(video_icfilelist):
+                ic_video_processor = VideoProcessor(video_icfile, ic_video_preset)
+
+                ic_video_processor.ic_video_process()
+
+            ic_logger.info("=IC VIDEO PROCESS END=")
         else:
             """
                 IC PREPROCESS

@@ -43,14 +43,20 @@ class VideoProcessor:
                 print(output.strip())
                 self.ic_logger.info(output)
 
-        print(handbrake_process)
-
     def encode_with_ffmpeg(self, src_video_abs_path, dst_image_abs_path, dst_video_path):
         if not os.path.exists(dst_video_path):
-            os.makedirs(dst_video_path, mode=0o777)
+            os.makedirs(dst_video_path)
 
         print("# Custom ffmpeg opttion detected.\n  '$in','$out' will be replaced with the input and output file paths.\n   You must provide extesions at last.\n   e.g. $in -c:v libx264 -crf 23 -c:a aac -b:a 128k -strict -2) $out.mp4\n")
         input("incoming >> ffmpeg ")
 
         command = ["ffmpeg", "-i", src_video_abs_path, dst_image_abs_path]
-        subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        ffmpeg_process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+
+        while True:
+            output = ffmpeg_process.stdout.readline()
+            if output == '' and ffmpeg_process.poll() is not None:
+                break
+            if output:
+                print(output.strip())
+                self.ic_logger.info(output)

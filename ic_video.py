@@ -15,7 +15,7 @@ class VideoProcessor:
     def ic_video_process(self):
         if self.video_preset['video_process_toggle']:
             src_video_abs_path = os.path.join(self.video_icfile.src_path, self.video_icfile.filename)
-            dst_video_abs_path = os.path.join(self.video_icfile.dst_path, self.video_icfile.filename)
+            dst_video_abs_path = os.path.join(self.video_icfile.dst_path, Path(self.video_icfile.filename).stem + self.video_preset["output_video_ext"])
             dst_video_path = self.video_icfile.dst_path
 
             if (self.video_preset["deafult_encoder_is_HandBrake"] == None):
@@ -27,12 +27,12 @@ class VideoProcessor:
             
     def encode_with_handbrake(self, src_video_abs_path, dst_video_abs_path, dst_video_path, hb_preset_path):
         if not os.path.exists(dst_video_path):
-            os.makedirs(dst_video_path, mode=0o777)
+            os.makedirs(dst_video_path)
 
         print(src_video_abs_path)
 
-        command = ["HandBrakeCLI", "-i", src_video_abs_path, "-o", dst_video_path, "--preset-import-file", hb_preset_path]
-        print(command)
+        command = ["HandBrakeCLI", "-i", src_video_abs_path, "-o", dst_video_abs_path, "--preset-import-file", hb_preset_path]
+
         handbrake_process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 
         while True:
@@ -42,6 +42,8 @@ class VideoProcessor:
             if output:
                 print(output.strip())
                 self.ic_logger.info(output)
+
+        print(handbrake_process)
 
     def encode_with_ffmpeg(self, src_video_abs_path, dst_image_abs_path, dst_video_path):
         if not os.path.exists(dst_video_path):

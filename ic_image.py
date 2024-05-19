@@ -75,7 +75,7 @@ class ImageProcessor:
 
     def save_processed_image(self, ic_image, dst_image_abs_path, dst_image_path):
         if not os.path.exists(dst_image_path):
-            os.makedirs(dst_image_path, mode=0o777)
+            os.makedirs(dst_image_path)
 
         output_quality = self.image_preset["output_quality"]
 

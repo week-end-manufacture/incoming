@@ -67,26 +67,26 @@ class PreProcessing:
             tmp_path = os.path.join(src_path, 'outgoing_archive')
 
             if not os.path.exists(tmp_path):
-                os.makedirs(tmp_path, mode=0o777)
+                os.makedirs(tmp_path)
 
             if archive_type == '.zip':
                 dst_path = os.path.join(tmp_path, Path(basename).stem + '_zip')
                 if not os.path.exists(dst_path):
-                    os.makedirs(dst_path, mode=0o777)
+                    os.makedirs(dst_path)
 
                 with zipfile.ZipFile(abs_path, 'r') as archive:
                     archive.extractall(dst_path)
             elif archive_type == '.rar':
                 dst_path = os.path.join(tmp_path, Path(basename).stem + '_rar')
                 if not os.path.exists(dst_path):
-                    os.makedirs(dst_path, mode=0o777)
+                    os.makedirs(dst_path)
 
                 with rarfile.RarFile(abs_path, 'r') as archive:
                     archive.extractall(dst_path)
             elif archive_type == '.7z':
                 dst_path = os.path.join(tmp_path, Path(basename).stem + '_7z')
                 if not os.path.exists(dst_path):
-                    os.makedirs(dst_path, mode=0o777)
+                    os.makedirs(dst_path)
 
                 with py7zr.SevenZipFile(abs_path, mode='r') as archive:
                     archive.extractall(dst_path)
@@ -126,8 +126,7 @@ class PreProcessing:
             dst_dir_path = os.path.join(os.path.dirname(src_dir_path), "[IC]" + os.path.basename(src_dir_path))
 
             if not os.path.exists(dst_dir_path):
-                os.umask(0)
-                os.makedirs(dst_dir_path, mode=0o777)
+                os.makedirs(dst_dir_path)
 
         for (src_path, src_dir, src_filelist) in os.walk(src_dir_path):
                 for (idx, src_file) in enumerate(src_filelist):
@@ -282,7 +281,7 @@ class PreProcessing:
         for (idx, icfile) in enumerate(icfile_list):
             if (icfile.ictype == IcType.INCOMING):
                 if not os.path.exists(icfile.dst_path):
-                    os.makedirs(icfile.dst_path, mode=0o777)
+                    os.makedirs(icfile.dst_path)
 
                 dst_icfile = open(os.path.join(icfile.dst_path, icfile.filename), "w")
                 len = dst_icfile.write(dummy)

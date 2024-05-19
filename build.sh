@@ -1,1 +1,1 @@
-pyinstaller main.py -n incoming
+pyinstaller main.py -n incoming --onefile

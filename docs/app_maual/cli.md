@@ -73,3 +73,41 @@ $ incoming -i "video.mkv" -o "../output"
 ### 접은 제목
 접은 내용
 </details>
+
+
+.
+`-- input
+    |-- Lorem.txt
+    |-- archive-got-3images.rar
+    |-- lena.png
+    `-- video.mkv
+
+2 directories, 4 files
+
+.
+|-- input
+|   |-- Lorem.txt
+|   |-- archive-got-3images.rar
+|   |-- lena.png
+|   |-- outgoing_archive
+|   |   `-- archive-got-3images_rar
+|   |       `-- archive-got-3images
+|   |           `-- image
+|   |               |-- _DSC8453.jpeg
+|   |               |-- _DSC8455.jpeg
+|   |               `-- _DSC8457.jpeg
+|   `-- video.mkv
+|-- log
+|   `-- ic_log.log
+`-- output
+    |-- lena.jpg
+    |-- outgoing_archive
+    |   `-- archive-got-3images_rar
+    |       `-- archive-got-3images
+    |           `-- image
+    |               |-- _DSC8453.jpg
+    |               |-- _DSC8455.jpg
+    |               `-- _DSC8457.jpg
+    `-- video.mp4
+
+12 directories, 13 files

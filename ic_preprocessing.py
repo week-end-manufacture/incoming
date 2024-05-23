@@ -20,7 +20,7 @@ class PreProcessing:
 
     def open_ic_settings(self):
         home_path = os.path.expanduser('~')
-        ic_set_path = os.path.join(home_path, '.config/incoming/config/ic_settings.json')
+        ic_set_path = os.path.join(home_path, '.config/incoming/settings.json')
         with open(ic_set_path, 'r') as json_file:
             iset = json.load(json_file)
         return iset
@@ -33,7 +33,7 @@ class PreProcessing:
     
     def open_ic_user_preset(self, user_preset):
         home_path = os.path.expanduser('~')
-        with open(os.path.join(home_path, '.config/incoming/config/ic-preset/' + user_preset + '.json'), 'r') as json_file:
+        with open(os.path.join(home_path, '.config/incoming/preset/' + user_preset + '.json'), 'r') as json_file:
             ipre = json.load(json_file)
         return ipre
         

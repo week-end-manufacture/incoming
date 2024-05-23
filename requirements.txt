@@ -2,7 +2,6 @@ altgraph==0.17.4
 Brotli==1.1.0
 colorlog==6.8.2
 inflate64==1.0.0
-json5==0.9.25
 macholib==1.16.3
 multivolumefile==0.2.3
 packaging==24.0

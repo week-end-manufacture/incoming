@@ -204,17 +204,7 @@ class PreProcessing:
                                                      cur_size,
                                                      cur_size))
                     elif (cur_ext in filtered_archive_ext_dict):
-                        if (src_abs_path in unzipped_filelist):
-                            src_icfilelist.append(IcFile(src_path,
-                                                     cur_dst_path,
-                                                     src_file,
-                                                     cur_ext,
-                                                     IcType.UNZIPPED,
-                                                     IcType.ARCHIVE,
-                                                     cur_size,
-                                                     cur_size))
-                        else:
-                            src_icfilelist.append(IcFile(src_path,
+                        src_icfilelist.append(IcFile(src_path,
                                                         cur_dst_path,
                                                         src_file,
                                                         cur_ext,

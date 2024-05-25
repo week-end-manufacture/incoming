@@ -21,7 +21,8 @@ class PostProcessing:
                 os.unlink(src_abs_path)
             
             if (os.path.isdir(src_path)):
-                os.rmdir(src_path)
+                if (len(os.listdir(src_path)) == 0):
+                    os.rmdir(src_path)
 
             self.icfile.ictype = IcType.DELETED
 

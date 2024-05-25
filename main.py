@@ -64,7 +64,7 @@ def main():
             if (src_dir_path == dst_dir_path):
                 ic_logger.info("!!!SAME PATH PROCEDURE ACTIVATE!!!")
 
-                src_icfilelist = pre_processiong.ic_serach(src_dir_path,
+                src_icfilelist = pre_processiong.ic_search(src_dir_path,
                                                         dst_dir_path,
                                                         filtered_video_ext_dict,
                                                         filtered_image_ext_dict,
@@ -80,7 +80,7 @@ def main():
                 ic_logger.info("!!!COPY CAT!!!")
                 ic_logger.info("=IC PREPROCESSING START=")
 
-                src_icfilelist = pre_processiong.ic_serach(src_dir_path,
+                src_icfilelist = pre_processiong.ic_search(src_dir_path,
                                                         dst_dir_path,
                                                         filtered_video_ext_dict,
                                                         filtered_image_ext_dict,
@@ -146,7 +146,7 @@ def main():
             if (src_dir_path == dst_dir_path):
                 ic_logger.info("!!!SAME PATH PROCEDURE ACTIVATE!!!")
 
-                src_icfilelist = pre_processiong.ic_serach(src_dir_path,
+                src_icfilelist = pre_processiong.ic_search(src_dir_path,
                                                         dst_dir_path,
                                                         filtered_video_ext_dict,
                                                         filtered_image_ext_dict,
@@ -163,7 +163,7 @@ def main():
             else:
                 ic_logger.info("!!!COPY CAT!!!")
 
-                src_icfilelist = pre_processiong.ic_serach(src_dir_path,
+                src_icfilelist = pre_processiong.ic_search(src_dir_path,
                                                         dst_dir_path,
                                                         filtered_video_ext_dict,
                                                         filtered_image_ext_dict,
@@ -229,7 +229,7 @@ def main():
             if (src_dir_path == dst_dir_path):
                 ic_logger.info("!!!SAME PATH PROCEDURE ACTIVATE!!!")
 
-                src_icfilelist = pre_processiong.ic_serach(src_dir_path,
+                src_icfilelist = pre_processiong.ic_search(src_dir_path,
                                                         dst_dir_path,
                                                         filtered_video_ext_dict,
                                                         filtered_image_ext_dict,
@@ -245,7 +245,7 @@ def main():
                 ic_logger.info("!!!COPY CAT!!!")
                 ic_logger.info("=IC PREPROCESSING START=")
 
-                src_icfilelist = pre_processiong.ic_serach(src_dir_path,
+                src_icfilelist = pre_processiong.ic_search(src_dir_path,
                                                         dst_dir_path,
                                                         filtered_video_ext_dict,
                                                         filtered_image_ext_dict,
@@ -313,7 +313,7 @@ def main():
             if (src_dir_path == dst_dir_path):
                 ic_logger.info("!!!SAME PATH PROCEDURE ACTIVATE!!!")
 
-                icfilelist = pre_processiong.ic_serach(src_dir_path,
+                icfilelist = pre_processiong.ic_search(src_dir_path,
                                                         dst_dir_path,
                                                         filtered_video_ext_dict,
                                                         filtered_image_ext_dict,
@@ -326,7 +326,7 @@ def main():
             else:
                 ic_logger.info("!!!COPY CAT!!!")
 
-                icfilelist = pre_processiong.ic_serach(src_dir_path,
+                icfilelist = pre_processiong.ic_search(src_dir_path,
                                                         dst_dir_path,
                                                         filtered_video_ext_dict,
                                                         filtered_image_ext_dict,

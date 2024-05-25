@@ -42,346 +42,182 @@ def main():
         src_dir_path = args.src_dir_path
         dst_dir_path = args.dst_dir_path
 
-        if (not os.path.exists(src_dir_path) or not os.path.exists(src_dir_path)):
-            ic_logger.warning("INVALID PATH")
+    if (not os.path.exists(src_dir_path) or not os.path.exists(src_dir_path)):
+        ic_logger.warning("INVALID PATH")
 
-            return (-1)
+        return (-1)
+
+    ic_logger.info("SRC_DIR_PATH:[%s]" % src_dir_path)
+    ic_logger.info("DST_DIR_PATH:[%s]" % dst_dir_path)
+
+    if (args.user_preset != None):
+        ic_logger.info("!!!USER PRESET USE!!!")
+        ic_logger.info("=IC PREPROCESSING START=")
+
+        ic_preset = pre_processiong.open_ic_user_preset(args.user_preset)
+
+        filtered_video_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_video_ext_dict"]
+        filtered_image_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_image_ext_dict"]
+
+        if (src_dir_path == dst_dir_path):
+            ic_logger.info("!!!SAME PATH PROCEDURE ACTIVATE!!!")
+
+            main_icfilelist = pre_processiong.ic_search(src_dir_path,
+                                                    dst_dir_path,
+                                                    filtered_video_ext_dict,
+                                                    filtered_image_ext_dict,
+                                                    filtered_archive_ext_dict)
+
+            ic_logger.info("FILE LENGTH: %d" % len(main_icfilelist))
+
+            pre_processiong.print_video_icfile(main_icfilelist)
+            pre_processiong.print_image_icfile(main_icfilelist)
+            pre_processiong.print_archive_icfile(main_icfilelist)
+            ic_logger.info("=IC PREPROCESSING END=")
+        else:
+            ic_logger.info("!!!COPY CAT!!!")
+            ic_logger.info("=IC PREPROCESSING START=")
+
+            main_icfilelist = pre_processiong.ic_search(src_dir_path,
+                                                    dst_dir_path,
+                                                    filtered_video_ext_dict,
+                                                    filtered_image_ext_dict,
+                                                    filtered_archive_ext_dict)
+
+            ic_logger.info("FILE LENGTH: %d" % len(main_icfilelist))
+
+            pre_processiong.print_video_icfile(main_icfilelist)
+            pre_processiong.print_image_icfile(main_icfilelist)
+            pre_processiong.print_archive_icfile(main_icfilelist)
+            ic_logger.info("=IC PREPROCESSING END=")
+
+        """
+            DUMMY OPTION CHECK
+        """
+        if (args.dummy):
+            pre_processiong.create_dummy_icfilelist(main_icfilelist)
+
+        """
+            IC IMAGE PROCESS
+        """
+        ic_logger.info("=IC IMAGE PROCESS START=")
+
+        for (idx, icfile) in enumerate(main_icfilelist):
+            if (pre_processiong.is_image_icfile(icfile)):
+                ic_image_processor = ImageProcessor(icfile, ic_image_preset)
+
+                icfile = ic_image_processor.ic_image_process()
+
+        ic_logger.info("=IC IMAGE PROCESS END=")
+
+        """
+            IC VIDEO PROCESS
+        """
+        ic_logger.info("=IC VIDEO PROCESS START=")
+
+        for (idx, icfile) in enumerate(main_icfilelist):
+            if (pre_processiong.is_video_icfile(icfile)):
+                ic_video_processor = VideoProcessor(icfile, ic_video_preset)
+
+                icfile = ic_video_processor.ic_video_process()
+
+        ic_logger.info("=IC VIDEO PROCESS END=")
+    else:
+        """
+            IC PREPROCESS
+        """
+        ic_logger.info("!!!DEFAULT PRESET USE!!!")
+        ic_logger.info("=IC PREPROCESSING START=")
 
         ic_logger.info("SRC_DIR_PATH:[%s]" % src_dir_path)
         ic_logger.info("DST_DIR_PATH:[%s]" % dst_dir_path)
 
-        if (args.user_preset != None):
-            ic_logger.info("!!!USER PRESET USE!!!")
-            ic_logger.info("=IC PREPROCESSING START=")
+        """
+            IC PRESET LOADING
+        """
+        ic_preset = pre_processiong.open_ic_default_preset(ic_settings["default_preset_path"])
+        ic_image_preset = ic_preset["image_process"]
+        ic_video_preset = ic_preset["video_process"]
+        filtered_video_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_video_ext_dict"]
+        filtered_image_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_image_ext_dict"]
 
-            ic_preset = pre_processiong.open_ic_user_preset(args.user_preset)
-            ic_image_preset = ic_preset["image_process"]
-            ic_video_preset = ic_preset["video_process"]
-            filtered_video_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_video_ext_dict"]
-            filtered_image_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_image_ext_dict"]
+        if (src_dir_path == dst_dir_path):
+            ic_logger.info("!!!SAME PATH PROCEDURE ACTIVATE!!!")
 
-            ic_logger.info("=IC PREPROCESSING START=")
+            main_icfilelist = pre_processiong.ic_search(src_dir_path,
+                                                    dst_dir_path,
+                                                    filtered_video_ext_dict,
+                                                    filtered_image_ext_dict,
+                                                    filtered_archive_ext_dict)
 
-            if (src_dir_path == dst_dir_path):
-                ic_logger.info("!!!SAME PATH PROCEDURE ACTIVATE!!!")
-
-                main_icfilelist = pre_processiong.ic_search(src_dir_path,
-                                                        dst_dir_path,
-                                                        filtered_video_ext_dict,
-                                                        filtered_image_ext_dict,
-                                                        filtered_archive_ext_dict)
-
-                ic_logger.info("FILE LENGTH: %d" % len(main_icfilelist))
-
-                pre_processiong.print_video_icfile(main_icfilelist)
-                pre_processiong.print_image_icfile(main_icfilelist)
-                pre_processiong.print_archive_icfile(main_icfilelist)
-                ic_logger.info("=IC PREPROCESSING END=")
-            else:
-                ic_logger.info("!!!COPY CAT!!!")
-                ic_logger.info("=IC PREPROCESSING START=")
-
-                main_icfilelist = pre_processiong.ic_search(src_dir_path,
-                                                        dst_dir_path,
-                                                        filtered_video_ext_dict,
-                                                        filtered_image_ext_dict,
-                                                        filtered_archive_ext_dict)
-
-                ic_logger.info("FILE LENGTH: %d" % len(main_icfilelist))
-
-                pre_processiong.print_video_icfile(main_icfilelist)
-                pre_processiong.print_image_icfile(main_icfilelist)
-                pre_processiong.print_archive_icfile(main_icfilelist)
-
-            ic_logger.info("=IC PREPROCESSING END=")
-
-            """
-                DUMMY OPTION CHECK
-            """
-            if (args.dummy):
-                pre_processiong.create_dummy_icfilelist(main_icfilelist)
-
-            """
-                IC IMAGE PROCESS
-            """
-            ic_logger.info("=IC IMAGE PROCESS START=")
-
-            for (idx, icfile) in enumerate(main_icfilelist):
-                if (pre_processiong.is_image_icfile(icfile)):
-                    ic_image_processor = ImageProcessor(icfile, ic_image_preset)
-
-                    icfile = ic_image_processor.ic_image_process()
-
-            ic_logger.info("=IC IMAGE PROCESS END=")
-
-            """
-                IC VIDEO PROCESS
-            """
-            ic_logger.info("=IC VIDEO PROCESS START=")
-
-            for (idx, icfile) in enumerate(main_icfilelist):
-                if (pre_processiong.is_video_icfile(icfile)):
-                    ic_video_processor = VideoProcessor(icfile, ic_video_preset)
-
-                    icfile = ic_video_processor.ic_video_process()
-
-            ic_logger.info("=IC VIDEO PROCESS END=")
+            pre_processiong.print_video_icfile(main_icfilelist)
+            pre_processiong.print_image_icfile(main_icfilelist)
+            pre_processiong.print_archive_icfile(main_icfilelist)
+            pre_processiong.print_not_filtered_icfile(main_icfilelist)
         else:
-            """
-                IC PREPROCESS
-            """
-            ic_logger.info("!!!DEFAULT PRESET USE!!!")
-            ic_logger.info("=IC PREPROCESSING START=")
+            ic_logger.info("!!!COPY CAT!!!")
 
-            """
-                IC PRESET LOADING
-            """
-            ic_preset = pre_processiong.open_ic_default_preset(ic_settings["default_preset_path"])
-            ic_image_preset = ic_preset["image_process"]
-            ic_video_preset = ic_preset["video_process"]
-            filtered_video_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_video_ext_dict"]
-            filtered_image_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_image_ext_dict"]
+            main_icfilelist = pre_processiong.ic_search(src_dir_path,
+                                                    dst_dir_path,
+                                                    filtered_video_ext_dict,
+                                                    filtered_image_ext_dict,
+                                                    filtered_archive_ext_dict)
 
-            if (src_dir_path == dst_dir_path):
-                ic_logger.info("!!!SAME PATH PROCEDURE ACTIVATE!!!")
+            ic_logger.info("FILE LENGTH: %d" % len(main_icfilelist))
 
-                main_icfilelist = pre_processiong.ic_search(src_dir_path,
-                                                        dst_dir_path,
-                                                        filtered_video_ext_dict,
-                                                        filtered_image_ext_dict,
-                                                        filtered_archive_ext_dict)
+            pre_processiong.print_video_icfile(main_icfilelist)
+            pre_processiong.print_image_icfile(main_icfilelist)
+            pre_processiong.print_archive_icfile(main_icfilelist)
+            pre_processiong.print_not_filtered_icfile(main_icfilelist)
 
-                pre_processiong.print_video_icfile(main_icfilelist)
-                pre_processiong.print_image_icfile(main_icfilelist)
-                pre_processiong.print_archive_icfile(main_icfilelist)
-                pre_processiong.print_not_filtered_icfile(main_icfilelist)
+        ic_logger.info("=IC PREPROCESSING END=")
 
-                if (args.dummy):
-                    pre_processiong.create_dummy_icfilelist(main_icfilelist)
+        """
+            DUMMY OPTION CHECK
+        """
+        if (args.dummy):
+            pre_processiong.create_dummy_icfilelist(main_icfilelist)
 
-            else:
-                ic_logger.info("!!!COPY CAT!!!")
+        """
+            IC IMAGE PROCESS
+        """
+        ic_logger.info("=IC IMAGE PROCESS START=")
 
-                main_icfilelist = pre_processiong.ic_search(src_dir_path,
-                                                        dst_dir_path,
-                                                        filtered_video_ext_dict,
-                                                        filtered_image_ext_dict,
-                                                        filtered_archive_ext_dict)
+        for (idx, icfile) in enumerate(main_icfilelist):
+            if (pre_processiong.is_image_icfile(icfile)):
+                ic_image_processor = ImageProcessor(icfile, ic_image_preset)
 
-                ic_logger.info("FILE LENGTH: %d" % len(main_icfilelist))
+                icfile = ic_image_processor.ic_image_process()
 
-                pre_processiong.print_video_icfile(main_icfilelist)
-                pre_processiong.print_image_icfile(main_icfilelist)
-                pre_processiong.print_archive_icfile(main_icfilelist)
-                pre_processiong.print_not_filtered_icfile(main_icfilelist)
+        ic_logger.info("=IC IMAGE PROCESS END=")
 
-            ic_logger.info("=IC PREPROCESSING END=")
+        """
+            IC VIDEO PROCESS
+        """
+        ic_logger.info("=IC VIDEO PROCESS START=")
 
-            """
-                DUMMY OPTION CHECK
-            """
-            if (args.dummy):
-                pre_processiong.create_dummy_icfilelist(main_icfilelist)
+        for (idx, icfile) in enumerate(main_icfilelist):
+            if (pre_processiong.is_video_icfile(icfile)):
+                ic_video_processor = VideoProcessor(icfile, ic_video_preset)
 
-            """
-                IC IMAGE PROCESS
-            """
-            ic_logger.info("=IC IMAGE PROCESS START=")
+                icfile = ic_video_processor.ic_video_process()
 
-            for (idx, icfile) in enumerate(main_icfilelist):
-                if (pre_processiong.is_image_icfile(icfile)):
-                    ic_image_processor = ImageProcessor(icfile, ic_image_preset)
+        ic_logger.info("=IC VIDEO PROCESS END=")
 
-                    icfile = ic_image_processor.ic_image_process()
+        """
+            IC POST PROCESS
+        """
+        ic_logger.info("=IC POST PROCESS START=")
 
-            ic_logger.info("=IC IMAGE PROCESS END=")
+        for (idx, icfile) in enumerate(main_icfilelist):
+            if (pre_processiong.is_incoming_icfile(icfile)):
+                ic_post_processor = PostProcessing(icfile)
 
-            """
-                IC VIDEO PROCESS
-            """
-            ic_logger.info("=IC VIDEO PROCESS START=")
+                icfile = ic_post_processor.ic_copy()
 
-            for (idx, icfile) in enumerate(main_icfilelist):
-                if (pre_processiong.is_video_icfile(icfile)):
-                    ic_video_processor = VideoProcessor(icfile, ic_video_preset)
+        ic_logger.info("=IC POST PROCESS END=")
 
-                    icfile = ic_video_processor.ic_video_process()
-
-            ic_logger.info("=IC VIDEO PROCESS END=")
-    else:
-        if (args.user_preset != None):
-            ic_logger.info("!!!USER PRESET USE!!!")
-            ic_logger.info("=IC PREPROCESSING START=")
-
-            if (not os.path.exists(src_dir_path) or not os.path.exists(src_dir_path)):
-                ic_logger.warning("INVALID PATH")
-
-                return (-1)
-
-            ic_preset = pre_processiong.open_ic_user_preset(args.user_preset)
-
-            filtered_video_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_video_ext_dict"]
-            filtered_image_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_image_ext_dict"]
-
-            if (src_dir_path == dst_dir_path):
-                ic_logger.info("!!!SAME PATH PROCEDURE ACTIVATE!!!")
-
-                main_icfilelist = pre_processiong.ic_search(src_dir_path,
-                                                        dst_dir_path,
-                                                        filtered_video_ext_dict,
-                                                        filtered_image_ext_dict,
-                                                        filtered_archive_ext_dict)
-
-                ic_logger.info("FILE LENGTH: %d" % len(main_icfilelist))
-
-                pre_processiong.print_video_icfile(main_icfilelist)
-                pre_processiong.print_image_icfile(main_icfilelist)
-                pre_processiong.print_archive_icfile(main_icfilelist)
-                ic_logger.info("=IC PREPROCESSING END=")
-            else:
-                ic_logger.info("!!!COPY CAT!!!")
-                ic_logger.info("=IC PREPROCESSING START=")
-
-                main_icfilelist = pre_processiong.ic_search(src_dir_path,
-                                                        dst_dir_path,
-                                                        filtered_video_ext_dict,
-                                                        filtered_image_ext_dict,
-                                                        filtered_archive_ext_dict)
-
-                ic_logger.info("FILE LENGTH: %d" % len(main_icfilelist))
-
-                pre_processiong.print_video_icfile(main_icfilelist)
-                pre_processiong.print_image_icfile(main_icfilelist)
-                pre_processiong.print_archive_icfile(main_icfilelist)
-                ic_logger.info("=IC PREPROCESSING END=")
-
-            """
-                DUMMY OPTION CHECK
-            """
-            if (args.dummy):
-                pre_processiong.create_dummy_icfilelist(main_icfilelist)
-
-            """
-                IC IMAGE PROCESS
-            """
-            ic_logger.info("=IC IMAGE PROCESS START=")
-
-            for (idx, icfile) in enumerate(main_icfilelist):
-                if (pre_processiong.is_image_icfile(icfile)):
-                    ic_image_processor = ImageProcessor(icfile, ic_image_preset)
-
-                    icfile = ic_image_processor.ic_image_process()
-
-            ic_logger.info("=IC IMAGE PROCESS END=")
-
-            """
-                IC VIDEO PROCESS
-            """
-            ic_logger.info("=IC VIDEO PROCESS START=")
-
-            for (idx, icfile) in enumerate(main_icfilelist):
-                if (pre_processiong.is_video_icfile(icfile)):
-                    ic_video_processor = VideoProcessor(icfile, ic_video_preset)
-
-                    icfile = ic_video_processor.ic_video_process()
-
-            ic_logger.info("=IC VIDEO PROCESS END=")
-        else:
-            """
-                IC PREPROCESS
-            """
-            ic_logger.info("!!!DEFAULT PRESET USE!!!")
-            ic_logger.info("=IC PREPROCESSING START=")
-
-            ic_logger.info("SRC_DIR_PATH:[%s]" % src_dir_path)
-            ic_logger.info("DST_DIR_PATH:[%s]" % dst_dir_path)
-
-            """
-                IC PRESET LOADING
-            """
-            ic_preset = pre_processiong.open_ic_default_preset(ic_settings["default_preset_path"])
-            ic_image_preset = ic_preset["image_process"]
-            ic_video_preset = ic_preset["video_process"]
-            filtered_video_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_video_ext_dict"]
-            filtered_image_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_image_ext_dict"]
-
-            if (src_dir_path == dst_dir_path):
-                ic_logger.info("!!!SAME PATH PROCEDURE ACTIVATE!!!")
-
-                main_icfilelist = pre_processiong.ic_search(src_dir_path,
-                                                        dst_dir_path,
-                                                        filtered_video_ext_dict,
-                                                        filtered_image_ext_dict,
-                                                        filtered_archive_ext_dict)
-
-                pre_processiong.print_video_icfile(main_icfilelist)
-                pre_processiong.print_image_icfile(main_icfilelist)
-                pre_processiong.print_archive_icfile(main_icfilelist)
-                pre_processiong.print_not_filtered_icfile(main_icfilelist)
-            else:
-                ic_logger.info("!!!COPY CAT!!!")
-
-                main_icfilelist = pre_processiong.ic_search(src_dir_path,
-                                                        dst_dir_path,
-                                                        filtered_video_ext_dict,
-                                                        filtered_image_ext_dict,
-                                                        filtered_archive_ext_dict)
-
-                ic_logger.info("FILE LENGTH: %d" % len(main_icfilelist))
-
-                pre_processiong.print_video_icfile(main_icfilelist)
-                pre_processiong.print_image_icfile(main_icfilelist)
-                pre_processiong.print_archive_icfile(main_icfilelist)
-                pre_processiong.print_not_filtered_icfile(main_icfilelist)
-
-            ic_logger.info("=IC PREPROCESSING END=")
-
-            """
-                DUMMY OPTION CHECK
-            """
-            if (args.dummy):
-                pre_processiong.create_dummy_icfilelist(main_icfilelist)
-
-            """
-                IC IMAGE PROCESS
-            """
-            ic_logger.info("=IC IMAGE PROCESS START=")
-
-            for (idx, icfile) in enumerate(main_icfilelist):
-                if (pre_processiong.is_image_icfile(icfile)):
-                    ic_image_processor = ImageProcessor(icfile, ic_image_preset)
-
-                    icfile = ic_image_processor.ic_image_process()
-
-            ic_logger.info("=IC IMAGE PROCESS END=")
-
-            """
-                IC VIDEO PROCESS
-            """
-            ic_logger.info("=IC VIDEO PROCESS START=")
-
-            for (idx, icfile) in enumerate(main_icfilelist):
-                if (pre_processiong.is_video_icfile(icfile)):
-                    ic_video_processor = VideoProcessor(icfile, ic_video_preset)
-
-                    icfile = ic_video_processor.ic_video_process()
-
-            ic_logger.info("=IC VIDEO PROCESS END=")
-
-            """
-                IC POST PROCESS
-            """
-            ic_logger.info("=IC POST PROCESS START=")
-
-            for (idx, icfile) in enumerate(main_icfilelist):
-                if (pre_processiong.is_incoming_icfile(icfile)):
-                    ic_post_processor = PostProcessing(icfile)
-
-                    icfile = ic_post_processor.ic_copy()
-
-            ic_logger.info("=IC POST PROCESS END=")
-
-            pre_processiong.print_all_icfile(main_icfilelist)
+        pre_processiong.print_all_icfile(main_icfilelist)
 
 
 if __name__ == "__main__":

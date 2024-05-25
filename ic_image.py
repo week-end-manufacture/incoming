@@ -42,7 +42,9 @@ class ImageProcessor:
                                       dst_image_abs_path,
                                       dst_image_path)
             
+            cur_size = os.path.getsize(dst_image_abs_path)
             self.image_icfile.ictype = IcType.OUTGOING
+            self.image_icfile.outgoing_size = cur_size
             
             return self.image_icfile
 

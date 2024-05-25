@@ -25,7 +25,9 @@ class VideoProcessor:
             else:
                 self.encode_with_ffmpeg(src_video_abs_path, dst_video_abs_path)
 
+            cur_size = os.path.getsize(dst_video_abs_path)
             self.video_icfile.ictype = IcType.OUTGOING
+            self.video_icfile.outgoing_size = cur_size
 
             return self.video_icfile
             

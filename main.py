@@ -207,7 +207,7 @@ def main():
         """
             IC POST PROCESS
         """
-        ic_logger.info("=IC POST PROCESS START=")
+        ic_logger.info("=IC COPY PROCESS START=")
 
         for (idx, icfile) in enumerate(main_icfilelist):
             if (pre_processiong.is_incoming_icfile(icfile)):
@@ -215,7 +215,16 @@ def main():
 
                 icfile = ic_post_processor.ic_copy()
 
-        ic_logger.info("=IC POST PROCESS END=")
+        ic_logger.info("=IC COPY PROCESS END=")
+
+        ic_logger.info("=IC UNLINK PROCESS START=")
+
+        for (idx, icfile) in enumerate(main_icfilelist):
+            ic_post_processor = PostProcessing(icfile)
+
+            icfile = ic_post_processor.ic_unlink()
+
+        ic_logger.info("=IC UNLINK PROCESS END=")
 
         pre_processiong.print_all_icfile(main_icfilelist)
 

@@ -35,8 +35,6 @@ class VideoProcessor:
         if not os.path.exists(dst_video_path):
             os.makedirs(dst_video_path)
 
-        print(src_video_abs_path)
-
         command = ["HandBrakeCLI", "-i", src_video_abs_path, "-o", dst_video_abs_path, "--preset-import-file", hb_preset_path]
 
         handbrake_process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
@@ -47,7 +45,7 @@ class VideoProcessor:
                 break
             if output:
                 print(output.strip())
-                self.ic_logger.info(output)
+                #self.ic_logger.info(output)
 
     def encode_with_ffmpeg(self, src_video_abs_path, dst_image_abs_path, dst_video_path):
         if not os.path.exists(dst_video_path):

@@ -7,7 +7,7 @@ from ic_preprocessing import *
 
 class PostProcessing:
     def __init__(self, icfile) -> None:
-        self.icfile = icfile
+        self.icfile: IcFile = icfile
 
         self.ic_logger_instance = IcLogger()
         self.ic_logger = self.ic_logger_instance.init_logger(__name__)
@@ -16,7 +16,7 @@ class PostProcessing:
         src_path = self.icfile.src_path
         src_abs_path = os.path.join(self.icfile.src_path, self.icfile.filename)
 
-        if (self.icfile.ictype == IcType.OUTGOING):
+        if (self.icfile.ictype == IcType.UNZIPPED):
             if (os.path.isfile(src_abs_path)):
                 os.unlink(src_abs_path)
             
@@ -25,7 +25,20 @@ class PostProcessing:
 
             self.icfile.ictype = IcType.DELETED
 
-            return self.icfile
+            self.ic_logger.info("UNLINK FILE:%s", src_abs_path)
+
+        if (option == 1):
+            if (self.icfile.ictype == IcType.OUTGOING):
+                if (os.path.isfile(src_abs_path)):
+                    os.unlink(src_abs_path)
+                
+                if (os.path.isdir(src_path)):
+                    if (len(os.listdir(src_path) == 0)):
+                        os.rmdir(src_path)
+
+                self.icfile.ictype = IcType.DELETED
+
+        return self.icfile
 
     def ic_copy(self, option=0):
         src_file_abs_path = os.path.join(self.icfile.src_path, self.icfile.filename)

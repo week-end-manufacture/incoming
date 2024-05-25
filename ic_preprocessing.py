@@ -105,6 +105,9 @@ class PreProcessing:
                     filtered_archive_ext_dict):
         retval = []
 
+        retval.append([])
+        retval.append([])
+
         for (src_path, src_dir, src_filelist) in os.walk(src_dir_path):
             for (idx, src_file) in enumerate(src_filelist):
                 abs_path = src_path + '/' + src_file
@@ -115,7 +118,8 @@ class PreProcessing:
                     unzipped_path = self.extract_if_contains_images(abs_path, src_path, cur_basename, cur_ext, filtered_image_ext_dict)
 
                     if (unzipped_path != False):
-                        retval.append(unzipped_path)
+                        retval[0].append(unzipped_path)
+                        retval[1].append(abs_path)
 
         return retval
 
@@ -159,7 +163,7 @@ class PreProcessing:
 
         unzipped_filelist = self.ic_unzipper(src_dir_path, filtered_image_ext_dict, filtered_archive_ext_dict)
 
-        for (idx, unzipped_path) in enumerate(unzipped_filelist):
+        for (idx, unzipped_path) in enumerate(unzipped_filelist[0]):
             src_icfilelist.append(IcFile(unzipped_path,
                                         'DIRECTORY',
                                         'DIRECTORY',
@@ -210,7 +214,17 @@ class PreProcessing:
                                                     cur_size,
                                                     cur_size))
                 elif (cur_ext in filtered_archive_ext_dict):
-                    src_icfilelist.append(IcFile(src_path,
+                    if (src_abs_path in unzipped_filelist[1]):
+                        src_icfilelist.append(IcFile(src_path,
+                                                    cur_dst_path,
+                                                    src_file,
+                                                    cur_ext,
+                                                    IcType.UNZIPPED,
+                                                    IcType.ARCHIVE,
+                                                    cur_size,
+                                                    cur_size))
+                    else:
+                        src_icfilelist.append(IcFile(src_path,
                                                     cur_dst_path,
                                                     src_file,
                                                     cur_ext,

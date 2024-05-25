@@ -16,7 +16,7 @@ class PostProcessing:
         src_path = self.icfile.src_path
         src_abs_path = os.path.join(self.icfile.src_path, self.icfile.filename)
 
-        if (self.icfile.ictype == IcType.UNZIPPED):
+        if (self.icfile.ictype == IcType.UNZIPPED and self.icfile.icexttype == IcType.DIRECTORY):
             shutil.rmtree(src_path)
 
             self.icfile.ictype = IcType.DELETED

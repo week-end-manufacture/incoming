@@ -17,16 +17,9 @@ class PostProcessing:
         src_abs_path = os.path.join(self.icfile.src_path, self.icfile.filename)
 
         if (self.icfile.ictype == IcType.UNZIPPED):
-            if (os.path.isfile(src_abs_path)):
-                os.unlink(src_abs_path)
-            
-            if (os.path.isdir(src_path)):
-                if (len(os.listdir(src_path)) == 0):
-                    os.rmdir(src_path)
+            shutil.rmtree(src_path)
 
             self.icfile.ictype = IcType.DELETED
-
-            self.ic_logger.info("UNLINK FILE:%s", src_abs_path)
 
         if (option == 1):
             if (self.icfile.ictype == IcType.OUTGOING):

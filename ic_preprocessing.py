@@ -95,12 +95,8 @@ class PreProcessing:
                 with py7zr.SevenZipFile(abs_path, mode='r') as archive:
                     archive.extractall(dst_path)
 
-            self.ic_logger.info("OK EXTRACT ARCHIVE FILE")
-
-            return True
+            return dst_path
         else:
-            self.ic_logger.info("UNDER IMAGE FILE COUNT IN ARCHIVE")
-
             return False
 
     def ic_unzipper(self,
@@ -116,8 +112,10 @@ class PreProcessing:
                 cur_ext = Path(src_file).suffix.lower()
 
                 if (cur_ext in filtered_archive_ext_dict):
-                    if (self.extract_if_contains_images(abs_path, src_path, cur_basename, cur_ext, filtered_image_ext_dict)):
-                        retval.append(abs_path)
+                    unzipped_path = self.extract_if_contains_images(abs_path, src_path, cur_basename, cur_ext, filtered_image_ext_dict)
+
+                    if (unzipped_path != False):
+                        retval.append(unzipped_path)
 
         return retval
 
@@ -138,8 +136,6 @@ class PreProcessing:
             cur_size = os.path.getsize(src_abs_path)
             rel_path = '/'
             cur_dst_path = os.path.join(os.path.abspath(dst_dir_path), rel_path[1:])
-
-            print(src_file)
 
             if (cur_ext in filtered_video_ext_dict):
                 src_icfilelist.append(IcFile(src_abs_dir_path,
@@ -163,6 +159,16 @@ class PreProcessing:
 
         unzipped_filelist = self.ic_unzipper(src_dir_path, filtered_image_ext_dict, filtered_archive_ext_dict)
 
+        for (idx, unzipped_path) in enumerate(unzipped_filelist):
+            src_icfilelist.append(IcFile(unzipped_path,
+                                        'DIRECTORY',
+                                        'DIRECTORY',
+                                        'DIRECTORY',
+                                        IcType.UNZIPPED,
+                                        IcType.DIRECTORY,
+                                        0,
+                                        0))
+
         if (src_dir_path == dst_dir_path):
             dst_dir_path = os.path.join(os.path.dirname(src_dir_path), "[IC]" + os.path.basename(src_dir_path))
 
@@ -170,57 +176,57 @@ class PreProcessing:
                 os.makedirs(dst_dir_path)
 
         for (src_path, src_dir, src_filelist) in os.walk(src_dir_path):
-                for (idx, src_file) in enumerate(src_filelist):
-                    src_abs_path = src_path + '/' + src_file
-                    cur_ext = Path(src_file).suffix.lower()
-                    cur_size = os.path.getsize(src_abs_path)
-                    rel_path = src_path.replace(src_dir_path, '')
-                    cur_dst_path = os.path.join(dst_dir_path, rel_path[1:])
+            for (idx, src_file) in enumerate(src_filelist):
+                src_abs_path = src_path + '/' + src_file
+                cur_ext = Path(src_file).suffix.lower()
+                cur_size = os.path.getsize(src_abs_path)
+                rel_path = src_path.replace(src_dir_path, '')
+                cur_dst_path = os.path.join(dst_dir_path, rel_path[1:])
 
-                    self.ic_logger.debug("=IC SEARCHING...===================")
-                    self.ic_logger.debug("PATH: %s" % src_path)
-                    self.ic_logger.debug("DIRECTORY: %s" % src_dir)
-                    self.ic_logger.debug("FILENAME: %s" % src_file)
-                    self.ic_logger.debug("EXTENSION: %s" % cur_ext)
-                    self.ic_logger.debug("SIZE: %d" % cur_size)
-                    self.ic_logger.debug("===================================")
+                self.ic_logger.debug("=IC SEARCHING...===================")
+                self.ic_logger.debug("PATH: %s" % src_path)
+                self.ic_logger.debug("DIRECTORY: %s" % src_dir)
+                self.ic_logger.debug("FILENAME: %s" % src_file)
+                self.ic_logger.debug("EXTENSION: %s" % cur_ext)
+                self.ic_logger.debug("SIZE: %d" % cur_size)
+                self.ic_logger.debug("===================================")
 
-                    if (cur_ext in filtered_video_ext_dict):
-                        src_icfilelist.append(IcFile(src_path,
-                                                     cur_dst_path,
-                                                     src_file,
-                                                     cur_ext,
-                                                     IcType.INCOMING,
-                                                     IcType.VIDEO,
-                                                     cur_size,
-                                                     cur_size))
-                    elif (cur_ext in filtered_image_ext_dict):
-                        src_icfilelist.append(IcFile(src_path,
-                                                     cur_dst_path,
-                                                     src_file,
-                                                     cur_ext,
-                                                     IcType.INCOMING,
-                                                     IcType.IMAGE,
-                                                     cur_size,
-                                                     cur_size))
-                    elif (cur_ext in filtered_archive_ext_dict):
-                        src_icfilelist.append(IcFile(src_path,
-                                                        cur_dst_path,
-                                                        src_file,
-                                                        cur_ext,
-                                                        IcType.INCOMING,
-                                                        IcType.ARCHIVE,
-                                                        cur_size,
-                                                        cur_size))
-                    else:
-                        src_icfilelist.append(IcFile(src_path,
-                                                     cur_dst_path,
-                                                     src_file,
-                                                     cur_ext,
-                                                     IcType.INCOMING,
-                                                     IcType.NOT_FILTERED,
-                                                     cur_size,
-                                                     cur_size))
+                if (cur_ext in filtered_video_ext_dict):
+                    src_icfilelist.append(IcFile(src_path,
+                                                    cur_dst_path,
+                                                    src_file,
+                                                    cur_ext,
+                                                    IcType.INCOMING,
+                                                    IcType.VIDEO,
+                                                    cur_size,
+                                                    cur_size))
+                elif (cur_ext in filtered_image_ext_dict):
+                    src_icfilelist.append(IcFile(src_path,
+                                                    cur_dst_path,
+                                                    src_file,
+                                                    cur_ext,
+                                                    IcType.INCOMING,
+                                                    IcType.IMAGE,
+                                                    cur_size,
+                                                    cur_size))
+                elif (cur_ext in filtered_archive_ext_dict):
+                    src_icfilelist.append(IcFile(src_path,
+                                                    cur_dst_path,
+                                                    src_file,
+                                                    cur_ext,
+                                                    IcType.INCOMING,
+                                                    IcType.ARCHIVE,
+                                                    cur_size,
+                                                    cur_size))
+                else:
+                    src_icfilelist.append(IcFile(src_path,
+                                                    cur_dst_path,
+                                                    src_file,
+                                                    cur_ext,
+                                                    IcType.INCOMING,
+                                                    IcType.NOT_FILTERED,
+                                                    cur_size,
+                                                    cur_size))
                         
         return src_icfilelist
     
@@ -419,6 +425,7 @@ class IcType(Enum):
     IMAGE = auto()
     ARCHIVE = auto()
     NOT_FILTERED = auto()
+    DIRECTORY = auto()
     INCOMING = auto()
     OUTGOING = auto()
     UNZIPPED = auto()

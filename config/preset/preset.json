@@ -6,7 +6,7 @@
 "filtered_image_ext_dict":[".jpg",".jpeg",".png",".bmp",".tiff",".tif"]
 },
 
-"minimum_images_for_processing_in_archive":4,
+"minimum_number_of_images_in_archive_for_processing":4,
 
 "video_process":{
     "video_process_toggle":true,

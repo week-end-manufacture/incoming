@@ -42,7 +42,9 @@ class ImageProcessor:
                                       dst_image_abs_path,
                                       dst_image_path)
             
-            return True
+            self.image_icfile.ictype = IcType.OUTGOING
+            
+            return self.image_icfile
 
     def assign_untagged_icc_profile_to_sRGB(self, ic_image):
         retval = None

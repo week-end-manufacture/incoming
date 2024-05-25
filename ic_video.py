@@ -22,6 +22,10 @@ class VideoProcessor:
                 hb_preset_path = self.video_preset["HandBrake_presets_path"]
 
                 self.encode_with_handbrake(src_video_abs_path, dst_video_abs_path, dst_video_path, hb_preset_path)
+
+                self.video_icfile.ictpye = IcType.OUTGOING
+
+                return self.video_icfile
             else:
                 self.encode_with_ffmpeg(src_video_abs_path, dst_video_abs_path)
 

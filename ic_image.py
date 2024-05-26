@@ -94,7 +94,12 @@ class ImageProcessor:
         output_icc_profile = ic_image.info.get("icc_profile")
 
         if (exif_rm_flag):
-            ic_image.save(dst_image_abs_path, quality=output_quality, icc_profile=output_icc_profile)
+            ic_image.save(dst_image_abs_path,
+                          quality=output_quality,
+                          icc_profile=output_icc_profile)
         else:
             org_exif = ic_image.getexif()
-            ic_image.save(dst_image_abs_path, quality=output_quality, exif=org_exif, icc_profile=output_icc_profile)
+            ic_image.save(dst_image_abs_path,
+                          quality=output_quality,
+                          exif=org_exif,
+                          icc_profile=output_icc_profile)

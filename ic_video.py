@@ -1,6 +1,6 @@
 import subprocess
 
-from ic_preprocessing import *
+from ic_filehandler import *
 from ic_log import *
 
 

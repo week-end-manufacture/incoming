@@ -36,13 +36,21 @@ class ImageProcessor:
                 ic_image = self.remove_only_gps_exif_data(ic_image)
 
             if self.image_preset['remove_all_exif_data']:
-                ic_image = self.remove_all_exif_data(ic_image)
-
-            self.save_processed_image(ic_image,
-                                      dst_image_abs_path,
-                                      dst_image_path)
+                self.save_processed_image(ic_image,
+                                        dst_image_abs_path,
+                                        dst_image_path,
+                                        True)
+            else:
+                self.save_processed_image(ic_image,
+                                        dst_image_abs_path,
+                                        dst_image_path,
+                                        False)
             
-            return True
+            cur_size = os.path.getsize(dst_image_abs_path)
+            self.image_icfile.ictype = IcType.OUTGOING
+            self.image_icfile.outgoing_size = cur_size
+            
+            return self.image_icfile
 
     def assign_untagged_icc_profile_to_sRGB(self, ic_image):
         retval = None
@@ -75,10 +83,23 @@ class ImageProcessor:
 
         return retval
 
-    def save_processed_image(self, ic_image, dst_image_abs_path, dst_image_path):
+    def save_processed_image(self, ic_image,
+                             dst_image_abs_path,
+                             dst_image_path,
+                             exif_rm_flag):
         if not os.path.exists(dst_image_path):
             os.makedirs(dst_image_path)
 
         output_quality = self.image_preset["output_quality"]
+        output_icc_profile = ic_image.info.get("icc_profile")
 
-        ic_image.save(dst_image_abs_path, quality=output_quality)
+        if (exif_rm_flag):
+            ic_image.save(dst_image_abs_path,
+                          quality=output_quality,
+                          icc_profile=output_icc_profile)
+        else:
+            org_exif = ic_image.getexif()
+            ic_image.save(dst_image_abs_path,
+                          quality=output_quality,
+                          exif=org_exif,
+                          icc_profile=output_icc_profile)

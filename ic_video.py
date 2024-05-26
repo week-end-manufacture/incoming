@@ -25,13 +25,15 @@ class VideoProcessor:
             else:
                 self.encode_with_ffmpeg(src_video_abs_path, dst_video_abs_path)
 
-            return True
+            cur_size = os.path.getsize(dst_video_abs_path)
+            self.video_icfile.ictype = IcType.OUTGOING
+            self.video_icfile.outgoing_size = cur_size
+
+            return self.video_icfile
             
     def encode_with_handbrake(self, src_video_abs_path, dst_video_abs_path, dst_video_path, hb_preset_path):
         if not os.path.exists(dst_video_path):
             os.makedirs(dst_video_path)
-
-        print(src_video_abs_path)
 
         command = ["HandBrakeCLI", "-i", src_video_abs_path, "-o", dst_video_abs_path, "--preset-import-file", hb_preset_path]
 
@@ -43,7 +45,7 @@ class VideoProcessor:
                 break
             if output:
                 print(output.strip())
-                self.ic_logger.info(output)
+                #self.ic_logger.info(output)
 
     def encode_with_ffmpeg(self, src_video_abs_path, dst_image_abs_path, dst_video_path):
         if not os.path.exists(dst_video_path):

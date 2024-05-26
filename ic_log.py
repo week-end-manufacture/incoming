@@ -19,7 +19,7 @@ class IcLogger:
         ic_logger = logging.getLogger(logname)
 
         streamFormatter = colorlog.ColoredFormatter(
-            "%(log_color)s[%(levelname)s|<%(name)s>|%(module)s|%(lineno)d]%(bg_blue)s%(message)s"
+            "%(log_color)s%(bg_blue)s%(message)s"
         )
         
         fileFormatter = logging.Formatter(

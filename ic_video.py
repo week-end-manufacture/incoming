@@ -21,9 +21,13 @@ class VideoProcessor:
             if (self.video_preset["deafult_encoder_is_HandBrake"] == None):
                 hb_preset_path = self.video_preset["HandBrake_presets_path"]
 
-                self.encode_with_handbrake(src_video_abs_path, dst_video_abs_path, dst_video_path, hb_preset_path)
+                self.encode_with_handbrake(src_video_abs_path,
+                                           dst_video_abs_path,
+                                           dst_video_path,
+                                           hb_preset_path)
             else:
-                self.encode_with_ffmpeg(src_video_abs_path, dst_video_abs_path)
+                self.encode_with_ffmpeg(src_video_abs_path,
+                                        dst_video_abs_path)
 
             cur_size = os.path.getsize(dst_video_abs_path)
             self.video_icfile.ictype = IcType.OUTGOING
@@ -31,7 +35,11 @@ class VideoProcessor:
 
             return self.video_icfile
             
-    def encode_with_handbrake(self, src_video_abs_path, dst_video_abs_path, dst_video_path, hb_preset_path):
+    def encode_with_handbrake(self,
+                              src_video_abs_path,
+                              dst_video_abs_path,
+                              dst_video_path,
+                              hb_preset_path):
         if not os.path.exists(dst_video_path):
             os.makedirs(dst_video_path)
 
@@ -44,10 +52,13 @@ class VideoProcessor:
             if output == '' and handbrake_process.poll() is not None:
                 break
             if output:
-                print(output.strip())
-                #self.ic_logger.info(output)
+                #print(output.strip())
+                self.ic_logger.info(output.strip())
 
-    def encode_with_ffmpeg(self, src_video_abs_path, dst_image_abs_path, dst_video_path):
+    def encode_with_ffmpeg(self,
+                           src_video_abs_path,
+                           dst_image_abs_path,
+                           dst_video_path):
         if not os.path.exists(dst_video_path):
             os.makedirs(dst_video_path)
 
@@ -62,5 +73,5 @@ class VideoProcessor:
             if output == '' and ffmpeg_process.poll() is not None:
                 break
             if output:
-                print(output.strip())
+                #print(output.strip())
                 self.ic_logger.info(output)

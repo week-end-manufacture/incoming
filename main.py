@@ -7,6 +7,7 @@ from ic_log import *
 from ic_image import *
 from ic_video import *
 from ic_postprocessing import *
+from ic_result import *
 
 def main():
     pre_processiong = PreProcessing()
@@ -178,6 +179,8 @@ def main():
         if (args.dummy):
             pre_processiong.create_dummy_icfilelist(main_icfilelist)
 
+            return (True)
+
         """
             IC IMAGE PROCESS
         """
@@ -226,7 +229,15 @@ def main():
 
         ic_logger.info("=IC UNLINK PROCESS END=")
 
+        """
+            IC RESULT
+        """
+        ic_result = Result()
+
         pre_processiong.print_all_icfile(main_icfilelist)
+        ic_result.ic_result(main_icfilelist)
+
+        return (True)
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 import os
 from PIL import Image, ImageCms
 
-from ic_preprocessing import *
+from ic_filehandler import *
 
 
 class ImageProcessor:
@@ -27,6 +27,7 @@ class ImageProcessor:
             src_image_abs_path = os.path.join(self.image_icfile.src_path, self.image_icfile.filename)
             dst_image_abs_path = os.path.join(self.image_icfile.dst_path, Path(self.image_icfile.filename).stem + self.image_preset["output_ext"])
             dst_image_path = self.image_icfile.dst_path
+            cur_ext = self.image_icfile.extension
 
             ic_image = self.image_open(src_image_abs_path)
 
@@ -39,11 +40,13 @@ class ImageProcessor:
                 self.save_processed_image(ic_image,
                                         dst_image_abs_path,
                                         dst_image_path,
+                                        cur_ext,
                                         True)
             else:
                 self.save_processed_image(ic_image,
                                         dst_image_abs_path,
                                         dst_image_path,
+                                        cur_ext,
                                         False)
             
             cur_size = os.path.getsize(dst_image_abs_path)
@@ -86,6 +89,7 @@ class ImageProcessor:
     def save_processed_image(self, ic_image,
                              dst_image_abs_path,
                              dst_image_path,
+                             extension,
                              exif_rm_flag):
         if not os.path.exists(dst_image_path):
             os.makedirs(dst_image_path)
@@ -98,8 +102,15 @@ class ImageProcessor:
                           quality=output_quality,
                           icc_profile=output_icc_profile)
         else:
-            org_exif = ic_image.getexif()
-            ic_image.save(dst_image_abs_path,
+            if (extension == ".tiff" or extension == ".tif"):
+                org_exif = ic_image.tag
+                ic_image.save(dst_image_abs_path,
                           quality=output_quality,
-                          exif=org_exif,
+                          tiffinfo=org_exif,
                           icc_profile=output_icc_profile)
+            else:
+                org_exif = ic_image.getexif()
+                ic_image.save(dst_image_abs_path,
+                            quality=output_quality,
+                            exif=org_exif,
+                            icc_profile=output_icc_profile)

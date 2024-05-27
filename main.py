@@ -2,16 +2,19 @@ import os
 import argparse
 from pathlib import Path
 
+from ic_filehandler import *
 from ic_preprocessing import *
 from ic_log import *
 from ic_image import *
 from ic_video import *
 from ic_postprocessing import *
+from ic_result import *
 
 def main():
     pre_processiong = PreProcessing()
     ic_logger_instance = IcLogger()
     ic_logger = ic_logger_instance.init_logger(__name__)
+    ic_filehandler = IcFileHandler()
     ic_settings = pre_processiong.open_ic_settings()
 
 
@@ -70,9 +73,6 @@ def main():
 
             ic_logger.info("FILE LENGTH: %d" % len(main_icfilelist))
 
-            pre_processiong.print_video_icfile(main_icfilelist)
-            pre_processiong.print_image_icfile(main_icfilelist)
-            pre_processiong.print_archive_icfile(main_icfilelist)
             ic_logger.info("=IC PREPROCESSING END=")
         else:
             ic_logger.info("!!!COPY CAT!!!")
@@ -86,9 +86,6 @@ def main():
 
             ic_logger.info("FILE LENGTH: %d" % len(main_icfilelist))
 
-            pre_processiong.print_video_icfile(main_icfilelist)
-            pre_processiong.print_image_icfile(main_icfilelist)
-            pre_processiong.print_archive_icfile(main_icfilelist)
             ic_logger.info("=IC PREPROCESSING END=")
 
         """
@@ -97,13 +94,15 @@ def main():
         if (args.dummy):
             pre_processiong.create_dummy_icfilelist(main_icfilelist)
 
+            return (True)
+
         """
             IC IMAGE PROCESS
         """
         ic_logger.info("=IC IMAGE PROCESS START=")
 
         for (idx, icfile) in enumerate(main_icfilelist):
-            if (pre_processiong.is_image_icfile(icfile)):
+            if (ic_filehandler.is_image_icfile(icfile)):
                 ic_image_processor = ImageProcessor(icfile, ic_image_preset)
 
                 icfile = ic_image_processor.ic_image_process()
@@ -116,7 +115,7 @@ def main():
         ic_logger.info("=IC VIDEO PROCESS START=")
 
         for (idx, icfile) in enumerate(main_icfilelist):
-            if (pre_processiong.is_video_icfile(icfile)):
+            if (ic_filehandler.is_video_icfile(icfile)):
                 ic_video_processor = VideoProcessor(icfile, ic_video_preset)
 
                 icfile = ic_video_processor.ic_video_process()
@@ -150,10 +149,6 @@ def main():
                                                     filtered_image_ext_dict,
                                                     filtered_archive_ext_dict)
 
-            pre_processiong.print_video_icfile(main_icfilelist)
-            pre_processiong.print_image_icfile(main_icfilelist)
-            pre_processiong.print_archive_icfile(main_icfilelist)
-            pre_processiong.print_not_filtered_icfile(main_icfilelist)
         else:
             ic_logger.info("!!!COPY CAT!!!")
 
@@ -163,12 +158,8 @@ def main():
                                                     filtered_image_ext_dict,
                                                     filtered_archive_ext_dict)
 
-            ic_logger.info("FILE LENGTH: %d" % len(main_icfilelist))
-
-            pre_processiong.print_video_icfile(main_icfilelist)
-            pre_processiong.print_image_icfile(main_icfilelist)
-            pre_processiong.print_archive_icfile(main_icfilelist)
-            pre_processiong.print_not_filtered_icfile(main_icfilelist)
+        ic_logger.info("FILE LENGTH: %d" % len(main_icfilelist))
+        ic_filehandler.print_all_icfile(main_icfilelist)
 
         ic_logger.info("=IC PREPROCESSING END=")
 
@@ -178,13 +169,15 @@ def main():
         if (args.dummy):
             pre_processiong.create_dummy_icfilelist(main_icfilelist)
 
+            return (True)
+
         """
             IC IMAGE PROCESS
         """
         ic_logger.info("=IC IMAGE PROCESS START=")
 
         for (idx, icfile) in enumerate(main_icfilelist):
-            if (pre_processiong.is_image_icfile(icfile)):
+            if (ic_filehandler.is_image_icfile(icfile)):
                 ic_image_processor = ImageProcessor(icfile, ic_image_preset)
 
                 icfile = ic_image_processor.ic_image_process()
@@ -197,7 +190,7 @@ def main():
         ic_logger.info("=IC VIDEO PROCESS START=")
 
         for (idx, icfile) in enumerate(main_icfilelist):
-            if (pre_processiong.is_video_icfile(icfile)):
+            if (ic_filehandler.is_video_icfile(icfile)):
                 ic_video_processor = VideoProcessor(icfile, ic_video_preset)
 
                 icfile = ic_video_processor.ic_video_process()
@@ -210,7 +203,7 @@ def main():
         ic_logger.info("=IC COPY PROCESS START=")
 
         for (idx, icfile) in enumerate(main_icfilelist):
-            if (pre_processiong.is_incoming_icfile(icfile)):
+            if (ic_filehandler.is_incoming_icfile(icfile)):
                 ic_post_processor = PostProcessing(icfile)
 
                 icfile = ic_post_processor.ic_copy()
@@ -226,7 +219,15 @@ def main():
 
         ic_logger.info("=IC UNLINK PROCESS END=")
 
-        pre_processiong.print_all_icfile(main_icfilelist)
+        """
+            IC RESULT
+        """
+        ic_result = Result()
+
+        ic_filehandler.print_all_icfile(main_icfilelist)
+        ic_result.ic_result(main_icfilelist)
+
+        return (True)
 
 
 if __name__ == "__main__":

@@ -39,7 +39,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'incoming = main:incoming',
+            'incoming = src.main:main',
         ]
     },
 )

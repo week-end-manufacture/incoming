@@ -2,7 +2,7 @@ import os
 import shutil
 from enum import Enum, unique, auto
 
-from ic_filehandler import *
+from .ic_filehandler import *
 
 
 class Result:

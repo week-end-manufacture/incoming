@@ -1,7 +1,7 @@
 import subprocess
 
-from ic_filehandler import *
-from ic_log import *
+from .ic_filehandler import *
+from .ic_log import *
 
 
 class VideoProcessor:

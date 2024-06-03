@@ -4,7 +4,7 @@ from pathlib import Path
 from dataclasses import dataclass, field
 from enum import Enum, unique, auto
 
-from ic_log import *
+from .ic_log import *
 
 
 class IcFileHandler:

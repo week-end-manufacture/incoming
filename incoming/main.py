@@ -2,13 +2,13 @@ import os
 import argparse
 from pathlib import Path
 
-from ic_filehandler import *
-from ic_preprocessing import *
-from ic_log import *
-from ic_image import *
-from ic_video import *
-from ic_postprocessing import *
-from ic_result import *
+from .ic_filehandler import *
+from .ic_preprocessing import *
+from .ic_log import *
+from .ic_image import *
+from .ic_video import *
+from .ic_postprocessing import *
+from .ic_result import *
 
 def main():
     pre_processiong = PreProcessing()

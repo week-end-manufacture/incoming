@@ -1,7 +1,7 @@
 import os
 from PIL import Image, ImageCms
 
-from ic_filehandler import *
+from .ic_filehandler import *
 
 
 class ImageProcessor:

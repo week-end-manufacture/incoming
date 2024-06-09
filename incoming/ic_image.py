@@ -3,6 +3,8 @@ from PIL import Image, ImageCms
 
 from .ic_filehandler import *
 
+Image.MAX_IMAGE_PIXELS = None
+
 
 class ImageProcessor:
     def __init__(self, image_icfile, ic_image_preset):

@@ -1,1 +1,1 @@
-pyinstaller --clean -n incoming --onefile main.py
+pyinstaller --clean -n incoming --onefile ./incoming/main.py

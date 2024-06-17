@@ -5,18 +5,26 @@ import colorlog
 from logging import handlers
 
 
-class IcLogger:
-    def __init__(self, filePath=None):
-        self.className = "IcLogger"
-        
-        if filePath is None:
-            self.filePath = "./log/"
+class IcLogger(object):
+    level_relations = {
+        'debug': logging.DEBUG,
+        'info': logging.INFO,
+        'warning': logging.WARNING,
+        'error': logging.ERROR,
+        'crit': logging.CRITICAL
+    }
+
+    def __init__(self,
+                 filename,
+                 level='debug',
+                 when='midnight',
+                 backCount=3,):
+        self.logger = logging.getLogger(filename)
+
+        self.filePath = "./log/"
 
         if not os.path.exists(self.filePath):
             os.makedirs(self.filePath)
-
-    def init_logger(self, logname):
-        ic_logger = logging.getLogger(logname)
 
         streamFormatter = colorlog.ColoredFormatter(
             "%(log_color)s%(bg_blue)s%(message)s"
@@ -25,24 +33,20 @@ class IcLogger:
         fileFormatter = logging.Formatter(
             "[%(asctime)s|%(levelname)s|<%(name)s>|%(module)s|%(lineno)d]%(message)s"
         )
-        
-        streamHandler = colorlog.StreamHandler(sys.stdout)
+
+        streamHandler = logging.StreamHandler()
+        streamHandler.setFormatter(streamFormatter)
 
         fileHandler = handlers.TimedRotatingFileHandler(
             os.path.abspath(f"{self.filePath}ic_log.log"),
-            when="midnight",
-            interval=1,
-            backupCount=14,
-            encoding="utf-8",
-        )
+            when=when,
+            backupCount=backCount,
+            encoding='utf-8'
+            )
         
-        streamHandler.setFormatter(streamFormatter)
         fileHandler.setFormatter(fileFormatter)
-
-        ic_logger.addHandler(streamHandler)
-        ic_logger.addHandler(fileHandler)
-
-        ic_logger.setLevel(logging.DEBUG)
-
-        return ic_logger
         
+        self.logger.addHandler(streamHandler)
+        self.logger.addHandler(fileHandler)
+
+        self.logger.setLevel(self.level_relations.get(level))

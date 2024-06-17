@@ -7,8 +7,8 @@ from incoming.ic_filehandler import *
 
 class Result:
     def __init__(self) -> None:
-        self.ic_logger_instance = IcLogger()
-        self.ic_logger = self.ic_logger_instance.init_logger(__name__)
+        self.ic_logger_instance = IcLogger(__name__)
+        self.ic_logger = self.ic_logger_instance.logger
         
     def convert_size(self, size_bytes):
         if size_bytes == 0:

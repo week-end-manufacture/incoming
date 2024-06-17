@@ -6,8 +6,8 @@ from incoming.ic_log import *
 
 class VideoProcessor:
     def __init__(self, video_icfile, ic_video_preset):
-        self.ic_logger_instance = IcLogger()
-        self.ic_logger = self.ic_logger_instance.init_logger(__name__)
+        self.ic_logger_instance = IcLogger(__name__)
+        self.ic_logger = self.ic_logger_instance.logger
 
         self.video_icfile = video_icfile
         self.video_preset = ic_video_preset

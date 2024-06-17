@@ -9,8 +9,8 @@ from incoming.ic_log import *
 
 class IcFileHandler:
     def __init__(self) -> None:
-        self.ic_logger_instance = IcLogger()
-        self.ic_logger = self.ic_logger_instance.init_logger(__name__)
+        self.ic_logger_instance = IcLogger(__name__)
+        self.ic_logger = self.ic_logger_instance.logger
 
     def print_all_icfile(self, icfile_list):
         for (idx, icfile) in enumerate(icfile_list):

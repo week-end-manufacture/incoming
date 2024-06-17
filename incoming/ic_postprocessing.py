@@ -2,7 +2,7 @@ import os
 import shutil
 from enum import Enum, unique, auto
 
-from .ic_filehandler import *
+from incoming.ic_filehandler import *
 
 
 class PostProcessing:

@@ -10,8 +10,8 @@ from dataclasses import dataclass, field
 from enum import Enum, unique, auto
 from PIL import Image
 
-from .ic_filehandler import *
-from .ic_log import *
+from incoming.ic_filehandler import *
+from incoming.ic_log import *
 
 
 class PreProcessing:

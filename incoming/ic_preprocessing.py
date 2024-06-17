@@ -16,8 +16,8 @@ from incoming.ic_log import *
 
 class PreProcessing:
     def __init__(self) -> None:
-        self.ic_logger_instance = IcLogger()
-        self.ic_logger = self.ic_logger_instance.init_logger(__name__)
+        self.ic_logger_instance = IcLogger(__name__)
+        self.ic_logger = self.ic_logger_instance.logger
 
     def open_ic_settings(self):
         home_path = os.path.expanduser('~')

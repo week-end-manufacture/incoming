@@ -9,8 +9,8 @@ class PostProcessing:
     def __init__(self, icfile) -> None:
         self.icfile: IcFile = icfile
 
-        self.ic_logger_instance = IcLogger()
-        self.ic_logger = self.ic_logger_instance.init_logger(__name__)
+        self.ic_logger_instance = IcLogger(__name__)
+        self.ic_logger = self.ic_logger_instance.logger
 
     def ic_unlink(self, option=0):
         src_path = self.icfile.src_path

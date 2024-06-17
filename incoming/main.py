@@ -12,15 +12,15 @@ from incoming.ic_result import *
 
 def main():
     pre_processiong = PreProcessing()
-    ic_logger_instance = IcLogger()
-    ic_logger = ic_logger_instance.init_logger(__name__)
+    ic_logger_instance = IcLogger(__name__)
+    ic_logger = ic_logger_instance.logger
     ic_filehandler = IcFileHandler()
     ic_settings = pre_processiong.open_ic_settings()
 
 
     src_dir_path = ic_settings["src_dir_path"]
     dst_dir_path = ic_settings["dst_dir_path"]
-    incoming_version = "beta0.0.3"
+    incoming_version = "beta0.0.4"
 
     filtered_archive_ext_dict = [".zip", ".rar", ".7z"]
 

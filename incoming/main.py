@@ -20,7 +20,7 @@ def main():
 
     src_dir_path = ic_settings["src_dir_path"]
     dst_dir_path = ic_settings["dst_dir_path"]
-    incoming_version = "beta0.0.4"
+    incoming_version = "beta0.0.5"
 
     filtered_archive_ext_dict = [".zip", ".rar", ".7z"]
 
@@ -208,6 +208,8 @@ def main():
 
                 icfile = ic_post_processor.ic_copy()
 
+                del ic_post_processor
+
         ic_logger.info("=IC COPY PROCESS END=")
 
         ic_logger.info("=IC UNLINK PROCESS START=")
@@ -216,6 +218,8 @@ def main():
             ic_post_processor = PostProcessing(icfile)
 
             icfile = ic_post_processor.ic_unlink()
+
+            del ic_post_processor
 
         ic_logger.info("=IC UNLINK PROCESS END=")
 

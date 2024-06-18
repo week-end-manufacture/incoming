@@ -57,7 +57,6 @@ class VideoProcessor:
 
         handbrake_process.stdout.close()
 
-
     def encode_with_ffmpeg(self,
                            src_video_abs_path,
                            dst_image_abs_path,

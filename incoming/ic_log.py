@@ -27,7 +27,15 @@ class IcLogger(object):
             os.makedirs(self.filePath)
 
         streamFormatter = colorlog.ColoredFormatter(
-            "%(log_color)s%(bg_blue)s%(message)s"
+            "%(log_color)s%(message)s",
+            log_colors={
+                'DEBUG':    'cyan',
+                'INFO':     'white,bold',
+                'INFOV':    'cyan,bold',
+                'WARNING':  'yellow',
+                'ERROR':    'red,bold',
+                'CRITICAL': 'red,bg_white',
+            }
         )
         
         fileFormatter = logging.Formatter(

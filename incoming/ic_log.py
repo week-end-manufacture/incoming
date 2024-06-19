@@ -16,7 +16,7 @@ class IcLogger(object):
 
     def __init__(self,
                  filename,
-                 level='debug',
+                 level='info',
                  when='midnight',
                  backCount=3,):
         self.logger = logging.getLogger(filename)

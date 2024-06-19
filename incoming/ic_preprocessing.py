@@ -3,6 +3,7 @@ import os
 import zipfile
 import rarfile
 import subprocess
+import platform
 import py7zr
 
 from pathlib import Path
@@ -19,10 +20,15 @@ class PreProcessing:
         self.ic_logger = ic_logger_instance_ic_preprocessing.logger
 
     def open_ic_env_dir(self):
-        home_path = os.path.expanduser('~')
-        ic_env_dir_path = os.path.join(home_path, '.config/incoming')
-        
-        subprocess.call(["open", ic_env_dir_path])
+        pl = platform.system()
+
+        if (pl == "Darwin"):
+            home_path = os.path.expanduser('~')
+            ic_env_dir_path = os.path.join(home_path, '.config/incoming')
+
+            subprocess.call(["open", ic_env_dir_path])
+        else:
+            self.ic_logger.error("INVALID OS SYSTEM")
 
     def open_ic_settings(self):
         home_path = os.path.expanduser('~')

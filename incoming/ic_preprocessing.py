@@ -1,5 +1,4 @@
 import json
-import math
 import os
 import zipfile
 import rarfile
@@ -11,13 +10,12 @@ from enum import Enum, unique, auto
 from PIL import Image
 
 from incoming.ic_filehandler import *
-from incoming.ic_log import *
+from incoming.ic_log import ic_logger_instance_ic_preprocessing
 
 
 class PreProcessing:
     def __init__(self) -> None:
-        self.ic_logger_instance = IcLogger(__name__)
-        self.ic_logger = self.ic_logger_instance.logger
+        self.ic_logger = ic_logger_instance_ic_preprocessing.logger
 
     def open_ic_settings(self):
         home_path = os.path.expanduser('~')

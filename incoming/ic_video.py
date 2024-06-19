@@ -1,13 +1,13 @@
 import subprocess
+import os
 
 from incoming.ic_filehandler import *
-from incoming.ic_log import *
+from incoming.ic_log import ic_logger_instance_ic_video
 
 
 class VideoProcessor:
     def __init__(self, video_icfile, ic_video_preset):
-        self.ic_logger_instance = IcLogger(__name__)
-        self.ic_logger = self.ic_logger_instance.logger
+        self.ic_logger = ic_logger_instance_ic_video.logger
 
         self.video_icfile = video_icfile
         self.video_preset = ic_video_preset

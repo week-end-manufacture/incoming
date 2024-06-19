@@ -3,12 +3,12 @@ import shutil
 from enum import Enum, unique, auto
 
 from incoming.ic_filehandler import *
+from incoming.ic_log import ic_logger_instance_ic_result
 
 
 class Result:
     def __init__(self) -> None:
-        self.ic_logger_instance = IcLogger(__name__)
-        self.ic_logger = self.ic_logger_instance.logger
+        self.ic_logger = ic_logger_instance_ic_result.logger
         
     def convert_size(self, size_bytes):
         if size_bytes == 0:

@@ -4,13 +4,12 @@ from pathlib import Path
 from dataclasses import dataclass, field
 from enum import Enum, unique, auto
 
-from incoming.ic_log import *
+from incoming.ic_log import ic_logger_instance_ic_filehandler
 
 
 class IcFileHandler:
     def __init__(self) -> None:
-        self.ic_logger_instance = IcLogger(__name__)
-        self.ic_logger = self.ic_logger_instance.logger
+        self.ic_logger = ic_logger_instance_ic_filehandler.logger
 
     def print_all_icfile(self, icfile_list):
         for (idx, icfile) in enumerate(icfile_list):

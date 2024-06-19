@@ -58,3 +58,11 @@ class IcLogger(object):
         self.logger.addHandler(fileHandler)
 
         self.logger.setLevel(self.level_relations.get(level))
+
+ic_logger_instance_main = IcLogger('main')
+ic_logger_instance_ic_filehandler = IcLogger('ic_filehandler')
+ic_logger_instance_ic_preprocessing = IcLogger('ic_preprocessing')
+ic_logger_instance_ic_postprocessing = IcLogger('ic_postprocessing')
+ic_logger_instance_ic_result = IcLogger('ic_result')
+ic_logger_instance_ic_image = IcLogger('ic_image')
+ic_logger_instance_ic_video = IcLogger('ic_video')

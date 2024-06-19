@@ -4,23 +4,26 @@ from pathlib import Path
 
 from incoming.ic_filehandler import *
 from incoming.ic_preprocessing import *
-from incoming.ic_log import *
+from incoming.ic_log import ic_logger_instance_main
 from incoming.ic_image import *
 from incoming.ic_video import *
 from incoming.ic_postprocessing import *
 from incoming.ic_result import *
 
 def main():
+    """
+        LOG INIT
+    """
+    ic_logger = ic_logger_instance_main.logger
+
     pre_processiong = PreProcessing()
-    ic_logger_instance = IcLogger(__name__)
-    ic_logger = ic_logger_instance.logger
     ic_filehandler = IcFileHandler()
     ic_settings = pre_processiong.open_ic_settings()
 
 
     src_dir_path = ic_settings["src_dir_path"]
     dst_dir_path = ic_settings["dst_dir_path"]
-    incoming_version = "beta0.0.5"
+    incoming_version = "beta0.0.6"
 
     filtered_archive_ext_dict = [".zip", ".rar", ".7z"]
 

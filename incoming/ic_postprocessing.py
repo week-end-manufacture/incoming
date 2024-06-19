@@ -3,14 +3,17 @@ import shutil
 from enum import Enum, unique, auto
 
 from incoming.ic_filehandler import *
+from incoming.ic_log import ic_logger_instance_ic_postprocessing
 
 
 class PostProcessing:
     def __init__(self, icfile) -> None:
         self.icfile: IcFile = icfile
 
-        self.ic_logger_instance = IcLogger(__name__)
-        self.ic_logger = self.ic_logger_instance.logger
+        self.ic_logger = ic_logger_instance_ic_postprocessing.logger
+
+    def __delete__(self):
+        del self.ic_logger_instance
 
     def ic_unlink(self, option=0):
         src_path = self.icfile.src_path

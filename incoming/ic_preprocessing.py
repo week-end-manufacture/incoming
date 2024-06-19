@@ -2,6 +2,7 @@ import json
 import os
 import zipfile
 import rarfile
+import subprocess
 import py7zr
 
 from pathlib import Path
@@ -16,6 +17,12 @@ from incoming.ic_log import ic_logger_instance_ic_preprocessing
 class PreProcessing:
     def __init__(self) -> None:
         self.ic_logger = ic_logger_instance_ic_preprocessing.logger
+
+    def open_ic_env_dir(self):
+        home_path = os.path.expanduser('~')
+        ic_env_dir_path = os.path.join(home_path, '.config/incoming')
+        
+        subprocess.call(["open", ic_env_dir_path])
 
     def open_ic_settings(self):
         home_path = os.path.expanduser('~')

@@ -23,7 +23,7 @@ def main():
 
     src_dir_path = ic_settings["src_dir_path"]
     dst_dir_path = ic_settings["dst_dir_path"]
-    incoming_version = "beta0.0.6"
+    incoming_version = "beta0.0.7"
 
     filtered_archive_ext_dict = [".zip", ".rar", ".7z"]
 
@@ -36,6 +36,7 @@ def main():
     parser.add_argument("-i", "--src_dir_path", help="Source directory path", action="store")
     parser.add_argument("-o", "--dst_dir_path", help="Destination directory path", action="store")
     parser.add_argument("-p", "--user_preset", help="User preset", action="store")
+    parser.add_argument("-s", "--settings", help="Open setting directory", action="store_true")
     parser.add_argument("-d", "--dummy", help="Create dummy file", action="store_true")
     parser.add_argument("-u", "--unlink", help="Unlink incoming file", action="store_true")
     parser.add_argument("-v", "--version", help="Version", action="version", version='%(prog)s ' + incoming_version)
@@ -55,6 +56,11 @@ def main():
 
     ic_logger.info("SRC_DIR_PATH:[%s]" % src_dir_path)
     ic_logger.info("DST_DIR_PATH:[%s]" % dst_dir_path)
+
+    if (args.settings):
+        pre_processiong.open_ic_env_dir()
+
+        return (1)
 
     if (args.user_preset != None):
         ic_logger.info("!!!USER PRESET USE!!!")

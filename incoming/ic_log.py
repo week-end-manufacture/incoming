@@ -16,12 +16,13 @@ class IcLogger(object):
 
     def __init__(self,
                  filename,
-                 level='debug',
+                 level='info',
                  when='midnight',
-                 backCount=3,):
+                 backCount=7,):
         self.logger = logging.getLogger(filename)
 
-        self.filePath = "./log/"
+        home_path = os.path.expanduser('~')
+        self.filePath = os.path.join(home_path,".config/incoming/log/")
 
         if not os.path.exists(self.filePath):
             os.makedirs(self.filePath)
@@ -48,6 +49,7 @@ class IcLogger(object):
         fileHandler = handlers.TimedRotatingFileHandler(
             os.path.abspath(f"{self.filePath}ic_log.log"),
             when=when,
+            interval=1,
             backupCount=backCount,
             encoding='utf-8'
             )
@@ -58,6 +60,7 @@ class IcLogger(object):
         self.logger.addHandler(fileHandler)
 
         self.logger.setLevel(self.level_relations.get(level))
+
 
 ic_logger_instance_main = IcLogger('main')
 ic_logger_instance_ic_filehandler = IcLogger('ic_filehandler')

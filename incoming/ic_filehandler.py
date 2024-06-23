@@ -1,4 +1,6 @@
 import math
+import sys
+import time
 
 from pathlib import Path
 from dataclasses import dataclass, field
@@ -184,6 +186,19 @@ class IcFileHandler:
         s = round(size_bytes / p, 2)
 
         return "%s %s" % (s, size_name[i])
+    
+    def ic_progressbar(self,
+                       iteration,
+                       total,
+                       prefix='',
+                       suffix='',
+                       length=30,
+                       fill='█'):
+        percent = ("{0:.1f}").format(100 * (iteration / float(total)))
+        filled_length = int(length * iteration // total)
+        bar = fill * filled_length + '-' * (length - filled_length)
+        sys.stdout.write(f'\r{prefix} |{bar}| {percent}% {suffix}')
+        sys.stdout.flush()
 
 
 @unique

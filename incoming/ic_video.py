@@ -54,10 +54,8 @@ class VideoProcessor:
         bar_idx = 0
         vid_loading_bar = {0: '\\', 1: '|', 2: '/', 3: '-'}
 
-        sys.stdout.write(filename + ' ===> ' + video_preset["output_video_ext"] + ' via HandBrakeCLI\n')
+        sys.stdout.write(filename + ' ==> ' + video_preset["output_video_ext"] + ' via HandBrakeCLI\n')
         sys.stdout.flush()
-
-        prev_output_len = 0
 
         while True:
             output = handbrake_process.stdout.readline()

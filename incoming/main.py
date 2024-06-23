@@ -42,7 +42,7 @@ def main():
     parser.add_argument("-v", "--version", help="Version", action="version", version='%(prog)s version ' + incoming_version + ', built with Homebrew')
     args = parser.parse_args()
 
-    print('incoming version ' + incoming_version + ', built with Homebrew')
+    sys.stdout.write('\nincoming version ' + incoming_version + ', built with Homebrew\n')
 
     """
         MAIN LOGIC
@@ -65,35 +65,37 @@ def main():
         return (1)
 
     if (args.user_preset != None):
-        ic_logger.info("!!!USER PRESET USE!!!")
-        ic_logger.info("=IC PREPROCESSING START=")
-
-        ic_preset = pre_processiong.open_ic_user_preset(args.user_preset)
-
-        ic_image_preset = ic_preset["image_process"]
-        ic_video_preset = ic_preset["video_process"]
-        filtered_video_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_video_ext_dict"]
-        filtered_image_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_image_ext_dict"]
-    else:
-        """
-            IC PREPROCESS
-        """
-        ic_logger.info("!!!DEFAULT PRESET USE!!!")
-        ic_logger.info("=IC PREPROCESSING START=")
-
-        ic_logger.info("SRC_DIR_PATH:[%s]" % src_dir_path)
-        ic_logger.info("DST_DIR_PATH:[%s]" % dst_dir_path)
-
         """
             IC PRESET LOADING
         """
+        preset_path = args.user_preset
+        ic_preset = pre_processiong.open_ic_user_preset(preset_path)
+    else:
+        """
+            IC PRESET LOADING
+        """
+        preset_path = ic_settings["default_preset_path"]
         ic_preset = pre_processiong.open_ic_default_preset(ic_settings["default_preset_path"])
-        ic_image_preset = ic_preset["image_process"]
-        ic_video_preset = ic_preset["video_process"]
-        filtered_video_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_video_ext_dict"]
-        filtered_image_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_image_ext_dict"]
+
+    ic_image_preset = ic_preset["image_process"]
+    ic_video_preset = ic_preset["video_process"]
+    filtered_video_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_video_ext_dict"]
+    filtered_image_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_image_ext_dict"]
 
        
+    sys.stdout.write(f'\n⚙️ Process start \
+                        \n- incoming:  [{src_dir_path}] \
+                        \n- outgoing:  [{dst_dir_path}] \
+                        \n- preset:    [{preset_path}] \
+                        \n     - image process: {ic_image_preset["image_process_toggle"]} \
+                        \n         {filtered_image_ext_dict} \
+                        \n         ==> {ic_image_preset["output_ext"]} (with PIL quality = {ic_image_preset["output_quality"]}) \
+                        \n    - video process: {ic_video_preset["video_process_toggle"]} \
+                        \n         {filtered_video_ext_dict} \
+                        \n         ==> {ic_video_preset["output_video_ext"]} (with HandBrakeCLI and preset [{ic_video_preset["HandBrake_presets_path"]}])')
+    
+    sys.stdout.write('\n\n')
+    sys.stdout.flush()
 
     ic_logger.info("=IC PREPROCESSING START=")
 
@@ -124,19 +126,21 @@ def main():
     ic_logger.info("=IC IMAGE PROCESS START=")
 
     for (idx, icfile) in enumerate(image_icfilelist):
-        ic_filehandler.ic_progressbar(idx + 1, image_icfilelist_len, 'IC IMAGE PROCESS:', 'Complete', 60)
+        ic_filehandler.ic_progressbar(idx + 1, image_icfilelist_len, '🏞️ Image Process:', '', 50)
         if (ic_filehandler.is_image_icfile(icfile)):
             ic_image_processor = ImageProcessor(icfile, ic_image_preset)
 
             icfile = ic_image_processor.ic_image_process()
 
-    sys.stdout.write('\nDONE\n')
+    sys.stdout.write('\n╰─ DONE\n')
     ic_logger.info("=IC IMAGE PROCESS END=")
 
     """
         IC VIDEO PROCESS
     """
     ic_logger.info("=IC VIDEO PROCESS START=")
+
+    sys.stdout.write('🎬 Video Process\n')
 
     for (idx, icfile) in enumerate(main_icfilelist):
         if (ic_filehandler.is_video_icfile(icfile)):

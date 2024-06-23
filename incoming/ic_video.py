@@ -45,15 +45,17 @@ class VideoProcessor:
 
         command = ["HandBrakeCLI", "-i", src_video_abs_path, "-o", dst_video_abs_path, "--preset-import-file", hb_preset_path]
 
-        handbrake_process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        handbrake_process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, universal_newlines=True)
 
         while True:
             output = handbrake_process.stdout.readline()
-            if output == '' and handbrake_process.poll() is not None:
+            if (output == '' and handbrake_process.poll() is not None) or not output:
                 break
             if output:
+                sys.stdout.write('\r' + 'Processing...|' + output.rstrip()[:50])
+                sys.stdout.flush()
                 #print(output.strip())
-                self.ic_logger.info(output.strip())
+                #self.ic_logger.info(output.strip())
 
         handbrake_process.stdout.close()
 

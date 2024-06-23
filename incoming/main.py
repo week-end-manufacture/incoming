@@ -23,7 +23,7 @@ def main():
 
     src_dir_path = ic_settings["src_dir_path"]
     dst_dir_path = ic_settings["dst_dir_path"]
-    incoming_version = "beta0.0.7"
+    incoming_version = "beta0.0.8"
 
     filtered_archive_ext_dict = [".zip", ".rar", ".7z"]
 
@@ -39,8 +39,10 @@ def main():
     parser.add_argument("-s", "--settings", help="Open setting directory", action="store_true")
     parser.add_argument("-d", "--dummy", help="Create dummy file", action="store_true")
     parser.add_argument("-u", "--unlink", help="Unlink incoming file", action="store_true")
-    parser.add_argument("-v", "--version", help="Version", action="version", version='%(prog)s ' + incoming_version)
+    parser.add_argument("-v", "--version", help="Version", action="version", version='%(prog)s version ' + incoming_version + ', built with Homebrew')
     args = parser.parse_args()
+
+    print('incoming version ' + incoming_version + ', built with Homebrew')
 
     """
         MAIN LOGIC
@@ -70,8 +72,6 @@ def main():
 
         filtered_video_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_video_ext_dict"]
         filtered_image_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_image_ext_dict"]
-
-        ic_logger.info("=IC PREPROCESSING START=")
 
         main_icfilelist = pre_processiong.ic_search(src_dir_path,
                                                 dst_dir_path,
@@ -104,6 +104,7 @@ def main():
 
                 icfile = ic_image_processor.ic_image_process()
 
+        sys.stdout.write('\nDONE\n')
         ic_logger.info("=IC IMAGE PROCESS END=")
 
         """
@@ -172,6 +173,7 @@ def main():
 
                 icfile = ic_image_processor.ic_image_process()
 
+        sys.stdout.write('\nDONE\n')
         ic_logger.info("=IC IMAGE PROCESS END=")
 
         """

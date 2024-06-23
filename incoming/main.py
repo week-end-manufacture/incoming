@@ -23,7 +23,7 @@ def main():
 
     src_dir_path = ic_settings["src_dir_path"]
     dst_dir_path = ic_settings["dst_dir_path"]
-    incoming_version = "beta0.0.8"
+    incoming_version = "beta0.1.0"
 
     filtered_archive_ext_dict = [".zip", ".rar", ".7z"]
 

@@ -57,6 +57,8 @@ class VideoProcessor:
         sys.stdout.write(filename + ' ===> ' + video_preset["output_video_ext"] + ' via HandBrakeCLI\n')
         sys.stdout.flush()
 
+        prev_output_len = 0
+
         while True:
             output = handbrake_process.stdout.readline()
             if (output == '' and handbrake_process.poll() is not None) or not output:
@@ -65,13 +67,13 @@ class VideoProcessor:
                 bar_idx %= 4
                 chk = output.strip().startswith("Encoding: task")
                 if (chk):
-                    sys.stdout.write('\r' + '     ╰─ ' + vid_loading_bar[bar_idx] + ' [' + output.rstrip() + ']')
+                    sys.stdout.write('\r' + '  ╰─  ' + vid_loading_bar[bar_idx] + '   [' + output.strip()[:30] + ']')
                     sys.stdout.flush()
                     bar_idx += 1
                 else:
                     self.ic_logger.info(output.strip())
 
-        sys.stdout.write('\rDONE\n')
+        sys.stdout.write('\r  ╰─ DONE\n')
         sys.stdout.flush()
         handbrake_process.stdout.close()
 

@@ -43,8 +43,8 @@ class IcLogger(object):
             "[%(asctime)s|%(levelname)s|<%(name)s>|%(module)s|%(lineno)d]%(message)s"
         )
 
-        streamHandler = logging.StreamHandler()
-        streamHandler.setFormatter(streamFormatter)
+        #streamHandler = logging.StreamHandler()
+        #streamHandler.setFormatter(streamFormatter)
 
         fileHandler = handlers.TimedRotatingFileHandler(
             os.path.abspath(f"{self.filePath}ic_log.log"),
@@ -56,7 +56,7 @@ class IcLogger(object):
         
         fileHandler.setFormatter(fileFormatter)
         
-        self.logger.addHandler(streamHandler)
+        #self.logger.addHandler(streamHandler)
         self.logger.addHandler(fileHandler)
 
         self.logger.setLevel(self.level_relations.get(level))

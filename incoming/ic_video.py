@@ -24,7 +24,9 @@ class VideoProcessor:
                 self.encode_with_handbrake(src_video_abs_path,
                                            dst_video_abs_path,
                                            dst_video_path,
-                                           hb_preset_path)
+                                           hb_preset_path,
+                                           self.video_icfile.filename,
+                                           self.video_preset)
             else:
                 self.encode_with_ffmpeg(src_video_abs_path,
                                         dst_video_abs_path)
@@ -39,22 +41,38 @@ class VideoProcessor:
                               src_video_abs_path,
                               dst_video_abs_path,
                               dst_video_path,
-                              hb_preset_path):
+                              hb_preset_path,
+                              filename,
+                              video_preset):
         if not os.path.exists(dst_video_path):
             os.makedirs(dst_video_path)
 
         command = ["HandBrakeCLI", "-i", src_video_abs_path, "-o", dst_video_abs_path, "--preset-import-file", hb_preset_path]
 
-        handbrake_process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        handbrake_process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, universal_newlines=True)
+
+        bar_idx = 0
+        vid_loading_bar = {0: '\\', 1: '|', 2: '/', 3: '-'}
+
+        sys.stdout.write(filename + ' ==> ' + video_preset["output_video_ext"] + ' via HandBrakeCLI\n')
+        sys.stdout.flush()
 
         while True:
             output = handbrake_process.stdout.readline()
-            if output == '' and handbrake_process.poll() is not None:
+            if (output == '' and handbrake_process.poll() is not None) or not output:
                 break
             if output:
-                #print(output.strip())
-                self.ic_logger.info(output.strip())
+                bar_idx %= 4
+                chk = output.strip().startswith("Encoding: task")
+                if (chk):
+                    sys.stdout.write('\r' + '  ╰─  ' + vid_loading_bar[bar_idx] + '   [' + output.strip()[:30] + ']')
+                    sys.stdout.flush()
+                    bar_idx += 1
+                else:
+                    self.ic_logger.info(output.strip())
 
+        sys.stdout.write('\r  ╰─ DONE' + (' ' * 40) + '\n')
+        sys.stdout.flush()
         handbrake_process.stdout.close()
 
     def encode_with_ffmpeg(self,

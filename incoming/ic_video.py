@@ -73,7 +73,7 @@ class VideoProcessor:
                 else:
                     self.ic_logger.info(output.strip())
 
-        sys.stdout.write('\r  ╰─ DONE\n')
+        sys.stdout.write('\r  ╰─ DONE' + (' ' * 40) + '\n')
         sys.stdout.flush()
         handbrake_process.stdout.close()
 

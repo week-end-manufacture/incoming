@@ -47,13 +47,18 @@ class VideoProcessor:
 
         handbrake_process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, universal_newlines=True)
 
+        bar_idx = 0
+        vid_loading_bar = {0: '\\', 1: '|', 2: '/', 3: '-'}
+
         while True:
             output = handbrake_process.stdout.readline()
             if (output == '' and handbrake_process.poll() is not None) or not output:
                 break
             if output:
-                sys.stdout.write('\r' + 'Processing...|' + output.rstrip()[:50])
+                bar_idx %= 4
+                sys.stdout.write('\r' + 'Processing...' + vid_loading_bar[bar_idx] + output.rstrip()[:50])
                 sys.stdout.flush()
+                bar_idx += 1
                 #print(output.strip())
                 #self.ic_logger.info(output.strip())
 

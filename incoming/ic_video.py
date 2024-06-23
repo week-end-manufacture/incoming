@@ -56,11 +56,14 @@ class VideoProcessor:
                 break
             if output:
                 bar_idx %= 4
-                sys.stdout.write('\r' + 'Processing...' + vid_loading_bar[bar_idx] + output.rstrip()[:50])
+                sys.stdout.write('\r' + 'IC VIDEO PROCESS...' + vid_loading_bar[bar_idx])
                 sys.stdout.flush()
                 bar_idx += 1
+                chk = output.strip().startswith("Encoding: task")
                 #print(output.strip())
-                #self.ic_logger.info(output.strip())
+                if (chk):
+                    continue
+                self.ic_logger.info(output.strip())
 
         handbrake_process.stdout.close()
 

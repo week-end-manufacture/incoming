@@ -70,55 +70,10 @@ def main():
 
         ic_preset = pre_processiong.open_ic_user_preset(args.user_preset)
 
+        ic_image_preset = ic_preset["image_process"]
+        ic_video_preset = ic_preset["video_process"]
         filtered_video_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_video_ext_dict"]
         filtered_image_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_image_ext_dict"]
-
-        main_icfilelist = pre_processiong.ic_search(src_dir_path,
-                                                dst_dir_path,
-                                                filtered_video_ext_dict,
-                                                filtered_image_ext_dict,
-                                                filtered_archive_ext_dict)
-
-        image_icfilelist_len = len(ic_filehandler.get_image_icfilelist(main_icfilelist))
-        video_icfilelist_len = len(ic_filehandler.get_video_icfilelist(main_icfilelist))
-
-        ic_logger.info("=IC PREPROCESSING END=")
-
-        """
-            DUMMY OPTION CHECK
-        """
-        if (args.dummy):
-            pre_processiong.create_dummy_icfilelist(main_icfilelist)
-
-            return (True)
-
-        """
-            IC IMAGE PROCESS
-        """
-        ic_logger.info("=IC IMAGE PROCESS START=")
-
-        for (idx, icfile) in enumerate(image_icfilelist):
-            ic_filehandler.ic_progressbar(idx + 1, image_icfilelist_len, 'IC IMAGE PROCESS:', 'Complete', 60)
-            if (ic_filehandler.is_image_icfile(icfile)):
-                ic_image_processor = ImageProcessor(icfile, ic_image_preset)
-
-                icfile = ic_image_processor.ic_image_process()
-
-        sys.stdout.write('\nDONE\n')
-        ic_logger.info("=IC IMAGE PROCESS END=")
-
-        """
-            IC VIDEO PROCESS
-        """
-        ic_logger.info("=IC VIDEO PROCESS START=")
-
-        for (idx, icfile) in enumerate(main_icfilelist):
-            if (ic_filehandler.is_video_icfile(icfile)):
-                ic_video_processor = VideoProcessor(icfile, ic_video_preset)
-
-                icfile = ic_video_processor.ic_video_process()
-
-        ic_logger.info("=IC VIDEO PROCESS END=")
     else:
         """
             IC PREPROCESS
@@ -138,92 +93,94 @@ def main():
         filtered_video_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_video_ext_dict"]
         filtered_image_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_image_ext_dict"]
 
-        ic_logger.info("=IC PREPROCESSING START=")
+       
 
-        main_icfilelist = pre_processiong.ic_search(src_dir_path,
-                                                dst_dir_path,
-                                                filtered_video_ext_dict,
-                                                filtered_image_ext_dict,
-                                                filtered_archive_ext_dict)
+    ic_logger.info("=IC PREPROCESSING START=")
 
-        image_icfilelist = ic_filehandler.get_image_icfilelist(main_icfilelist)
-        image_icfilelist_len = len(image_icfilelist)
-        video_icfilelist = ic_filehandler.get_video_icfilelist(main_icfilelist)
-        video_icfilelist_len = len(video_icfilelist)
+    main_icfilelist = pre_processiong.ic_search(src_dir_path,
+                                            dst_dir_path,
+                                            filtered_video_ext_dict,
+                                            filtered_image_ext_dict,
+                                            filtered_archive_ext_dict)
 
-        ic_logger.info("=IC PREPROCESSING END=")
+    image_icfilelist = ic_filehandler.get_image_icfilelist(main_icfilelist)
+    image_icfilelist_len = len(image_icfilelist)
+    video_icfilelist = ic_filehandler.get_video_icfilelist(main_icfilelist)
+    video_icfilelist_len = len(video_icfilelist)
 
-        """
-            DUMMY OPTION CHECK
-        """
-        if (args.dummy):
-            pre_processiong.create_dummy_icfilelist(main_icfilelist)
+    ic_logger.info("=IC PREPROCESSING END=")
 
-            return (True)
+    """
+        DUMMY OPTION CHECK
+    """
+    if (args.dummy):
+        pre_processiong.create_dummy_icfilelist(main_icfilelist)
 
-        """
-            IC IMAGE PROCESS
-        """
-        ic_logger.info("=IC IMAGE PROCESS START=")
+        return (True)
 
-        for (idx, icfile) in enumerate(image_icfilelist):
-            ic_filehandler.ic_progressbar(idx + 1, image_icfilelist_len, 'IC IMAGE PROCESS:', 'Complete', 60)
-            if (ic_filehandler.is_image_icfile(icfile)):
-                ic_image_processor = ImageProcessor(icfile, ic_image_preset)
+    """
+        IC IMAGE PROCESS
+    """
+    ic_logger.info("=IC IMAGE PROCESS START=")
 
-                icfile = ic_image_processor.ic_image_process()
+    for (idx, icfile) in enumerate(image_icfilelist):
+        ic_filehandler.ic_progressbar(idx + 1, image_icfilelist_len, 'IC IMAGE PROCESS:', 'Complete', 60)
+        if (ic_filehandler.is_image_icfile(icfile)):
+            ic_image_processor = ImageProcessor(icfile, ic_image_preset)
 
-        sys.stdout.write('\nDONE\n')
-        ic_logger.info("=IC IMAGE PROCESS END=")
+            icfile = ic_image_processor.ic_image_process()
 
-        """
-            IC VIDEO PROCESS
-        """
-        ic_logger.info("=IC VIDEO PROCESS START=")
+    sys.stdout.write('\nDONE\n')
+    ic_logger.info("=IC IMAGE PROCESS END=")
 
-        for (idx, icfile) in enumerate(main_icfilelist):
-            if (ic_filehandler.is_video_icfile(icfile)):
-                ic_video_processor = VideoProcessor(icfile, ic_video_preset)
+    """
+        IC VIDEO PROCESS
+    """
+    ic_logger.info("=IC VIDEO PROCESS START=")
 
-                icfile = ic_video_processor.ic_video_process()
+    for (idx, icfile) in enumerate(main_icfilelist):
+        if (ic_filehandler.is_video_icfile(icfile)):
+            ic_video_processor = VideoProcessor(icfile, ic_video_preset)
 
-        ic_logger.info("=IC VIDEO PROCESS END=")
+            icfile = ic_video_processor.ic_video_process()
 
-        """
-            IC POST PROCESS
-        """
-        ic_logger.info("=IC COPY PROCESS START=")
+    ic_logger.info("=IC VIDEO PROCESS END=")
 
-        for (idx, icfile) in enumerate(main_icfilelist):
-            if (ic_filehandler.is_incoming_icfile(icfile)):
-                ic_post_processor = PostProcessing(icfile)
+    """
+        IC POST PROCESS
+    """
+    ic_logger.info("=IC COPY PROCESS START=")
 
-                icfile = ic_post_processor.ic_copy()
-
-                del ic_post_processor
-
-        ic_logger.info("=IC COPY PROCESS END=")
-
-        ic_logger.info("=IC UNLINK PROCESS START=")
-
-        for (idx, icfile) in enumerate(main_icfilelist):
+    for (idx, icfile) in enumerate(main_icfilelist):
+        if (ic_filehandler.is_incoming_icfile(icfile)):
             ic_post_processor = PostProcessing(icfile)
 
-            icfile = ic_post_processor.ic_unlink()
+            icfile = ic_post_processor.ic_copy()
 
             del ic_post_processor
 
-        ic_logger.info("=IC UNLINK PROCESS END=")
+    ic_logger.info("=IC COPY PROCESS END=")
 
-        """
-            IC RESULT
-        """
-        ic_result = Result()
+    ic_logger.info("=IC UNLINK PROCESS START=")
 
-        ic_filehandler.print_all_icfile(main_icfilelist)
-        ic_result.ic_result(main_icfilelist)
+    for (idx, icfile) in enumerate(main_icfilelist):
+        ic_post_processor = PostProcessing(icfile)
 
-        return (True)
+        icfile = ic_post_processor.ic_unlink()
+
+        del ic_post_processor
+
+    ic_logger.info("=IC UNLINK PROCESS END=")
+
+    """
+        IC RESULT
+    """
+    ic_result = Result()
+
+    ic_filehandler.print_all_icfile(main_icfilelist)
+    ic_result.ic_result(main_icfilelist)
+
+    return (True)
 
 
 if __name__ == "__main__":

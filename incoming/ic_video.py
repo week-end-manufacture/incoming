@@ -24,7 +24,9 @@ class VideoProcessor:
                 self.encode_with_handbrake(src_video_abs_path,
                                            dst_video_abs_path,
                                            dst_video_path,
-                                           hb_preset_path)
+                                           hb_preset_path,
+                                           self.video_icfile.filename,
+                                           self.video_preset)
             else:
                 self.encode_with_ffmpeg(src_video_abs_path,
                                         dst_video_abs_path)
@@ -39,7 +41,9 @@ class VideoProcessor:
                               src_video_abs_path,
                               dst_video_abs_path,
                               dst_video_path,
-                              hb_preset_path):
+                              hb_preset_path,
+                              filename,
+                              video_preset):
         if not os.path.exists(dst_video_path):
             os.makedirs(dst_video_path)
 
@@ -50,6 +54,9 @@ class VideoProcessor:
         bar_idx = 0
         vid_loading_bar = {0: '\\', 1: '|', 2: '/', 3: '-'}
 
+        sys.stdout.write(filename + ' ===> ' + video_preset["output_video_ext"] + ' via HandBrakeCLI\n')
+        sys.stdout.flush()
+
         while True:
             output = handbrake_process.stdout.readline()
             if (output == '' and handbrake_process.poll() is not None) or not output:
@@ -58,13 +65,14 @@ class VideoProcessor:
                 bar_idx %= 4
                 chk = output.strip().startswith("Encoding: task")
                 if (chk):
-                    sys.stdout.write('\r' + 'IC VIDEO PROCESS...' + vid_loading_bar[bar_idx] + '[' + output.strip() + ']')
+                    sys.stdout.write('\r' + '  ╰─ ' + vid_loading_bar[bar_idx] + ' [' + output.strip() + ']')
                     sys.stdout.flush()
                     bar_idx += 1
                 else:
                     self.ic_logger.info(output.strip())
 
-        sys.stdout.write('\n')
+        sys.stdout.write('| DONE\n')
+        sys.stdout.flush()
         handbrake_process.stdout.close()
 
     def encode_with_ffmpeg(self,

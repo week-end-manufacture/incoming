@@ -132,7 +132,7 @@ def main():
 
             icfile = ic_image_processor.ic_image_process()
 
-    sys.stdout.write('\n╰─ DONE\n')
+    sys.stdout.write('\n╰─ DONE\n\n')
     ic_logger.info("=IC IMAGE PROCESS END=")
 
     """

@@ -2,6 +2,7 @@ import os
 import argparse
 from pathlib import Path
 
+import ic_printer
 from incoming.ic_filehandler import *
 from incoming.ic_preprocessing import *
 from incoming.ic_log import ic_logger_instance_main
@@ -83,19 +84,17 @@ def main():
     filtered_image_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_image_ext_dict"]
 
        
-    sys.stdout.write(f'\n⚙️ Process start \
-                        \n- incoming:  [{src_dir_path}] \
-                        \n- outgoing:  [{dst_dir_path}] \
-                        \n- preset:    [{preset_path}] \
-                        \n     - image process: {ic_image_preset["image_process_toggle"]} \
-                        \n         {filtered_image_ext_dict} \
-                        \n         ==> {ic_image_preset["output_ext"]} (with PIL quality = {ic_image_preset["output_quality"]}) \
-                        \n    - video process: {ic_video_preset["video_process_toggle"]} \
-                        \n         {filtered_video_ext_dict} \
-                        \n         ==> {ic_video_preset["output_video_ext"]} (with HandBrakeCLI and preset [{ic_video_preset["HandBrake_presets_path"]}])')
-    
-    sys.stdout.write('\n\n')
-    sys.stdout.flush()
+    ic_printer.print_process_start(src_dir_path,
+                                   dst_dir_path,
+                                   preset_path,
+                                   ic_image_preset["image_process_toggle"],
+                                   filtered_image_ext_dict,
+                                   ic_image_preset["output_ext"],
+                                   ic_image_preset["output_quality"],
+                                   ic_video_preset["video_process_toggle"],
+                                   filtered_video_ext_dict,
+                                   ic_video_preset["output_video_ext"],
+                                   ic_video_preset["HandBrake_presets_path"])
 
     ic_logger.info("=IC PREPROCESSING START=")
 

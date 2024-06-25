@@ -25,3 +25,24 @@ def print_process_start(src_dir_path,
     
     sys.stdout.write('\n\n')
     sys.stdout.flush()
+
+
+def print_job_done(space=0, carriage=False, backspace=0):
+    if (carriage):
+        sys.stdout.write('\r' + (' ' * space) + '╰─ DONE' + (' ' * backspace) + '\n')
+        sys.stdout.flush()
+    else:
+        sys.stdout.write('\n' + (' ' * space) + '╰─ DONE\n\n')
+        sys.stdout.flush()
+
+
+def print_video_process_init():
+    sys.stdout.write('🎬 Video Process\n')
+    sys.stdout.flush()
+
+def loader(idx):
+    loadd = {0: '\\', 1: '|', 2: '/', 3: '-'}
+
+    return loadd[idx]
+
+

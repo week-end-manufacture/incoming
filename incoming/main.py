@@ -24,7 +24,7 @@ def main():
 
     src_dir_path = ic_settings["src_dir_path"]
     dst_dir_path = ic_settings["dst_dir_path"]
-    incoming_version = "beta0.1.0"
+    incoming_version = "beta0.1.1"
 
     filtered_archive_ext_dict = [".zip", ".rar", ".7z"]
 
@@ -131,7 +131,8 @@ def main():
 
             icfile = ic_image_processor.ic_image_process()
 
-    sys.stdout.write('\n╰─ DONE\n\n')
+    ic_printer.print_job_done()
+
     ic_logger.info("=IC IMAGE PROCESS END=")
 
     """
@@ -139,7 +140,7 @@ def main():
     """
     ic_logger.info("=IC VIDEO PROCESS START=")
 
-    sys.stdout.write('🎬 Video Process\n')
+    ic_printer.print_video_process_init()
 
     for (idx, icfile) in enumerate(main_icfilelist):
         if (ic_filehandler.is_video_icfile(icfile)):

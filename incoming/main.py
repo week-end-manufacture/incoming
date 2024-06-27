@@ -125,7 +125,7 @@ def main():
     ic_logger.info("=IC IMAGE PROCESS START=")
 
     for (idx, icfile) in enumerate(image_icfilelist):
-        ic_filehandler.ic_progressbar(idx + 1, image_icfilelist_len, '🏞️ Image Process:', '', 50)
+        ic_printer.print_progressbar(idx + 1, image_icfilelist_len, '🏞️ Image Process:', '', 50)
         if (ic_filehandler.is_image_icfile(icfile)):
             ic_image_processor = ImageProcessor(icfile, ic_image_preset)
 
@@ -181,7 +181,7 @@ def main():
     """
     ic_result = Result()
 
-    ic_filehandler.print_all_icfile(main_icfilelist)
+    ic_filehandler.logging_icfile(main_icfilelist)
     ic_result.ic_result(main_icfilelist)
 
     return (True)

@@ -40,7 +40,7 @@ class IcLogger(object):
         )
         
         fileFormatter = logging.Formatter(
-            "[%(asctime)s|%(levelname)s|<%(name)s>|%(module)s|%(lineno)d]%(message)s"
+            "[%(asctime)s|%(levelname)s|%(name)s|%(module)s|%(lineno)d]%(message)s"
         )
 
         #streamHandler = logging.StreamHandler()

@@ -13,84 +13,30 @@ class IcFileHandler:
     def __init__(self) -> None:
         self.ic_logger = ic_logger_instance_ic_filehandler.logger
 
-    def print_all_icfile(self, icfile_list):
-        for (idx, icfile) in enumerate(icfile_list):
-            self.ic_logger.info("===================================")
-            self.ic_logger.info("=ICFILE======================")
-            self.ic_logger.info("SRC PATH: %s" % icfile.src_path)
-            self.ic_logger.info("DST PATH: %s" % icfile.dst_path)
-            self.ic_logger.info("FILENAME: %s" % icfile.filename)
-            self.ic_logger.info("EXTENSION: %s" % icfile.extension)
-            self.ic_logger.info("IC TYPE: %s" % icfile.ictype)
-            self.ic_logger.info("IC EXTENTION TYPE: %s" % icfile.icexttype)
-            self.ic_logger.info("INCOMING SIZE: %s" % self.convert_size(icfile.incoming_size))
-            self.ic_logger.info("OUTGOING SIZE: %s" % self.convert_size(icfile.outgoing_size))
-            self.ic_logger.info("===================================")
-
-    def print_video_icfile(self, icfile_list):
-        for (idx, icfile) in enumerate(icfile_list):
-            if (icfile.icexttype == IcType.VIDEO):
-                self.ic_logger.info("===================================")
-                self.ic_logger.info("=VIDEO ICFILE======================")
-                self.ic_logger.info("SRC PATH: %s" % icfile.src_path)
-                self.ic_logger.info("DST PATH: %s" % icfile.dst_path)
-                self.ic_logger.info("FILENAME: %s" % icfile.filename)
-                self.ic_logger.info("EXTENSION: %s" % icfile.extension)
-                self.ic_logger.info("INCOMING SIZE: %s" % self.convert_size(icfile.incoming_size))
-                self.ic_logger.info("OUTGOING SIZE: %s" % self.convert_size(icfile.outgoing_size))
-                self.ic_logger.info("===================================")
-
-    def print_image_icfile(self, icfile_list):
-        for (idx, icfile) in enumerate(icfile_list):
-            if (icfile.icexttype == IcType.IMAGE):
-                self.ic_logger.info("===================================")
-                self.ic_logger.info("=IMAGE ICFILE======================")
-                self.ic_logger.info("SRC PATH: %s" % icfile.src_path)
-                self.ic_logger.info("DST PATH: %s" % icfile.dst_path)
-                self.ic_logger.info("FILENAME: %s" % icfile.filename)
-                self.ic_logger.info("EXTENSION: %s" % icfile.extension)
-                self.ic_logger.info("INCOMING SIZE: %s" % self.convert_size(icfile.incoming_size))
-                self.ic_logger.info("OUTGOING SIZE: %s" % self.convert_size(icfile.outgoing_size))
-                self.ic_logger.info("===================================")
-
-    def print_archive_icfile(self, icfile_list):
-        for (idx, icfile) in enumerate(icfile_list):
-            if (icfile.icexttype == IcType.ARCHIVE):
-                self.ic_logger.info("===================================")
-                self.ic_logger.info("=ARCHIVE ICFILE====================")
-                self.ic_logger.info("SRC PATH: %s" % icfile.src_path)
-                self.ic_logger.info("DST PATH: %s" % icfile.dst_path)
-                self.ic_logger.info("FILENAME: %s" % icfile.filename)
-                self.ic_logger.info("EXTENSION: %s" % icfile.extension)
-                self.ic_logger.info("INCOMING SIZE: %s" % self.convert_size(icfile.incoming_size))
-                self.ic_logger.info("OUTGOING SIZE: %s" % self.convert_size(icfile.outgoing_size))
-                self.ic_logger.info("===================================")
-
-    def print_unzipped_icfile(self, icfile_list):
-        for (idx, icfile) in enumerate(icfile_list):
-            if (icfile.icexttype == IcType.UNZIPPED):
-                self.ic_logger.info("===================================")
-                self.ic_logger.info("=UNZIPPED ICFILE===================")
-                self.ic_logger.info("SRC PATH: %s" % icfile.src_path)
-                self.ic_logger.info("DST PATH: %s" % icfile.dst_path)
-                self.ic_logger.info("FILENAME: %s" % icfile.filename)
-                self.ic_logger.info("EXTENSION: %s" % icfile.extension)
-                self.ic_logger.info("INCOMING SIZE: %s" % self.convert_size(icfile.incoming_size))
-                self.ic_logger.info("OUTGOING SIZE: %s" % self.convert_size(icfile.outgoing_size))
-                self.ic_logger.info("===================================")
-
-    def print_not_filtered_icfile(self, icfile_list):
-        for (idx, icfile) in enumerate(icfile_list):
-            if (icfile.icexttype == IcType.NOT_FILTERED):
-                self.ic_logger.info("===================================")
-                self.ic_logger.info("=NOT FILTERED ICFILE================")
-                self.ic_logger.info("SRC PATH: %s" % icfile.src_path)
-                self.ic_logger.info("DST PATH: %s" % icfile.dst_path)
-                self.ic_logger.info("FILENAME: %s" % icfile.filename)
-                self.ic_logger.info("EXTENSION: %s" % icfile.extension)
-                self.ic_logger.info("INCOMING SIZE: %s" % self.convert_size(icfile.incoming_size))
-                self.ic_logger.info("OUTGOING SIZE: %s" % self.convert_size(icfile.outgoing_size))
-                self.ic_logger.info("===================================")
+    def logging_icfile(self, icfile_list, ictype=None):
+        if (ictype != None):
+            for (idx, icfile) in enumerate(icfile_list):
+                self.ic_logger.info(f"{icfile.src_path}\
+                                    |{icfile.dst_path}\
+                                    |{icfile.filename}\
+                                    |{icfile.extension}|\
+                                    |{icfile.ictype}\
+                                    |{icfile.icexttype}\
+                                    |{icfile.icexttype}\
+                                    |{icfile.incoming_size}\
+                                    |{self.convert_size(icfile.outgoing_size)}")
+        else:
+            for (idx, icfile) in enumerate(icfile_list):
+                if (icfile.icexttype == ictype):
+                    self.ic_logger.info(f"{icfile.src_path}\
+                                        |{icfile.dst_path}\
+                                        |{icfile.filename}\
+                                        |{icfile.extension}|\
+                                        |{icfile.ictype}\
+                                        |{icfile.icexttype}\
+                                        |{icfile.icexttype}\
+                                        |{icfile.incoming_size}\
+                                        |{self.convert_size(icfile.outgoing_size)}")
 
     def is_video_icfile(self, icfile):
         if (icfile.icexttype == IcType.VIDEO):
@@ -158,6 +104,7 @@ class IcFileHandler:
 
         return retval
     
+
     def get_archive_icfilelist(self, icfile_list):
         retval = []
 
@@ -186,19 +133,6 @@ class IcFileHandler:
         s = round(size_bytes / p, 2)
 
         return "%s %s" % (s, size_name[i])
-    
-    def ic_progressbar(self,
-                       iteration,
-                       total,
-                       prefix='',
-                       suffix='',
-                       length=30,
-                       fill='█'):
-        percent = ("{0:.1f}").format(100 * (iteration / float(total)))
-        filled_length = int(length * iteration // total)
-        bar = fill * filled_length + '-' * (length - filled_length)
-        sys.stdout.write(f'\r{prefix} [{bar}] {percent}% {suffix}')
-        sys.stdout.flush()
 
 
 @unique

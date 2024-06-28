@@ -1,6 +1,7 @@
 import subprocess
 import os
 
+import ic_printer
 from incoming.ic_filehandler import *
 from incoming.ic_log import ic_logger_instance_ic_video
 
@@ -52,7 +53,6 @@ class VideoProcessor:
         handbrake_process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, universal_newlines=True)
 
         bar_idx = 0
-        vid_loading_bar = {0: '\\', 1: '|', 2: '/', 3: '-'}
 
         sys.stdout.write(filename + ' ==> ' + video_preset["output_video_ext"] + ' via HandBrakeCLI\n')
         sys.stdout.flush()
@@ -65,14 +65,13 @@ class VideoProcessor:
                 bar_idx %= 4
                 chk = output.strip().startswith("Encoding: task")
                 if (chk):
-                    sys.stdout.write('\r' + '  ╰─  ' + vid_loading_bar[bar_idx] + '   [' + output.strip()[:30] + ']')
+                    sys.stdout.write('\r' + '  ╰─  ' + ic_printer.loader(bar_idx) + '   [' + output.strip()[:30] + ']')
                     sys.stdout.flush()
                     bar_idx += 1
                 else:
                     self.ic_logger.info(output.strip())
 
-        sys.stdout.write('\r  ╰─ DONE' + (' ' * 40) + '\n')
-        sys.stdout.flush()
+        ic_printer.print_job_done(3, True, 40)
         handbrake_process.stdout.close()
 
     def encode_with_ffmpeg(self,

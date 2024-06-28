@@ -2,6 +2,7 @@ import os
 import argparse
 from pathlib import Path
 
+import ic_printer
 from incoming.ic_filehandler import *
 from incoming.ic_preprocessing import *
 from incoming.ic_log import ic_logger_instance_main
@@ -23,7 +24,7 @@ def main():
 
     src_dir_path = ic_settings["src_dir_path"]
     dst_dir_path = ic_settings["dst_dir_path"]
-    incoming_version = "beta0.1.0"
+    incoming_version = "beta0.1.1"
 
     filtered_archive_ext_dict = [".zip", ".rar", ".7z"]
 
@@ -83,19 +84,17 @@ def main():
     filtered_image_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_image_ext_dict"]
 
        
-    sys.stdout.write(f'\n⚙️ Process start \
-                        \n- incoming:  [{src_dir_path}] \
-                        \n- outgoing:  [{dst_dir_path}] \
-                        \n- preset:    [{preset_path}] \
-                        \n     - image process: {ic_image_preset["image_process_toggle"]} \
-                        \n         {filtered_image_ext_dict} \
-                        \n         ==> {ic_image_preset["output_ext"]} (with PIL quality = {ic_image_preset["output_quality"]}) \
-                        \n    - video process: {ic_video_preset["video_process_toggle"]} \
-                        \n         {filtered_video_ext_dict} \
-                        \n         ==> {ic_video_preset["output_video_ext"]} (with HandBrakeCLI and preset [{ic_video_preset["HandBrake_presets_path"]}])')
-    
-    sys.stdout.write('\n\n')
-    sys.stdout.flush()
+    ic_printer.print_process_start(src_dir_path,
+                                   dst_dir_path,
+                                   preset_path,
+                                   ic_image_preset["image_process_toggle"],
+                                   filtered_image_ext_dict,
+                                   ic_image_preset["output_ext"],
+                                   ic_image_preset["output_quality"],
+                                   ic_video_preset["video_process_toggle"],
+                                   filtered_video_ext_dict,
+                                   ic_video_preset["output_video_ext"],
+                                   ic_video_preset["HandBrake_presets_path"])
 
     ic_logger.info("=IC PREPROCESSING START=")
 
@@ -126,13 +125,14 @@ def main():
     ic_logger.info("=IC IMAGE PROCESS START=")
 
     for (idx, icfile) in enumerate(image_icfilelist):
-        ic_filehandler.ic_progressbar(idx + 1, image_icfilelist_len, '🏞️ Image Process:', '', 50)
+        ic_printer.print_progressbar(idx + 1, image_icfilelist_len, '🏞️ Image Process:', '', 50)
         if (ic_filehandler.is_image_icfile(icfile)):
             ic_image_processor = ImageProcessor(icfile, ic_image_preset)
 
             icfile = ic_image_processor.ic_image_process()
 
-    sys.stdout.write('\n╰─ DONE\n\n')
+    ic_printer.print_job_done()
+
     ic_logger.info("=IC IMAGE PROCESS END=")
 
     """
@@ -140,7 +140,7 @@ def main():
     """
     ic_logger.info("=IC VIDEO PROCESS START=")
 
-    sys.stdout.write('🎬 Video Process\n')
+    ic_printer.print_video_process_init()
 
     for (idx, icfile) in enumerate(main_icfilelist):
         if (ic_filehandler.is_video_icfile(icfile)):
@@ -181,7 +181,7 @@ def main():
     """
     ic_result = Result()
 
-    ic_filehandler.print_all_icfile(main_icfilelist)
+    ic_filehandler.logging_icfile(main_icfilelist)
     ic_result.ic_result(main_icfilelist)
 
     return (True)

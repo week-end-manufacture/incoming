@@ -2,7 +2,7 @@ import os
 import argparse
 from pathlib import Path
 
-import ic_printer
+from incoming.ic_printer import *
 from incoming.ic_filehandler import *
 from incoming.ic_preprocessing import *
 from incoming.ic_log import ic_logger_instance_main
@@ -83,18 +83,17 @@ def main():
     filtered_video_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_video_ext_dict"]
     filtered_image_ext_dict = ic_preset["filterd_all_ext_dict"]["filtered_image_ext_dict"]
 
-       
-    ic_printer.print_process_start(src_dir_path,
-                                   dst_dir_path,
-                                   preset_path,
-                                   ic_image_preset["image_process_toggle"],
-                                   filtered_image_ext_dict,
-                                   ic_image_preset["output_ext"],
-                                   ic_image_preset["output_quality"],
-                                   ic_video_preset["video_process_toggle"],
-                                   filtered_video_ext_dict,
-                                   ic_video_preset["output_video_ext"],
-                                   ic_video_preset["HandBrake_presets_path"])
+    print_process_start(src_dir_path,
+                        dst_dir_path,
+                        preset_path,
+                        ic_image_preset["image_process_toggle"],
+                        filtered_image_ext_dict,
+                        ic_image_preset["output_ext"],
+                        ic_image_preset["output_quality"],
+                        ic_video_preset["video_process_toggle"],
+                        filtered_video_ext_dict,
+                        ic_video_preset["output_video_ext"],
+                        ic_video_preset["HandBrake_presets_path"])
 
     ic_logger.info("=IC PREPROCESSING START=")
 
@@ -125,13 +124,13 @@ def main():
     ic_logger.info("=IC IMAGE PROCESS START=")
 
     for (idx, icfile) in enumerate(image_icfilelist):
-        ic_printer.print_progressbar(idx + 1, image_icfilelist_len, '🏞️ Image Process:', '', 50)
+        print_progressbar(idx + 1, image_icfilelist_len, '🏞️ Image Process:', '', 50)
         if (ic_filehandler.is_image_icfile(icfile)):
             ic_image_processor = ImageProcessor(icfile, ic_image_preset)
 
             icfile = ic_image_processor.ic_image_process()
 
-    ic_printer.print_job_done()
+    print_job_done()
 
     ic_logger.info("=IC IMAGE PROCESS END=")
 
@@ -140,7 +139,7 @@ def main():
     """
     ic_logger.info("=IC VIDEO PROCESS START=")
 
-    ic_printer.print_video_process_init()
+    print_video_process_init()
 
     for (idx, icfile) in enumerate(main_icfilelist):
         if (ic_filehandler.is_video_icfile(icfile)):

@@ -9,7 +9,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md')) as f:
 setup(
     name='incoming',
     author='WEEK END MANUFACTURE',
-    version='0.1.1',
+    version='0.1.2',
     license='MIT License',
     url='https://github.com/week-end-manufacture/incoming',
     description='Our best file encoder',

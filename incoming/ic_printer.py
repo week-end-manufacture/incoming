@@ -50,7 +50,7 @@ def print_progressbar(iteration,
         sys.stdout.write(f'\r{prefix} [{bar}] {percent}% {suffix}')
         sys.stdout.flush()
 
-def loader(idx):
+def print_loader(idx):
     loadd = {0: '\\', 1: '|', 2: '/', 3: '-'}
 
     return loadd[idx]

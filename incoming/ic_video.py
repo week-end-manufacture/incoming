@@ -1,7 +1,7 @@
 import subprocess
 import os
 
-import ic_printer
+from incoming.ic_printer import *
 from incoming.ic_filehandler import *
 from incoming.ic_log import ic_logger_instance_ic_video
 
@@ -65,13 +65,13 @@ class VideoProcessor:
                 bar_idx %= 4
                 chk = output.strip().startswith("Encoding: task")
                 if (chk):
-                    sys.stdout.write('\r' + '  ╰─  ' + ic_printer.loader(bar_idx) + '   [' + output.strip()[:30] + ']')
+                    sys.stdout.write('\r' + '  ╰─  ' + print_loader(bar_idx) + '   [' + output.strip()[:30] + ']')
                     sys.stdout.flush()
                     bar_idx += 1
                 else:
                     self.ic_logger.info(output.strip())
 
-        ic_printer.print_job_done(3, True, 40)
+        print_job_done(3, True, 40)
         handbrake_process.stdout.close()
 
     def encode_with_ffmpeg(self,

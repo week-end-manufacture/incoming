@@ -38,6 +38,14 @@ def print_video_process_init():
     sys.stdout.write('🎬 Video Process\n')
     sys.stdout.flush()
 
+def print_video_file(filename, output_video_ext):
+    sys.stdout.write(filename + ' ==> ' + output_video_ext + ' via HandBrakeCLI\n')
+    sys.stdout.flush()
+
+def print_video_progress(encoder_state, bar_idx=0):
+    sys.stdout.write('\r' + '  ╰─  ' + print_loader(bar_idx) + '   [' + encoder_state[:30] + ']')
+    sys.stdout.flush()
+
 def print_progressbar(iteration,
                       total,
                       prefix='',

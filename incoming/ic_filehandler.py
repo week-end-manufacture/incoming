@@ -14,7 +14,7 @@ class IcFileHandler:
         self.ic_logger = ic_logger_instance_ic_filehandler.logger
 
     def logging_icfile(self, icfile_list, ictype=None):
-        if (ictype != None):
+        if (ictype == None):
             for (idx, icfile) in enumerate(icfile_list):
                 self.ic_logger.info(f"{icfile.src_path}\
                                     |{icfile.dst_path}\

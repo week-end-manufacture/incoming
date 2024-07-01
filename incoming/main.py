@@ -24,11 +24,9 @@ def main():
 
     src_dir_path = ic_settings["src_dir_path"]
     dst_dir_path = ic_settings["dst_dir_path"]
-    incoming_version = "beta0.1.2"
+    incoming_version = "beta0.1.3"
 
     filtered_archive_ext_dict = [".zip", ".rar", ".7z"]
-
-    ic_logger.debug("!!!START ICOMING PROGRAM!!!")
 
     """
         명령어 설정
@@ -95,8 +93,6 @@ def main():
                         ic_video_preset["output_video_ext"],
                         ic_video_preset["HandBrake_presets_path"])
 
-    ic_logger.info("=IC PREPROCESSING START=")
-
     main_icfilelist = pre_processiong.ic_search(src_dir_path,
                                             dst_dir_path,
                                             filtered_video_ext_dict,
@@ -107,8 +103,6 @@ def main():
     image_icfilelist_len = len(image_icfilelist)
     video_icfilelist = ic_filehandler.get_video_icfilelist(main_icfilelist)
     video_icfilelist_len = len(video_icfilelist)
-
-    ic_logger.info("=IC PREPROCESSING END=")
 
     """
         DUMMY OPTION CHECK
@@ -121,8 +115,6 @@ def main():
     """
         IC IMAGE PROCESS
     """
-    ic_logger.info("=IC IMAGE PROCESS START=")
-
     for (idx, icfile) in enumerate(image_icfilelist):
         print_progressbar(idx + 1, image_icfilelist_len, '🏞️ Image Process:', '', 50)
         if (ic_filehandler.is_image_icfile(icfile)):
@@ -132,13 +124,9 @@ def main():
 
     print_job_done()
 
-    ic_logger.info("=IC IMAGE PROCESS END=")
-
     """
         IC VIDEO PROCESS
     """
-    ic_logger.info("=IC VIDEO PROCESS START=")
-
     print_video_process_init()
 
     for (idx, icfile) in enumerate(main_icfilelist):
@@ -147,13 +135,9 @@ def main():
 
             icfile = ic_video_processor.ic_video_process()
 
-    ic_logger.info("=IC VIDEO PROCESS END=")
-
     """
         IC POST PROCESS
     """
-    ic_logger.info("=IC COPY PROCESS START=")
-
     for (idx, icfile) in enumerate(main_icfilelist):
         if (ic_filehandler.is_incoming_icfile(icfile)):
             ic_post_processor = PostProcessing(icfile)
@@ -162,18 +146,12 @@ def main():
 
             del ic_post_processor
 
-    ic_logger.info("=IC COPY PROCESS END=")
-
-    ic_logger.info("=IC UNLINK PROCESS START=")
-
     for (idx, icfile) in enumerate(main_icfilelist):
         ic_post_processor = PostProcessing(icfile)
 
         icfile = ic_post_processor.ic_unlink()
 
         del ic_post_processor
-
-    ic_logger.info("=IC UNLINK PROCESS END=")
 
     """
         IC RESULT

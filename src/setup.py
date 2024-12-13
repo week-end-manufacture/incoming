@@ -2,9 +2,6 @@
 import os
 from setuptools import setup, find_packages
 
-with open(os.path.join(os.path.dirname(__file__), 'README.md')) as f:
-    long_description = f.read()
-
 def get_version():
     version = {}
     version_file_path = os.path.join('incoming', 'libj', 'verlib.py')
@@ -20,7 +17,6 @@ setup(
     license='MIT License',
     url='https://github.com/week-end-manufacture/incoming',
     description='Our best file encoder',
-    long_description=long_description,
     packages=find_packages(include=['libj', 'libj.*']),
     py_modules=['main'],
     install_requires = [

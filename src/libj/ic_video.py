@@ -1,9 +1,9 @@
 import subprocess
 import os
 
-from incoming.ic_printer import *
-from incoming.ic_filehandler import *
-from incoming.ic_log import ic_logger_instance_ic_video
+from libj.ic_printer import *
+from libj.ic_filehandler import *
+from libj.ic_log import ic_logger_instance_ic_video
 
 
 class VideoProcessor:

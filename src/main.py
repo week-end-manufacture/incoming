@@ -2,14 +2,14 @@ import os
 import argparse
 from pathlib import Path
 
-from incoming.ic_printer import *
-from incoming.ic_filehandler import *
-from incoming.ic_preprocessing import *
-from incoming.ic_log import ic_logger_instance_main
-from incoming.ic_image import *
-from incoming.ic_video import *
-from incoming.ic_postprocessing import *
-from incoming.ic_result import *
+from libj.ic_printer import *
+from libj.ic_filehandler import *
+from libj.ic_preprocessing import *
+from libj.ic_log import ic_logger_instance_main
+from libj.ic_image import *
+from libj.ic_video import *
+from libj.ic_postprocessing import *
+from libj.ic_result import *
 from libj.verlib import __version__
 
 def main():

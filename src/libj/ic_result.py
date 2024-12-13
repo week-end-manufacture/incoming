@@ -2,8 +2,8 @@ import os
 import shutil
 from enum import Enum, unique, auto
 
-from incoming.ic_filehandler import *
-from incoming.ic_log import ic_logger_instance_ic_result
+from libj.ic_filehandler import *
+from libj.ic_log import ic_logger_instance_ic_result
 
 
 class Result:

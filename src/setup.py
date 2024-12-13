@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 import os
+
 from setuptools import setup, find_packages
 
 def get_version():
     version = {}
-    version_file_path = os.path.join('incoming', 'libj', 'verlib.py')
+    version_file_path = os.path.join('libj', 'verlib.py')
     with open(version_file_path) as fp:
         exec(fp.read(), version)
     return version['__version__']
@@ -20,6 +21,7 @@ setup(
     packages=find_packages(include=['libj', 'libj.*']),
     py_modules=['main'],
     install_requires = [
+        'setuptools==69.5.1',
         'altgraph==0.17.4',
         'Brotli==1.1.0',
         'colorlog==6.8.2',
@@ -37,7 +39,6 @@ setup(
         'pyppmd==1.1.0',
         'pyzstd==0.15.10',
         'rarfile==4.2',
-        'setuptools==69.5.1',
         'texttable==1.7.0',
         'unrar==0.4',
     ],
@@ -46,4 +47,5 @@ setup(
             'incoming = main:main',
         ]
     },
+    python_requires='>=3.6',
 )

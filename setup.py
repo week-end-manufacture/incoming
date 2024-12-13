@@ -21,7 +21,7 @@ setup(
     url='https://github.com/week-end-manufacture/incoming',
     description='Our best file encoder',
     long_description=long_description,
-    packages=find_packages('.'),
+    packages=find_packages(include=['.', 'libj', 'libj.*']),
     install_requires = [
         'altgraph==0.17.4',
         'Brotli==1.1.0',

@@ -10,6 +10,7 @@ from incoming.ic_image import *
 from incoming.ic_video import *
 from incoming.ic_postprocessing import *
 from incoming.ic_result import *
+from libj.verlib import __version__
 
 def main():
     """
@@ -24,7 +25,7 @@ def main():
 
     src_dir_path = ic_settings["src_dir_path"]
     dst_dir_path = ic_settings["dst_dir_path"]
-    incoming_version = "beta0.1.3"
+    incoming_version = __version__
 
     filtered_archive_ext_dict = [".zip", ".rar", ".7z"]
 

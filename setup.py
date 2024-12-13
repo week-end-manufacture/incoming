@@ -5,11 +5,18 @@ from setuptools import setup, find_packages
 with open(os.path.join(os.path.dirname(__file__), 'README.md')) as f:
     long_description = f.read()
 
+def get_version():
+    version = {}
+    version_file_path = os.path.join('incoming', 'libj', 'verlib.py')
+    with open(version_file_path) as fp:
+        exec(fp.read(), version)
+    return version['__version__']
+
 
 setup(
     name='incoming',
     author='WEEK END MANUFACTURE',
-    version='0.1.2',
+    version=get_version(),
     license='MIT License',
     url='https://github.com/week-end-manufacture/incoming',
     description='Our best file encoder',

@@ -21,7 +21,8 @@ setup(
     url='https://github.com/week-end-manufacture/incoming',
     description='Our best file encoder',
     long_description=long_description,
-    packages=find_packages(include=['.', 'libj', 'libj.*']),
+    packages=find_packages(include=['libj', 'libj.*']),
+    py_modules=['main'],
     install_requires = [
         'altgraph==0.17.4',
         'Brotli==1.1.0',
@@ -46,7 +47,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'incoming = incoming.main:main',
+            'incoming = main:main',
         ]
     },
 )

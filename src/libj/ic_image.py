@@ -1,7 +1,7 @@
 import os
 from PIL import Image, ImageCms
 
-from incoming.ic_filehandler import *
+from libj.ic_filehandler import *
 
 Image.MAX_IMAGE_PIXELS = None
 

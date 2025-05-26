@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "/Volumes/JO002TSE001/JO002TSE001/jo-drive/dev/git/IncomingDir/src",
+      "program": "/Volumes/JO002TSE001/JO002TSE001/jo-drive/dev/git/IncomingDir/src/build/Debug/outDebug"
+    }
+  ]
+}

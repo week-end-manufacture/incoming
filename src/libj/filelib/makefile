@@ -2,27 +2,27 @@
 CC = gcc
 
 # Directories
-SRC_DIR = ./
-BUILD_DIR = build
-LIB_DIR = ../libobj
-INCLUDE_DIR = ../include
+SRC_DIR := .
+BUILD_DIR := build
+LIB_DIR := ../../build/libobj
+INCLUDE_DIR := ../include
 
 # Find all subdirectories in INCLUDE_DIR
-INCLUDE_DIRS = $(shell find $(INCLUDE_DIR) -type d)
-INCLUDE_FLAGS = $(addprefix -I,$(INCLUDE_DIRS))
+INCLUDE_DIRS := $(shell find $(INCLUDE_DIR) -type d)
+INCLUDE_FLAGS := $(addprefix -I,$(INCLUDE_DIRS))
 
 # Target library name
-LIB_NAME = j.file
-LIB_SHARED = $(LIB_DIR)/lib$(LIB_NAME).so
-LIB_STATIC = $(LIB_DIR)/libj.a
+LIB_NAME := j.file
+LIB_SHARED := $(LIB_DIR)/lib$(LIB_NAME).so
+LIB_STATIC := $(LIB_DIR)/lib$(LIB_NAME).a
 
 # Source and object files
-SRCS = $(wildcard $(SRC_DIR)/*.c)
-OBJS = $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRCS))
+SRCS := $(wildcard $(SRC_DIR)/*.c)
+OBJS := $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRCS))
 
 # Compiler flags
-CFLAGS = -Wall -Wextra -O2 -fPIC -I$(INCLUDE_FLAGS)
-LDFLAGS = -shared
+CFLAGS := -Wall -Wextra -O2 -fPIC $(INCLUDE_FLAGS)
+LDFLAGS := -shared
 
 # Default target
 all: $(LIB_SHARED) $(LIB_STATIC)
@@ -42,9 +42,12 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Clean build files
+# Clean build files (라이브러리 파일은 남기고 오브젝트만 삭제)
 clean:
-	rm -rf $(BUILD_DIR) $(LIB_DIR)
+	rm -rf $(BUILD_DIR)
 
-# Phony targets
-.PHONY: all clean
+# 완전 정리 (오브젝트와 라이브러리 모두 삭제)
+distclean:
+	rm -rf $(BUILD_DIR) $(LIB_DIR)/lib$(LIB_NAME).so $(LIB_DIR)/lib$(LIB_NAME).a
+
+.PHONY: all clean distclean

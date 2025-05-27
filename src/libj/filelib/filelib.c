@@ -96,6 +96,99 @@ const char *dst_filename;
     return (1);
 }
 
+int dexist(dirname)
+const char *dirname;
+{
+    DIR *dp;
+
+    if ((dp = opendir(dirname)) == NULL) {
+        perror("opendir()");
+
+        return (-1);
+    }
+
+    closedir(dp);
+
+    return (1);
+}
+
+int derase(dirname)
+const char *dirname;
+{
+    DIR *dp;
+    struct dirent *dent;
+    char path[PATH_LEN_MAX];
+
+    if ((dp = opendir(dirname)) == NULL) {
+        perror("opendir()");
+
+        return (-1);
+    }
+
+    while ((dent = readdir(dp)) != NULL) {
+        if (strcmp(dent->d_name, ".") == 0 || strcmp(dent->d_name, "..") == 0) {
+            continue;
+        }
+
+        snprintf(path, sizeof(path), "%s/%s", dirname, dent->d_name);
+
+        if (unlink(path) == -1) {
+            perror("unlink()");
+            closedir(dp);
+
+            return (-1);
+        }
+    }
+
+    closedir(dp);
+
+    return (1);
+}
+
+int dcopy(src_dirname, dst_dirname)
+const char *src_dirname;
+const char *dst_dirname;
+{
+    DIR *src_dp, *dst_dp;
+    struct dirent *dent;
+    char src_path[PATH_LEN_MAX];
+    char dst_path[PATH_LEN_MAX];
+
+    if ((src_dp = opendir(src_dirname)) == NULL) {
+        perror("opendir()");
+
+        return (-1);
+    }
+
+    if ((dst_dp = opendir(dst_dirname)) == NULL) {
+        perror("opendir()");
+        closedir(src_dp);
+
+        return (-1);
+    }
+
+    while ((dent = readdir(src_dp)) != NULL) {
+        if (strcmp(dent->d_name, ".") == 0 || strcmp(dent->d_name, "..") == 0) {
+            continue;
+        }
+
+        snprintf(src_path, sizeof(src_path), "%s/%s", src_dirname, dent->d_name);
+        snprintf(dst_path, sizeof(dst_path), "%s/%s", dst_dirname, dent->d_name);
+
+        if (fcopy(src_path, dst_path) == -1) {
+            closedir(src_dp);
+            closedir(dst_dp);
+
+            return (-1);
+        }
+    }
+
+    closedir(src_dp);
+    closedir(dst_dp);
+
+    return (1);
+}
+
 int init_seqnof(filename)
 const char *filename;
 {
@@ -352,7 +445,7 @@ char *dirname;
     return (1);
 }
 
-int search_filelist_dir(dirname, filelist)
+int search_directory(dirname, filelist)
 const char *dirname;
 char *filelist;
 {
@@ -395,7 +488,7 @@ char *filelist;
 
         if (dent->d_type == DT_DIR)
         {
-            search_filelist_dir(abs_path, filelist);
+            search_directory(abs_path, filelist);
         }
         else
         {
@@ -407,4 +500,170 @@ char *filelist;
     closedir(dp);
 
     return (1);
+}
+
+static int collect_filehandlers_recursive(src_path, list, count, capacity)
+const char *src_path;
+FileHandler **list;
+int *count;
+int *capacity;
+{
+    DIR *dp = opendir(src_path);
+    if (!dp) return -1;
+
+    struct dirent *dent;
+    char fullpath[PATH_LEN_MAX];
+    char abs_path[PATH_LEN_MAX];
+
+    while ((dent = readdir(dp)) != NULL)
+    {
+        if (strcmp(dent->d_name, ".") == 0 || strcmp(dent->d_name, "..") == 0)
+            continue;
+
+        snprintf(fullpath, sizeof(fullpath), "%s/%s", src_path, dent->d_name);
+
+        struct stat st;
+
+        if (stat(fullpath, &st) == -1)
+            continue;
+
+        if (S_ISDIR(st.st_mode))
+        {
+            // 디렉토리면 재귀 호출
+            collect_filehandlers_recursive(fullpath, list, count, capacity);
+        }
+        else if (S_ISREG(st.st_mode))
+        {
+            // 파일이면 리스트에 추가
+            if (*count >= *capacity)
+            {
+                *capacity *= 2;
+                *list = realloc(*list, (*capacity) * sizeof(FileHandler));
+            }
+
+            FileHandler *fh = &((*list)[*count]);
+            memset(fh, 0, sizeof(FileHandler));
+
+            strncpy(fh->filename, dent->d_name, PATH_LEN_MAX - 1);
+
+            if (realpath(fullpath, abs_path))
+            {
+                strncpy(fh->src_path, abs_path, PATH_LEN_MAX - 1);
+            }
+            else
+            {
+                strncpy(fh->src_path, fullpath, PATH_LEN_MAX - 1);
+            }
+
+            size_t input_path_len = strlen(global_input_path);
+            
+            if (strncmp(fh->src_path, global_input_path, input_path_len) == 0)
+            {
+                snprintf(fh->dst_path, PATH_LEN_MAX, "%s%s", global_output_path, fh->src_path + input_path_len);
+
+                char abs_dst_path[PATH_LEN_MAX];
+                if (realpath(fh->dst_path, abs_dst_path))
+                {
+                    strncpy(fh->dst_path, abs_dst_path, PATH_LEN_MAX - 1);
+                    fh->dst_path[PATH_LEN_MAX - 1] = '\0';
+                }
+            }
+            else
+            {
+                strncpy(fh->dst_path, fh->src_path, PATH_LEN_MAX - 1); // fallback
+            }
+            
+            (*count)++;
+        }
+    }
+
+    closedir(dp);
+
+    return 0;
+}
+
+int make_filehandler_list(input_path, output_path, out_list, out_count)
+const char *input_path;
+const char *output_path;
+FileHandler **out_list;
+int *out_count;
+{
+    int capacity = 128;
+    int abs_path[PATH_LEN_MAX];
+    int count = 0;
+    FileHandler *list = malloc(capacity * sizeof(FileHandler));
+
+    if (dexist(input_path) != 1)
+    {
+        fprintf(stderr, "Error: Input path does not exist: %s\n", input_path);
+        free(list);
+        return -1;
+    }
+
+    if (dexist(output_path) != 1)
+    {
+        if (mkdir(output_path, 0755) != 0)
+        {
+            perror("mkdir()");
+            free(list);
+
+            return (-1);
+        }
+    }
+
+    if (realpath(input_path, abs_path))
+    {
+        strncpy(global_input_path, abs_path, PATH_LEN_MAX - 1); 
+        global_input_path[PATH_LEN_MAX - 1] = '\0';
+    }
+    else
+    {
+        strncpy(global_input_path, input_path, PATH_LEN_MAX - 1);
+        global_input_path[PATH_LEN_MAX - 1] = '\0';
+    }
+
+    if (realpath(output_path, abs_path))
+    {
+        strncpy(global_output_path, abs_path, PATH_LEN_MAX - 1);
+        global_output_path[PATH_LEN_MAX - 1] = '\0';
+    }
+    else
+    {
+        strncpy(global_output_path, output_path, PATH_LEN_MAX - 1);
+        global_output_path[PATH_LEN_MAX - 1] = '\0';
+    }
+
+    if (!list) return -1;
+
+    if (collect_filehandlers_recursive(input_path, &list, &count, &capacity) != 0)
+    {
+        free(list);
+
+        return (-1);
+    }
+
+    *out_list = list;
+    *out_count = count;
+
+    return 0;
+}
+
+void print_filehandler_list(list, count)
+FileHandler *list;
+int count;
+{
+    for (int i = 0; i < count; i++)
+    {
+        FileHandler *fh = &list[i];
+        printf("File %d:\n", i + 1);
+        printf("  Filename: %s\n", fh->filename);
+        printf("  Source Path:\t\t%s\n", fh->src_path);
+        printf("  Destination Path:\t%s\n", fh->dst_path);
+        printf("  File Size: %s\n", fh->file_size);
+        printf("  File Format: %s\n", fh->file_format);
+        printf("  File Extension: %s\n", fh->file_extension);
+        printf("  File Type: %d\n", fh->file_type);
+        printf("  File State: %d\n", fh->file_state);
+        printf("  Outgoing Size: %s\n", fh->outgoing_size);
+    }
 }

@@ -1,16 +1,22 @@
 all:
 	$(MAKE) -C libj/filelib
+	$(MAKE) -C libj/envlib
+	$(MAKE) -C libj/ffmpeglib
 	# Ensure the file library is built before the daemon
 	# This is important as the daemon depends on the file library.
 	$(MAKE) -C deamon
 
 clean:
 	$(MAKE) -C libj/filelib clean
+	$(MAKE) -C libj/envlib clean
+	$(MAKE) -C libj/ffmpeglib clean
 	$(MAKE) -C deamon clean
 
 distclean:
-	$(MAKE) -C deamon distclean
 	$(MAKE) -C libj/filelib distclean
+	$(MAKE) -C libj/envlib distclean
+	$(MAKE) -C libj/ffmpeglib distclean
+	$(MAKE) -C deamon distclean
 
 .PHONY: all clean distclean
 # This Makefile orchestrates the build process for both the daemon and the file library.

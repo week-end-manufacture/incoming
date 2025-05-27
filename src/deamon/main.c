@@ -118,5 +118,22 @@ char *argv[];
     printf("Output Path: %s\n", output_path);
     printf("User Home Directory: %s\n", user_home_dir);
 
+    if (make_filehandler_list(input_path, output_path, &file_handler, &file_handler_count) != 0)
+    {
+        fprintf(stderr, "Error: Failed to create file handler list.\n");
+
+        return program_exit(1);
+    }
+
+    printf("File Handler Count: %d\n", file_handler_count);
+    if (file_handler_count < 0)
+    {
+        fprintf(stderr, "Error: Failed to create file handler list.\n");
+
+        return program_exit(1);
+    }
+
+    print_filehandler_list(file_handler, file_handler_count);
+
     return program_exit(0);
 }

@@ -16,11 +16,14 @@
 
 #define INCOMING_ENV_PATH "./ENV/incoming.env"
 #define INCOMING_PATH_MAX 1024
+#define FILEHANDLER_MAX 102400
 
 char *input_path;    // Input file path
 char *output_path;   // Output file path
 char *settings_path; // Settings file path
 char user_home_dir[1024]; // User's home directory
+FileHandler *file_handler; // File handler array
+int file_handler_count = 0; // Count of file handlers
 
 
 #endif

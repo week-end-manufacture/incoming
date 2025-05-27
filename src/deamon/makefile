@@ -2,7 +2,9 @@
 
 LIB_PATH = ../build/libobj
 LIB_FLAGS = -lj.file \
-			-lj.env
+			-lj.env \
+			-lj.ffmpeg
+
 BUILD_DIR = ../build/bin
 TARGET = $(BUILD_DIR)/incoming
 

@@ -27,6 +27,27 @@ int exit_code;
     return exit_code;
 }
 
+static void program_version()
+{
+    char version[8];
+
+    if (fexist(INCOMING_ENV_PATH) == 1)
+    {
+        read_env_value(INCOMING_ENV_PATH, "VERSION", "VERSION", version, sizeof(version));
+    }
+    else
+    {
+        fprintf(stderr, "Error: Incoming Environment file not found.\n");
+        
+        program_exit(1);
+    }
+
+    printf("Incoming Daemon Version %s\n", version);
+    printf("Copyright (C) 2025 week end manufacture\n");
+    printf("This program comes with ABSOLUTELY NO WARRANTY.\n");
+    printf("This is free software, and you are welcome to redistribute it under certain conditions.\n");
+}
+
 int main(argc, argv)
 int argc;
 char *argv[];
@@ -53,6 +74,7 @@ char *argv[];
 
                 return program_exit(0);
             case 'v':
+                program_version();
             
                 return program_exit(0);
             default:

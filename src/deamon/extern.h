@@ -6,6 +6,7 @@
 extern char *input_path;    // Input file path
 extern char *output_path;   // Output file path
 extern char *settings_path; // Settings file path
+extern char user_home_dir[1024]; // User's home directory
 
 #endif // __EXTERN_H__
 // extern.h - Header file for external declarations in the daemon process

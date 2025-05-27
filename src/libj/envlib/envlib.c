@@ -8,6 +8,25 @@ int print_envlib()
     return 0;
 }
 
+int get_user_home_dir(out, out_size)
+char *out;
+size_t out_size;
+{
+    const char *home = getenv("HOME");
+    
+    if (home == NULL)
+    {
+        fprintf(stderr, "Error: HOME environment variable is not set.\n");
+
+        return (-1); // 환경 변수 HOME이 설정되어 있지 않음
+    }
+
+    strncpy(out, home, out_size - 1);
+    out[out_size - 1] = '\0'; // null-terminate
+
+    return (0);
+}
+
 int read_env_value(filepath, section, key, out, out_size)
 const char *filepath;
 const char *section;

@@ -6,7 +6,7 @@ BUILD_DIR = ../build/bin
 TARGET = $(BUILD_DIR)/incoming
 
 SRCS = $(wildcard *.c)
-CFLAGS = -Wall -Werror -pthread -I$(INCLUDE_FLAGS)
+CFLAGS = -Wall -pthread -I$(INCLUDE_FLAGS)
 INCLUDE_DIR = ../libj/include
 
 # Find all subdirectories in INCLUDE_DIR

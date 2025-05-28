@@ -502,6 +502,91 @@ char *filelist;
     return (1);
 }
 
+int get_file_type(filename, file_type)
+const char *filename;
+int *file_type;
+{
+    char ext[32];
+    if (get_file_extension(filename, ext) != 1) {
+        *file_type = OTHER;
+        return 1; // 확장자 없음
+    }
+
+    if (strcmp(ext, ".mp4") == 0 ||
+        strcmp(ext, ".mkv") == 0 ||
+        strcmp(ext, ".avi") == 0 ||
+        strcmp(ext, ".mov") == 0 ||
+        strcmp(ext, ".flv") == 0 ||
+        strcmp(ext, ".wmv") == 0 ||
+        strcmp(ext, ".webm") == 0 ||
+        strcmp(ext, ".mpeg") == 0 ||
+        strcmp(ext, ".mpg") == 0 ||
+        strcmp(ext, ".m4v") == 0 ||
+        strcmp(ext, ".3gp") == 0 ||
+        strcmp(ext, ".m3u8") == 0 ||
+        strcmp(ext, ".ts") == 0 ||
+        strcmp(ext, ".vob") == 0 ||
+        strcmp(ext, ".ogv") == 0 ||
+        strcmp(ext, ".rmvb") == 0 ||
+        strcmp(ext, ".rm") == 0 ||
+        strcmp(ext, ".asf") == 0 ||
+        strcmp(ext, ".m2ts") == 0 ||
+        strcmp(ext, ".mts") == 0 ||
+        strcmp(ext, ".mxf") == 0 ||
+        strcmp(ext, ".divx") == 0 ||
+        strcmp(ext, ".xvid") == 0 ||
+        strcmp(ext, ".h264") == 0 ||
+        strcmp(ext, ".h265") == 0 ||
+        strcmp(ext, ".hevc") == 0 ||
+        strcmp(ext, ".vp9") == 0 ||
+        strcmp(ext, ".av1") == 0 ||
+        strcmp(ext, ".dvr-ms") == 0
+        )
+    {
+        *file_type = VIDEO;
+    }
+    else if (strcmp(ext, ".mp3") == 0 ||
+            strcmp(ext, ".wav") == 0 ||
+            strcmp(ext, ".flac") == 0 ||
+            strcmp(ext, ".aac") == 0 ||
+            strcmp(ext, ".ogg") == 0 ||
+            strcmp(ext, ".wma") == 0 ||
+            strcmp(ext, ".m4a") == 0 ||
+            strcmp(ext, ".opus") == 0 ||
+            strcmp(ext, ".aiff") == 0 ||
+            strcmp(ext, ".aif") == 0 ||
+            strcmp(ext, ".ape") == 0 ||
+            strcmp(ext, ".alac") == 0 ||
+            strcmp(ext, ".dsd") == 0 ||
+            strcmp(ext, ".dff") == 0 ||
+            strcmp(ext, ".dsf") == 0 ||
+            strcmp(ext, ".mp2") == 0 ||
+            strcmp(ext, ".mpc") == 0 ||
+            strcmp(ext, ".spx") == 0
+            )
+    {
+        *file_type = AUDIO;
+    }
+    else if (strcmp(ext, ".jpg") == 0 || strcmp(ext, ".png") == 0)
+    {
+        *file_type = IMAGE;
+    }
+    else if (strcmp(ext, ".pdf") == 0 || strcmp(ext, ".docx") == 0)
+    {
+        *file_type = DOCUMENT;
+    }
+    else if (strcmp(ext, ".zip") == 0 || strcmp(ext, ".tar.gz") == 0)
+    {
+        *file_type = ARCHIVE;
+    }
+    else
+    {
+        *file_type = OTHER;
+    }
+
+    return 1;
+}
+
 static int collect_filehandlers_recursive(src_path, list, count, capacity)
 const char *src_path;
 FileHandler **list;
@@ -571,6 +656,21 @@ int *capacity;
             else
             {
                 strncpy(fh->dst_path, fh->src_path, PATH_LEN_MAX - 1); // fallback
+            }
+
+            long filesize = 0;
+            if (get_filesize(fh->src_path, &filesize) == 1)
+            {
+                snprintf(fh->file_size, sizeof(fh->file_size), "%ld", filesize);
+            }
+            else
+            {
+                strncpy(fh->file_size, "0", sizeof(fh->file_size));
+            }
+
+            if (get_file_extension(fh->filename, fh->file_extension) != 1)
+            {
+                fh->file_extension[0] = '\0'; // 확장자 없음
             }
             
             (*count)++;

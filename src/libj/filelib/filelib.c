@@ -567,15 +567,55 @@ int *file_type;
     {
         *file_type = AUDIO;
     }
-    else if (strcmp(ext, ".jpg") == 0 || strcmp(ext, ".png") == 0)
+    else if (strcmp(ext, ".jpg") == 0 ||
+            strcmp(ext, ".png") == 0 ||
+            strcmp(ext, ".gif") == 0 ||
+            strcmp(ext, ".bmp") == 0 ||
+            strcmp(ext, ".tiff") == 0 ||
+            strcmp(ext, ".tif") == 0 ||
+            strcmp(ext, ".webp") == 0 ||
+            strcmp(ext, ".svg") == 0 ||
+            strcmp(ext, ".heif") == 0 ||
+            strcmp(ext, ".heic") == 0 ||
+            strcmp(ext, ".ico") == 0 ||
+            strcmp(ext, ".raw") == 0 ||
+            strcmp(ext, ".cr2") == 0 ||
+            strcmp(ext, ".nef") == 0 ||
+            strcmp(ext, ".orf") == 0 ||
+            strcmp(ext, ".arw") == 0 ||
+            strcmp(ext, ".dng") == 0
+            )
     {
         *file_type = IMAGE;
     }
-    else if (strcmp(ext, ".pdf") == 0 || strcmp(ext, ".docx") == 0)
+    else if (strcmp(ext, ".pdf") == 0 ||
+            strcmp(ext, ".docx") == 0 ||
+            strcmp(ext, ".doc") == 0 ||
+            strcmp(ext, ".txt") == 0 ||
+            strcmp(ext, ".xlsx") == 0 ||
+            strcmp(ext, ".xls") == 0 ||
+            strcmp(ext, ".pptx") == 0 ||
+            strcmp(ext, ".ppt") == 0
+            )
     {
         *file_type = DOCUMENT;
     }
-    else if (strcmp(ext, ".zip") == 0 || strcmp(ext, ".tar.gz") == 0)
+    else if (strcmp(ext, ".zip") == 0 ||
+            strcmp(ext, ".tar.gz") == 0 ||
+            strcmp(ext, ".tar") == 0 ||
+            strcmp(ext, ".gz") == 0 ||
+            strcmp(ext, ".rar") == 0 ||
+            strcmp(ext, ".7z") == 0 ||
+            strcmp(ext, ".tar.bz2") == 0 ||
+            strcmp(ext, ".bz2") == 0 ||
+            strcmp(ext, ".xz") == 0 ||
+            strcmp(ext, ".zst") == 0 ||
+            strcmp(ext, ".lzma") == 0 ||
+            strcmp(ext, ".lzo") == 0 ||
+            strcmp(ext, ".cab") == 0 ||
+            strcmp(ext, ".iso") == 0 ||
+            strcmp(ext, ".ar") == 0
+            )
     {
         *file_type = ARCHIVE;
     }

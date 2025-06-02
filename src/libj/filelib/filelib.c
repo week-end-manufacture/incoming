@@ -669,8 +669,14 @@ int *capacity;
             FileHandler *fh = &((*list)[*count]);
             memset(fh, 0, sizeof(FileHandler));
 
+            /*
+            * filename
+            */
             strncpy(fh->filename, dent->d_name, PATH_LEN_MAX - 1);
 
+            /*
+            * src_path
+            */
             if (realpath(fullpath, abs_path))
             {
                 strncpy(fh->src_path, abs_path, PATH_LEN_MAX - 1);
@@ -680,6 +686,9 @@ int *capacity;
                 strncpy(fh->src_path, fullpath, PATH_LEN_MAX - 1);
             }
 
+            /*
+            * dst_path
+            */
             size_t input_path_len = strlen(global_input_path);
             
             if (strncmp(fh->src_path, global_input_path, input_path_len) == 0)
@@ -698,6 +707,9 @@ int *capacity;
                 strncpy(fh->dst_path, fh->src_path, PATH_LEN_MAX - 1); // fallback
             }
 
+            /*
+            * file_size
+            */
             long filesize = 0;
             if (get_filesize(fh->src_path, &filesize) == 1)
             {
@@ -708,10 +720,26 @@ int *capacity;
                 strncpy(fh->file_size, "0", sizeof(fh->file_size));
             }
 
+            /*
+            * file_extension
+            */
             if (get_file_extension(fh->filename, fh->file_extension) != 1)
             {
                 fh->file_extension[0] = '\0'; // 확장자 없음
             }
+
+            /*
+            * file_type
+            */
+            if (get_file_type(fh->src_path, &fh->file_type) != 1)
+            {
+                fh->file_type = OTHER; // 기본값
+            }
+
+            /*
+            * file_state
+            */
+            fh->file_state = INCOMING; // 기본값
             
             (*count)++;
         }
@@ -788,6 +816,60 @@ int *out_count;
     return 0;
 }
 
+void get_file_type_string(file_type, type_str)
+int file_type;
+char *type_str;
+{
+    switch (file_type)
+    {
+        case VIDEO:
+            strcpy(type_str, "VIDEO");
+            break;
+        case AUDIO:
+            strcpy(type_str, "AUDIO");
+            break;
+        case IMAGE:
+            strcpy(type_str, "IMAGE");
+            break;
+        case DOCUMENT:
+            strcpy(type_str, "DOCUMENT");
+            break;
+        case ARCHIVE:
+            strcpy(type_str, "ARCHIVE");
+            break;
+        default:
+            strcpy(type_str, "OTHER");
+            break;
+    }
+}
+
+void get_file_state_string(file_state, state_str)
+int file_state;
+char *state_str;
+{
+    switch (file_state)
+    {
+        case INCOMING:
+            strcpy(state_str, "INCOMING");
+            break;
+        case OUTGOING:
+            strcpy(state_str, "OUTGOING");
+            break;
+        case UNZIPPED:
+            strcpy(state_str, "UNZIPPED");
+            break;
+        case FAILED:
+            strcpy(state_str, "FAILED");
+            break;
+        case DELETED:
+            strcpy(state_str, "DELETED");
+            break;
+        default:
+            strcpy(state_str, "UNKNOWN");
+            break;
+    }
+}
+
 void print_filehandler_list(list, count)
 FileHandler *list;
 int count;
@@ -795,15 +877,19 @@ int count;
     for (int i = 0; i < count; i++)
     {
         FileHandler *fh = &list[i];
+        char file_type_str[32];
+        char file_state_str[32];
+
         printf("File %d:\n", i + 1);
         printf("  Filename: %s\n", fh->filename);
         printf("  Source Path:\t\t%s\n", fh->src_path);
         printf("  Destination Path:\t%s\n", fh->dst_path);
         printf("  File Size: %s\n", fh->file_size);
-        printf("  File Format: %s\n", fh->file_format);
         printf("  File Extension: %s\n", fh->file_extension);
-        printf("  File Type: %d\n", fh->file_type);
-        printf("  File State: %d\n", fh->file_state);
+        get_file_type_string(fh->file_type, file_type_str);
+        printf("  File Type: %s\n", file_type_str);
+        get_file_state_string(fh->file_state, file_state_str);
+        printf("  File State: %s\n", file_state_str);
         printf("  Outgoing Size: %s\n", fh->outgoing_size);
     }
 }

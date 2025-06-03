@@ -369,6 +369,91 @@ char *state_str;
     }
 }
 
+int is_filehandler_list_empty(list, count)
+FileHandler *list;
+int count;
+{
+    if (list == NULL || count <= 0)
+    {
+        return 1; // 리스트가 비어있음
+    }
+
+    for (int i = 0; i < count; i++)
+    {
+        if (list[i].filename[0] != '\0')
+        {
+            return 0; // 비어있지 않음
+        }
+    }
+
+    return 1; // 리스트가 비어있음
+}
+
+int get_filehandler_count(list, count)
+FileHandler *list;
+int count;
+{
+    if (list == NULL || count <= 0)
+    {
+        return 0; // 리스트가 비어있음
+    }
+
+    int valid_count = 0;
+    for (int i = 0; i < count; i++)
+    {
+        if (list[i].filename[0] != '\0')
+        {
+            valid_count++;
+        }
+    }
+
+    return valid_count;
+}
+
+int get_filehandler_by_index(list, count, index, out_fh)
+FileHandler *list;
+int count;
+int index;
+FileHandler *out_fh;
+{
+    if (list == NULL || count <= 0 || index < 0 || index >= count)
+    {
+        return -1; // 잘못된 인덱스
+    }
+
+    if (list[index].filename[0] == '\0')
+    {
+        return -1; // 해당 인덱스에 유효한 파일 핸들러가 없음
+    }
+
+    *out_fh = list[index];
+    return 0; // 성공
+}
+
+int file_type_check(fh, type)
+FileHandler *fh;
+int type;
+{
+    if (fh == NULL)
+    {
+        return -1; // 잘못된 파일 핸들러
+    }
+
+    return (fh->file_type == type) ? 1 : 0; // 타입이 일치하면 1, 아니면 0
+}
+
+int file_state_check(fh, state)
+FileHandler *fh;
+int state;
+{
+    if (fh == NULL)
+    {
+        return -1; // 잘못된 파일 핸들러
+    }
+
+    return (fh->file_state == state) ? 1 : 0; // 상태가 일치하면 1, 아니면 0
+}
+
 void print_filehandler_list(list, count)
 FileHandler *list;
 int count;

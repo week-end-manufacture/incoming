@@ -41,5 +41,7 @@ struct JsonValue {
 
 int print_jsonlib();
 int parse_json(const char *json_str, void **json_obj);
+int parse_json_file(const char *filepath, void **json_obj);
+void json_print(const JsonValue *v, int indent);
 
 #endif // __JSONLIB__

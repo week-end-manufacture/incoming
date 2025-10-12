@@ -264,3 +264,95 @@ int parse_json(const char *json_str, void **json_obj)
     *json_obj = (void *)root;
     return 0;
 }
+
+int parse_json_file(const char *filepath, void **json_obj)
+{
+    if (!filepath || !json_obj) return -1;
+
+    FILE *fp = fopen(filepath, "rb");
+    if (!fp) {
+        perror("fopen");
+        return -1;
+    }
+
+    if (fseek(fp, 0, SEEK_END) != 0) {
+        fclose(fp);
+        return -1;
+    }
+    long len = ftell(fp);
+    if (len < 0) {
+        fclose(fp);
+        return -1;
+    }
+    rewind(fp);
+
+    char *buf = (char *)malloc((size_t)len + 1);
+    if (!buf) {
+        fclose(fp);
+        return -1;
+    }
+
+    size_t nread = fread(buf, 1, (size_t)len, fp);
+    fclose(fp);
+    if (nread != (size_t)len) {
+        free(buf);
+        return -1;
+    }
+    buf[len] = '\0';
+
+    int rc = parse_json(buf, json_obj);
+    free(buf);
+    return rc;
+}
+
+static void print_indent(int indent) {
+    for (int i = 0; i < indent; ++i) putchar(' ');
+}
+
+void json_print(const JsonValue *v, int indent)
+{
+    if (!v) { printf("null\n"); return; }
+
+    switch (v->type) {
+        case JSON_NULL:
+            printf("null");
+            break;
+        case JSON_BOOL:
+            printf("%s", v->as.boolean ? "true" : "false");
+            break;
+        case JSON_NUMBER:
+            printf("%g", v->as.number);
+            break;
+        case JSON_STRING:
+            printf("\"%s\"", v->as.string ? v->as.string : "");
+            break;
+        case JSON_ARRAY: {
+            printf("[\n");
+            for (int i = 0; i < v->as.array.count; ++i) {
+                print_indent(indent + 2);
+                json_print(v->as.array.items[i], indent + 2);
+                if (i + 1 < v->as.array.count) printf(",");
+                printf("\n");
+            }
+            print_indent(indent);
+            printf("]");
+            break;
+        }
+        case JSON_OBJECT: {
+            printf("{\n");
+            for (int i = 0; i < v->as.object.count; ++i) {
+                print_indent(indent + 2);
+                printf("\"%s\": ", v->as.object.keys[i] ? v->as.object.keys[i] : "");
+                json_print(v->as.object.values[i], indent + 2);
+                if (i + 1 < v->as.object.count) printf(",");
+                printf("\n");
+            }
+            print_indent(indent);
+            printf("}");
+            break;
+        }
+        default:
+            printf("/* unknown */");
+            break;
+    }
+}

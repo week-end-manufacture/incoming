@@ -12,6 +12,7 @@
 #include <signal.h>
 
 #include "filelib.h"
+#include "fhlib.h"
 #include "envlib.h"
 #include "ffmpeglib.h"
 #include "jsonlib.h"
@@ -27,6 +28,6 @@ char *settings_path; // Settings file path
 char user_home_dir[1024]; // User's home directory
 FileHandler *file_handler; // File handler array
 int file_handler_count = 0; // Count of file handlers
-
+JsonValue *settings_json; // Settings JSON object
 
 #endif

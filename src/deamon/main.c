@@ -5,9 +5,10 @@ static void program_usage()
 {
     printf("Usage: incoming [options]\n");
     printf("Options:\n");
+    printf("  -r, --run        Run the incoming daemon using default settings\n");
     printf("  -i, --input <path>  Specify input file path\n");
     printf("  -o, --output <path> Specify output file path\n");
-    printf("  -s, --settings Open settings file\n");
+    printf("  -s, --settings   Open settings file\n");
     printf("  -h, --help       Show this help message and exit\n");
     printf("  -v, --version    Show version information and exit\n");
     printf("  -u, --user       Show user information and exit\n");
@@ -59,6 +60,24 @@ static int program_user()
     return (0);
 }
 
+static int read_settings()
+{
+    if (parse_json_file(INCOMING_CONFIG_PATH, (void **)&settings_json) != 0 || !settings_json) {
+        fprintf(stderr, "Error: Failed to read settings file: %s\n", INCOMING_CONFIG_PATH);
+        return (-1);
+    }
+
+    printf("Settings loaded successfully from %s\n", INCOMING_CONFIG_PATH);
+    json_print(settings_json, 0);
+    printf("\n");
+
+    // TODO: destroy_json(root)로 메모리 해제 필요
+    return (0);
+
+    // TODO: 필요하면 destroy_json(root)로 메모리 해제
+    return (0);
+}
+
 int main(argc, argv)
 int argc;
 char *argv[];
@@ -67,10 +86,13 @@ char *argv[];
     extern char *optarg;
     extern int optind;
 
-    while ((opt = getopt(argc, argv, "i:o:s:hvu")) != -1)
+    while ((opt = getopt(argc, argv, "i:o:s:rhvu")) != -1)
     {
         switch (opt)
         {
+            case 'r':
+                read_settings();
+                break;
             case 'i':
                 input_path = optarg;
                 break;
@@ -95,14 +117,6 @@ char *argv[];
 
                 return program_exit(1);
         }
-    }
-
-    if (input_path == NULL || output_path == NULL)
-    {
-        fprintf(stderr, "Error: Input and output paths must be specified.\n");
-        program_usage();
-
-        return program_exit(1);
     }
 
     if (get_user_home_dir(user_home_dir, sizeof(user_home_dir)) != 0)

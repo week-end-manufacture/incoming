@@ -13,8 +13,11 @@
 
 #include "filelib.h"
 #include "envlib.h"
+#include "ffmpeglib.h"
+#include "jsonlib.h"
 
 #define INCOMING_ENV_PATH "./ENV/incoming.env"
+#define INCOMING_CONFIG_PATH "./config/settings.json"
 #define INCOMING_PATH_MAX 1024
 #define FILEHANDLER_MAX 102400
 

@@ -270,31 +270,37 @@ int parse_json_file(const char *filepath, void **json_obj)
     if (!filepath || !json_obj) return -1;
 
     FILE *fp = fopen(filepath, "rb");
-    if (!fp) {
+    if (!fp)
+    {
         perror("fopen");
         return -1;
     }
 
-    if (fseek(fp, 0, SEEK_END) != 0) {
+    if (fseek(fp, 0, SEEK_END) != 0)
+    {
         fclose(fp);
         return -1;
     }
     long len = ftell(fp);
-    if (len < 0) {
+    if (len < 0)
+    {
         fclose(fp);
         return -1;
     }
     rewind(fp);
 
     char *buf = (char *)malloc((size_t)len + 1);
-    if (!buf) {
+    if (!buf)
+    {
         fclose(fp);
         return -1;
     }
 
     size_t nread = fread(buf, 1, (size_t)len, fp);
     fclose(fp);
-    if (nread != (size_t)len) {
+
+    if (nread != (size_t)len)
+    {
         free(buf);
         return -1;
     }
@@ -305,7 +311,8 @@ int parse_json_file(const char *filepath, void **json_obj)
     return rc;
 }
 
-static void print_indent(int indent) {
+static void print_indent(int indent)
+{
     for (int i = 0; i < indent; ++i) putchar(' ');
 }
 
@@ -313,7 +320,8 @@ void json_print(const JsonValue *v, int indent)
 {
     if (!v) { printf("null\n"); return; }
 
-    switch (v->type) {
+    switch (v->type)
+    {
         case JSON_NULL:
             printf("null");
             break;
@@ -355,4 +363,20 @@ void json_print(const JsonValue *v, int indent)
             printf("/* unknown */");
             break;
     }
+}
+
+int get_json_value_by_key(const JsonValue *obj, const char *key, JsonValue **out)
+{
+    if (!obj || obj->type != JSON_OBJECT || !key || !out) return -1;
+
+    for (int i = 0; i < obj->as.object.count; ++i)
+    {
+        if (obj->as.object.keys[i] && strcmp(obj->as.object.keys[i], key) == 0)
+        {
+            *out = obj->as.object.values[i];
+            return 0;
+        }
+    }
+
+    return -1; // key not found
 }

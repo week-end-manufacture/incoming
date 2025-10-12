@@ -60,9 +60,15 @@ static int program_user()
     return (0);
 }
 
+static int program_run()
+{
+    return (0);
+}
+
 static int read_settings()
 {
-    if (parse_json_file(INCOMING_CONFIG_PATH, (void **)&settings_json) != 0 || !settings_json) {
+    if (parse_json_file(INCOMING_CONFIG_PATH, (void **)&settings_json) != 0 || !settings_json)
+    {
         fprintf(stderr, "Error: Failed to read settings file: %s\n", INCOMING_CONFIG_PATH);
         return (-1);
     }
@@ -71,10 +77,29 @@ static int read_settings()
     json_print(settings_json, 0);
     printf("\n");
 
-    // TODO: destroy_json(root)로 메모리 해제 필요
-    return (0);
+    JsonValue *input_path_json = NULL;
+    JsonValue *output_path_json = NULL;
 
-    // TODO: 필요하면 destroy_json(root)로 메모리 해제
+    if (get_json_value_by_key(settings_json, "src_dir_path", (JsonValue **)&input_path_json) != 0 || !input_path_json)
+    {
+        fprintf(stderr, "Error: 'src_dir_path' not found in settings.json\n");
+        return (-1);
+    }
+    else
+    {
+        strcpy(input_path, input_path_json->as.string);
+    }
+
+    if (get_json_value_by_key(settings_json, "dst_dir_path", (JsonValue **)&output_path_json) != 0 || !output_path_json)
+    {
+        fprintf(stderr, "Error: 'dst_dir_path' not found in settings.json\n");
+        return (-1);
+    }
+    else
+    {
+        strcpy(output_path, output_path_json->as.string);
+    }
+
     return (0);
 }
 
@@ -86,21 +111,22 @@ char *argv[];
     extern char *optarg;
     extern int optind;
 
+    read_settings();
+
     while ((opt = getopt(argc, argv, "i:o:s:rhvu")) != -1)
     {
         switch (opt)
         {
             case 'r':
-                read_settings();
                 break;
             case 'i':
-                input_path = optarg;
+                strcpy(input_path, optarg);
                 break;
             case 'o':
-                output_path = optarg;
+                strcpy(output_path, optarg);
                 break;
             case 's':
-                settings_path = optarg;
+                strcpy(settings_path, optarg);
                 break;
             case 'h':
                 program_usage();

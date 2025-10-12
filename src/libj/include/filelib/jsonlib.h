@@ -43,5 +43,6 @@ int print_jsonlib();
 int parse_json(const char *json_str, void **json_obj);
 int parse_json_file(const char *filepath, void **json_obj);
 void json_print(const JsonValue *v, int indent);
+int get_json_value_by_key(const JsonValue *obj, const char *key, JsonValue **out);
 
 #endif // __JSONLIB__

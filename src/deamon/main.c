@@ -5,9 +5,10 @@ static void program_usage()
 {
     printf("Usage: incoming [options]\n");
     printf("Options:\n");
+    printf("  -r, --run        Run the incoming daemon using default settings\n");
     printf("  -i, --input <path>  Specify input file path\n");
     printf("  -o, --output <path> Specify output file path\n");
-    printf("  -s, --settings Open settings file\n");
+    printf("  -s, --settings   Open settings file\n");
     printf("  -h, --help       Show this help message and exit\n");
     printf("  -v, --version    Show version information and exit\n");
     printf("  -u, --user       Show user information and exit\n");
@@ -59,6 +60,49 @@ static int program_user()
     return (0);
 }
 
+static int program_run()
+{
+    return (0);
+}
+
+static int read_settings()
+{
+    if (parse_json_file(INCOMING_CONFIG_PATH, (void **)&settings_json) != 0 || !settings_json)
+    {
+        fprintf(stderr, "Error: Failed to read settings file: %s\n", INCOMING_CONFIG_PATH);
+        return (-1);
+    }
+
+    printf("Settings loaded successfully from %s\n", INCOMING_CONFIG_PATH);
+    json_print(settings_json, 0);
+    printf("\n");
+
+    JsonValue *input_path_json = NULL;
+    JsonValue *output_path_json = NULL;
+
+    if (get_json_value_by_key(settings_json, "src_dir_path", (JsonValue **)&input_path_json) != 0 || !input_path_json)
+    {
+        fprintf(stderr, "Error: 'src_dir_path' not found in settings.json\n");
+        return (-1);
+    }
+    else
+    {
+        strcpy(input_path, input_path_json->as.string);
+    }
+
+    if (get_json_value_by_key(settings_json, "dst_dir_path", (JsonValue **)&output_path_json) != 0 || !output_path_json)
+    {
+        fprintf(stderr, "Error: 'dst_dir_path' not found in settings.json\n");
+        return (-1);
+    }
+    else
+    {
+        strcpy(output_path, output_path_json->as.string);
+    }
+
+    return (0);
+}
+
 int main(argc, argv)
 int argc;
 char *argv[];
@@ -67,18 +111,22 @@ char *argv[];
     extern char *optarg;
     extern int optind;
 
-    while ((opt = getopt(argc, argv, "i:o:s:hvu")) != -1)
+    read_settings();
+
+    while ((opt = getopt(argc, argv, "i:o:s:rhvu")) != -1)
     {
         switch (opt)
         {
+            case 'r':
+                break;
             case 'i':
-                input_path = optarg;
+                strcpy(input_path, optarg);
                 break;
             case 'o':
-                output_path = optarg;
+                strcpy(output_path, optarg);
                 break;
             case 's':
-                settings_path = optarg;
+                strcpy(settings_path, optarg);
                 break;
             case 'h':
                 program_usage();
@@ -95,14 +143,6 @@ char *argv[];
 
                 return program_exit(1);
         }
-    }
-
-    if (input_path == NULL || output_path == NULL)
-    {
-        fprintf(stderr, "Error: Input and output paths must be specified.\n");
-        program_usage();
-
-        return program_exit(1);
     }
 
     if (get_user_home_dir(user_home_dir, sizeof(user_home_dir)) != 0)

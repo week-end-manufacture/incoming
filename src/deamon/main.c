@@ -60,8 +60,9 @@ static int program_user()
     return (0);
 }
 
-static int program_run()
+static int program_run_with_default_settings()
 {
+    
     return (0);
 }
 
@@ -118,6 +119,7 @@ char *argv[];
         switch (opt)
         {
             case 'r':
+                return program_exit(program_run_with_default_settings());
                 break;
             case 'i':
                 strcpy(input_path, optarg);

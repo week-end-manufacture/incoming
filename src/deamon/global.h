@@ -16,6 +16,7 @@
 #include "envlib.h"
 #include "ffmpeglib.h"
 #include "jsonlib.h"
+#include "hblib.h"
 
 #define INCOMING_ENV_PATH "./ENV/incoming.env"
 #define INCOMING_CONFIG_PATH "./config/settings.json"
@@ -26,6 +27,8 @@
 
 char input_path[NORMAL_LENGTH];    // Input file path
 char output_path[NORMAL_LENGTH];   // Output file path
+char preset_path[NORMAL_LENGTH];   // Preset file path
+char handbrake_preset_path[NORMAL_LENGTH]; // Handbrake preset file path
 char settings_path[NORMAL_LENGTH]; // Settings file path
 char user_home_dir[NORMAL_LENGTH]; // User's home directory
 FileHandler *file_handler; // File handler array

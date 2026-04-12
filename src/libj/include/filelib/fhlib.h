@@ -45,5 +45,6 @@ static char global_output_path[PATH_LEN_MAX];
 int search_directory(const char *dirname, char *filelist);
 int make_filehandler_list(const char *input_path, const char *output_path, FileHandler **out_list, int *out_count);
 void print_filehandler_list(FileHandler *list, int count);
+void print_outgoing_filehandlers(FileHandler *list, int count);
 
 #endif // __FHLIB__

@@ -148,6 +148,8 @@ static int program_run_with_default_settings()
                     strncpy(file_handler[i].outgoing_size, "0", sizeof(file_handler[i].outgoing_size));
                 }
 
+                // delete original file
+                /*
                 if (funlink(src_path) != 0)
                 {
                     fprintf(stderr, "Error: Failed to delete original file: %s\n", src_path);
@@ -156,11 +158,12 @@ static int program_run_with_default_settings()
                 {
                     printf("Successfully deleted original file: %s\n", src_path);
                 }
+                */
             }
         }
         else
         {
-            fprintf(stderr, "Warning: Unsupported file type for file: %s\n", src_path);
+            printf("Unsupported file type for file: %s\n", src_path);
         }
     }
 

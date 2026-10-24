@@ -1,0 +1,18 @@
+{
+"src_dir_path":"", 
+"dst_dir_path":"",
+"default_preset_path":".config/incoming/preset/preset.json",
+"open_dst_dir_when_done":false,
+
+"output_filename_appending":{
+    "prefix_toggle":false,
+    "prefix":"",
+    "suffix_toggle":false,
+    "suffix":""
+},
+"logging":{
+    "create_log_dst_dir_toggle":true,
+    "log_filename":"incoming.log",
+    "custom_log_file_path":""
+}
+}

@@ -24,6 +24,8 @@ int get_seqnof(const char *filename, int seqno);
 int set_seqnof(const char *filename, int seqno);
 int get_file_extension(const char *filename, char *ext);
 int dexist(const char *filename);
-
+int dcreate(const char *dirname);
+int dcopy(const char *src_dirname, const char *dst_dirname);
+int get_dirpath(const char *filename, char *dirpath, size_t dirpath_size);
 
 #endif

@@ -17,7 +17,6 @@ int *file_type;
         strcmp(ext, ".mov") == 0 ||
         strcmp(ext, ".flv") == 0 ||
         strcmp(ext, ".wmv") == 0 ||
-        strcmp(ext, ".webm") == 0 ||
         strcmp(ext, ".mpeg") == 0 ||
         strcmp(ext, ".mpg") == 0 ||
         strcmp(ext, ".m4v") == 0 ||
@@ -475,5 +474,32 @@ int count;
         get_file_state_string(fh->file_state, file_state_str);
         printf("  File State: %s\n", file_state_str);
         printf("  Outgoing Size: %s\n", fh->outgoing_size);
+    }
+}
+
+void print_outgoing_filehandlers(list, count)
+FileHandler *list;
+int count;
+{
+    for (int i = 0; i < count; i++)
+    {
+        FileHandler *fh = &list[i];
+        if (fh->file_state == OUTGOING)
+        {
+            char file_type_str[32];
+            char file_state_str[32];
+
+            printf("File %d:\n", i + 1);
+            printf("  Filename: %s\n", fh->filename);
+            printf("  Source Path:\t\t%s\n", fh->src_path);
+            printf("  Destination Path:\t%s\n", fh->dst_path);
+            printf("  File Size: %s\n", fh->file_size);
+            printf("  File Extension: %s\n", fh->file_extension);
+            get_file_type_string(fh->file_type, file_type_str);
+            printf("  File Type: %s\n", file_type_str);
+            get_file_state_string(fh->file_state, file_state_str);
+            printf("  File State: %s\n", file_state_str);
+            printf("  Outgoing Size: %s\n", fh->outgoing_size);
+        }
     }
 }

@@ -96,6 +96,29 @@ const char *dst_filename;
     return (1);
 }
 
+int get_dirpath(filename, dirpath, dirpath_size)
+const char *filename;
+char *dirpath;
+size_t dirpath_size;
+{
+    char *last_slash = strrchr(filename, '/');
+    if (last_slash == NULL) {
+        fprintf(stderr, "Error: No directory path found in filename: %s\n", filename);
+        return (-1);
+    }
+
+    size_t path_len = last_slash - filename;
+    if (path_len >= dirpath_size) {
+        fprintf(stderr, "Error: Directory path buffer too small for filename: %s\n", filename);
+        return (-1);
+    }
+
+    strncpy(dirpath, filename, path_len);
+    dirpath[path_len] = '\0';
+
+    return (1);
+}
+
 int dexist(dirname)
 const char *dirname;
 {
@@ -108,6 +131,18 @@ const char *dirname;
     }
 
     closedir(dp);
+
+    return (1);
+}
+
+int dcreate(dirname)
+const char *dirname;
+{
+    if (mkdir(dirname, 0755) == -1) {
+        perror("mkdir()");
+
+        return (-1);
+    }
 
     return (1);
 }

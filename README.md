@@ -1,215 +1,357 @@
-<a name="readme-top"></a>
+# incoming
 
+`incoming` is a POSIX C program that recursively scans an input directory (or
+a single file), converts images and videos, extracts archives, and copies other
+files to an output directory.
 
-[![Activity][activity-shield]][activity-url]
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
+- Version: **1.0.0**
+- Implementation: C11
+- License: [MIT](./LICENSE)
+- Repository: <https://github.com/week-end-manufacture/incoming>
 
+## Features
 
+- Recursively process input directories and their subdirectories
+- Convert images with ImageMagick `magick`, retrying with `convert`
+- Convert videos with HandBrakeCLI and a HandBrake preset
+- Extract ZIP, RAR, and 7z archives
+- Copy files with unknown extensions without conversion
+- Configure output extensions and image quality
+- Preview the output structure with `--dummy`
+- Delete successfully converted or copied source files with `--unlink`
+- Write processing logs and display per-file progress
 
-<!-- PROJECT LOGO -->
-<br />
-<div align="center">
-  <a href="https://github.com/week-end-manufacture/incoming">
-    <img src="images/logo.jpeg" alt="Logo" width="360" height="360">
-  </a>
+> **Note:** The C implementation classifies files by extension. It does not
+> inspect MIME types, so file extensions must be correct.
 
-  <h3 align="center">incoming</h3>
+## Supported File Types
 
-  <p align="center">
-    Quantize your files prjoect
-    <br />
-    <a href="https://github.com/week-end-manufacture/incoming"><strong>Explore the docs »</strong></a>
-    <br />
-    <br />
-    <a href="https://github.com/week-end-manufacture/incoming">View Project</a>
-    ·
-    <a href="https://github.com/week-end-manufacture/incoming/issues">Report Bug</a>
-    ·
-    <a href="https://github.com/week-end-manufacture/incoming/issues">Request Feature</a>
-  </p>
-</div>
+### Images
 
+The default image extensions are:
 
-<!-- TABLE OF CONTENTS -->
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-      <a href="#about-the-project">About The Project</a>
-      <ul>
-        <li><a href="#built-with">Built With</a></li>
-      </ul>
-    </li>
-    <li>
-      <a href="#getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
-      </ul>
-    </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
-  </ol>
-</details>
+`.jpg`, `.jpeg`, `.png`, `.bmp`, `.tiff`, `.tif`
 
+Images are converted to `.jpg` by default while keeping the original base name.
+For example, `photo.png` becomes `photo.jpg` in the output directory.
 
+### Videos
 
-<!-- ABOUT THE PROJECT -->
-## About The Project
+The default video extensions are:
 
-[![Product Name Screen Shot][product-screenshot]](https://github.com/week-end-manufacture/incoming)
+`.asf`, `.avi`, `.flv`, `.mkv`, `.mov`, `.mp4`, `.mpeg`, `.ts`, `.webm`,
+`.wmv`, `.m4v`, `.mpg`, `.mts`, `.m2ts`, `.vob`, `.evo`
 
-Developers grow up struggling with various problems. This project aims to write a narrative about the process of solving these difficulties and learning through them.
+Videos are converted to `.mp4` by default and encoded according to the
+configured HandBrake preset.
 
-Here's why:
-* To optimize massive file system
+### Archives
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+- `.zip`: `unzip`
+- `.rar`: `unrar`
+- `.7z`: `7z`
 
+Archives are extracted in the directory containing the source archive, not in
+the output directory. The program creates a directory named
+`<filename>_zip`, `<filename>_rar`, or `<filename>_7z`.
 
+### Other Files
 
-### Built With
+Files with unsupported extensions are copied without conversion while
+preserving their relative directory structure.
 
+## Requirements
 
-* [![Python][Python]][Python-url]
+### Operating System
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+The program uses POSIX APIs and is intended for macOS or Linux-like systems.
+The `--settings` option uses macOS's `open` command to open the configuration
+directory.
 
+### Build Tools
 
+- A C11-compatible compiler (`cc`, `clang`, or `gcc`)
+- `make`
 
-<!-- GETTING STARTED -->
-## Getting Started
+### Runtime Commands
 
-To get a local copy up and running follow these simple example steps.
+The required commands depend on the file types being processed.
 
-### Prerequisites
+| Feature | Command |
+| --- | --- |
+| Image conversion | `magick` or `convert` (ImageMagick) |
+| Video conversion | `HandBrakeCLI` |
+| ZIP extraction | `unzip` |
+| RAR extraction | `unrar` |
+| 7z extraction | `7z` |
 
-This is an example of how to list things you need to use the software and how to install them.
-* venv
-  ```sh
-  python3 -m venv venv
-  ```
+On macOS with Homebrew:
 
-### Installation
+```sh
+brew install imagemagick handbrake p7zip
+```
 
-Perform the following procedure to install the required package.
+`unzip` is included with macOS. RAR processing requires an `unrar` executable
+to be installed separately.
 
-1. Clone the repo
-   ```sh
-   git clone https://github.com/week-end-manufacture/incoming.git
-   ```
-2. Install Python packages
-   ```sh
-   source download.sh
-   ```
+## Installation
 
+### Build from Source
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+```sh
+git clone https://github.com/week-end-manufacture/incoming.git
+cd incoming/src
+make
+```
 
+The executable is created at `src/incoming`.
 
+To install it to a system directory:
 
-<!-- USAGE EXAMPLES -->
+```sh
+cd src
+make
+sudo make install PREFIX=/usr/local
+```
+
+Because the Makefile installs to `$(PREFIX)/bin`, explicitly setting
+`PREFIX` is recommended when choosing a system-wide installation path.
+
+### Homebrew Formula
+
+The repository includes [Formula/incoming.rb](./Formula/incoming.rb). The
+Formula builds the C program and declares ImageMagick, HandBrake, and p7zip as
+dependencies.
+
+```sh
+brew install --build-from-source Formula/incoming.rb
+```
+
+When installed through the Formula, example configuration files are placed
+under Homebrew's `share/incoming` directory. Copy them before the first run:
+
+```sh
+mkdir -p ~/.config/incoming
+cp -R "$(brew --prefix)/share/incoming/config/"* ~/.config/incoming/
+```
+
+## Configuration
+
+At startup, the program reads:
+
+```text
+~/.config/incoming/settings.json
+```
+
+Execution fails if the file is missing or does not contain these required keys:
+
+- `src_dir_path`
+- `dst_dir_path`
+- `default_preset_path`
+
+Minimal example:
+
+```json
+{
+  "src_dir_path": "/Users/you/Incoming",
+  "dst_dir_path": "/Users/you/Outgoing",
+  "default_preset_path": ".config/incoming/preset/preset.json"
+}
+```
+
+If `default_preset_path` starts with `/`, it is treated as an absolute path.
+Otherwise, `$HOME` is prepended.
+
+### Image and Video Presets
+
+The default preset is the JSON file referenced by `default_preset_path`.
+The `-p` option overrides it with a preset from:
+
+```text
+~/.config/incoming/preset/<name>.json
+```
+
+The C implementation reads these preset keys:
+
+| Key | Type | Default | Description |
+| --- | --- | --- | --- |
+| `image_process_toggle` | boolean | `true` | Enable image conversion |
+| `video_process_toggle` | boolean | `true` | Enable video conversion |
+| `process_hidden_files_toggle` | boolean | `true` | Include files and directories whose names start with `.` |
+| `output_ext` | string | `.jpg` | Image output extension |
+| `output_video_ext` | string | `.mp4` | Video output extension |
+| `remove_all_exif_data` | boolean | `false` | Remove EXIF with ImageMagick `-strip` |
+| `remove_only_gps_exif_data` | boolean | `false` | Read but not applied by the current implementation |
+| `HandBrake_presets_path` | string | none | HandBrake preset JSON path |
+
+Image quality uses the code default of `85`. The current implementation does
+not read `output_quality` from the JSON configuration.
+
+If the HandBrake preset path is relative, `$HOME` is prepended. An example
+preset is included at:
+
+```text
+src/config/handbrake_preset.json
+```
+
+### Open the Configuration Directory
+
+```sh
+incoming --settings
+```
+
+This opens `~/.config/incoming` with macOS's `open` command. Because the
+program loads the configuration before handling this option, copy the example
+configuration first when setting up a new installation.
+
 ## Usage
 
-_For more examples, please refer to the [Documentation](https://github.com/week-end-manufacture/incoming)_
+```text
+incoming [options]
+```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+| Option | Description |
+| --- | --- |
+| `-i PATH`, `--src_dir_path PATH` | Input directory or single input file |
+| `-o PATH`, `--dst_dir_path PATH` | Output directory |
+| `-p NAME`, `--user_preset NAME` | Use `~/.config/incoming/preset/NAME.json` |
+| `-s`, `--settings` | Open the configuration directory |
+| `-d`, `--dummy` | Create dummy files instead of converting or copying |
+| `-u`, `--unlink` | Delete successfully processed source files |
+| `-v`, `--version` | Print the version |
+| `-h`, `--help` | Print help |
 
+Command-line values for `-i`, `-o`, and `-p` take precedence over the
+configuration file.
 
+### Basic Processing
 
-<!-- ROADMAP -->
-## Roadmap
+```sh
+incoming -i "/Users/you/Incoming" -o "/Users/you/Outgoing"
+```
 
-- [] Create new issues.
+If the input and output paths are omitted, the values from the configuration
+file are used:
 
-See the [open issues](https://github.com/week-end-manufacture/incoming/issues) for a full list of proposed features (and known issues).
+```sh
+incoming
+```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+### Select a Preset
 
+```sh
+incoming -p travel
+```
 
+This uses `~/.config/incoming/preset/travel.json`.
 
-<!-- CONTRIBUTING -->
+### Preview the Output Structure
+
+```sh
+incoming --dummy -i "/Users/you/Incoming" -o "/Users/you/Outgoing"
+```
+
+`--dummy` creates a file containing `ic-dummy` instead of producing the real
+conversion or copy result. Source files are not modified.
+
+### Delete Sources after Processing
+
+```sh
+incoming --unlink -i "/Users/you/Incoming" -o "/Users/you/Outgoing"
+```
+
+Source files are deleted only after successful image conversion, video
+conversion, or ordinary file copying. Successfully extracted archives and
+dummy files are not considered eligible for deletion. Back up important files
+before using this option.
+
+### Process a Single File
+
+```sh
+incoming -i "/Users/you/Incoming/photo.png" -o "/Users/you/Outgoing"
+```
+
+Only the specified file is processed.
+
+## Processing Flow and Output Layout
+
+1. Load the configuration and selected preset.
+2. Validate the input path and create the output directory.
+3. Recursively scan the input directory, if the input is a directory.
+4. Process images first, followed by videos, archives, and other files.
+5. Print a summary of incoming and outgoing sizes.
+
+If the input and output directories are the same, the program uses a directory
+with `[IC]` prepended to the original directory name. For example, an input
+directory of `/Users/you/Incoming` produces `/Users/you/[IC]Incoming`.
+
+Ordinary files and conversion results retain their relative paths under the
+input directory. Output extensions are changed according to the selected
+preset.
+
+## Logs and Errors
+
+The log file is appended at:
+
+```text
+~/.config/incoming/log/ic_log.log
+```
+
+Progress and error messages are also written to standard error. The program
+exits unsuccessfully when the input path is invalid or the output directory
+cannot be created.
+
+If an external command is missing or a file conversion fails, the program
+records an error or warning and continues with other files when possible.
+
+## Development
+
+```sh
+cd src
+make
+./incoming --help
+make clean
+```
+
+The default compiler options are:
+
+```text
+cc -std=c11 -O2 -Wall -Wextra -Wpedantic
+```
+
+Override the compiler or flags through Make variables:
+
+```sh
+make CC=clang CFLAGS="-std=c11 -O0 -g -Wall -Wextra -Wpedantic"
+```
+
+## Known Limitations
+
+- The JSON reader is not a general-purpose JSON parser; it searches for the
+  required keys as strings. Complex JSON formatting and escaped strings should
+  be used with care.
+- Paths are limited to 4096 bytes.
+- The video encoder is currently fixed to HandBrakeCLI in the C implementation.
+- `ffmpeg` settings remain in the example preset, but are not used by the
+  current C video-processing path.
+- Some legacy settings, including `open_dst_dir_when_done`, are not applied by
+  the C implementation.
+- Only the remove-all-EXIF option is passed to ImageMagick. The GPS-only option
+  is currently read but does not affect processing.
+- Hidden files in directories are included by default. Set
+  `process_hidden_files_toggle` to `false` in the selected preset to skip
+  hidden files and directories.
+
 ## Contributing
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+Report bugs and request features through
+[Issues](https://github.com/week-end-manufacture/incoming/issues). Keep
+changes focused, verify the build and relevant behavior, and submit a pull
+request.
 
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-Don't forget to give the project a star! Thanks again!
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/amazing-feature`)
-3. Commit your Changes (`git commit -m 'feat: Add some amazing-feature'`)
-* commit message
-  ```git
-  <type>[optional scope]: <description>
-  
-  [optional body]
-
-  [optional footer(s)]
-  ```
-* commit type
-  ```git
-  - feat: a commit of the type feat introduces a new feature to the codebase
-  - fix: a commit of the type fix patches a bug in your codebase
-  ```
-4. Push to the Branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- LICENSE -->
-## License
-
-Distributed under the MIT License. See `LICENSE.txt` for more information.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- CONTACT -->
-## Contact
-
-WEEK END MANUFACTURE
-
-Project Link: [https://github.com/week-end-manufacture/incoming](https://github.com/week-end-manufacture/incoming)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-* [Python](https://www.python.org)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/week-end-manufacture/incoming.svg?style=for-the-badge
-[contributors-url]: https://github.com/week-end-manufacture/incoming/graphs/contributors
-[activity-shield]: https://img.shields.io/github/commit-activity/m/week-end-manufacture/incoming.svg?style=for-the-badge
-[activity-url]: https://github.com/week-end-manufacture/incoming/pulse
-[forks-shield]: https://img.shields.io/github/forks/week-end-manufacture/incoming.svg?style=for-the-badge
-[forks-url]: https://github.com/week-end-manufacture/incoming/network/members
-[stars-shield]: https://img.shields.io/github/stars/week-end-manufacture/incoming.svg?style=for-the-badge
-[stars-url]: https://github.com/week-end-manufacture/incoming/stargazers
-[issues-shield]: https://img.shields.io/github/issues/week-end-manufacture/incoming.svg?style=for-the-badge
-[issues-url]: https://github.com/week-end-manufacture/incoming/issues
-[license-shield]: https://img.shields.io/github/license/week-end-manufacture/incoming.svg?style=for-the-badge
-[license-url]: https://github.com/week-end-manufacture/incoming/blob/master/LICENSE
-[product-screenshot]: images/screenshot.png
-[Python]: https://img.shields.io/badge/python-000000?style=for-the-badge&logo=python&logoColor=white
-[Python-url]: https://www.python.org
+- [ImageMagick](https://imagemagick.org/)
+- [HandBrake](https://handbrake.fr/)
+- [FFmpeg](https://ffmpeg.org/)
+- [Homebrew](https://brew.sh/)

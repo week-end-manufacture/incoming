@@ -321,6 +321,7 @@ static void apply_preset_file(Config *config, const char *path)
     }
     config->image_enabled = setting_bool(preset, "image_process_toggle", config->image_enabled);
     config->video_enabled = setting_bool(preset, "video_process_toggle", config->video_enabled);
+    config->process_hidden = setting_bool(preset, "process_hidden_files_toggle", config->process_hidden);
     config->remove_all_exif = setting_bool(preset, "remove_all_exif_data", config->remove_all_exif);
     config->remove_gps_exif = setting_bool(preset, "remove_only_gps_exif_data", config->remove_gps_exif);
     setting_string(preset, "output_ext", config->output_image_ext, sizeof(config->output_image_ext));

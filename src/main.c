@@ -235,6 +235,7 @@ static void scan_directory(const char *source, const char *destination,
     }
     while ((entry = readdir(directory)) != NULL) {
         if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) continue;
+        if (strncmp(entry->d_name, "._", 2) == 0) continue;
         if (!config->process_hidden && entry->d_name[0] == '.') continue;
         if (path_join(source_path, sizeof(source_path), source, entry->d_name) != 0 ||
             path_join(destination_path, sizeof(destination_path), destination, entry->d_name) != 0) {

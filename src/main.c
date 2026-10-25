@@ -609,6 +609,16 @@ static void print_job_done(void)
     fflush(stdout);
 }
 
+static void unlink_source_if_requested(Item *item, int unlink_sources)
+{
+    if (!unlink_sources || item->state != STATE_OUTGOING) return;
+    if (unlink(item->src_path) == 0) {
+        item->state = STATE_DELETED;
+        printf("✓ Unlinked successfully: %s\n", item->src_path);
+        fflush(stdout);
+    }
+}
+
 static void print_process_start(const Config *config)
 {
     printf("\n⚙️ Process start"
@@ -776,31 +786,48 @@ int main(int argc, char **argv)
             }
             image_index++;
             print_progressbar(image_index, image_count);
-            if (unlink_sources && item->state == STATE_OUTGOING) {
-                if (unlink(item->src_path) == 0) item->state = STATE_DELETED;
-            }
+            unlink_source_if_requested(item, unlink_sources);
         }
         print_job_done();
     }
-    printf("🎬 Video Process\n");
-    for (i = 0; (size_t)i < list.count; i++) {
-        Item *item = &list.items[i];
-        if (item->kind == KIND_IMAGE) continue;
-        if (dummy && item->state == STATE_INCOMING) {
-            if (mkdir_p(item->dst_dir) == 0) {
-                if (copy_file("/dev/null", item->dst_path) == 0) {
-                    FILE *dummy_file = fopen(item->dst_path, "w");
-                    if (dummy_file != NULL) { fputs("ic-dummy", dummy_file); fclose(dummy_file); item->state = STATE_DUMMY; }
+    {
+        size_t video_count = 0;
+        size_t video_index = 0;
+
+        for (i = 0; (size_t)i < list.count; i++) {
+            if (list.items[i].kind == KIND_VIDEO) video_count++;
+        }
+        printf("🎬 Video Process (total: %zu)\n", video_count);
+        for (i = 0; (size_t)i < list.count; i++) {
+            Item *item = &list.items[i];
+            if (item->kind == KIND_IMAGE) continue;
+            if (dummy && item->state == STATE_INCOMING) {
+                if (mkdir_p(item->dst_dir) == 0) {
+                    if (copy_file("/dev/null", item->dst_path) == 0) {
+                        FILE *dummy_file = fopen(item->dst_path, "w");
+                        if (dummy_file != NULL) {
+                            fputs("ic-dummy", dummy_file);
+                            fclose(dummy_file);
+                            item->state = STATE_DUMMY;
+                        }
+                    }
+                }
+            } else if (item->kind == KIND_IMAGE) {
+                process_image(item, &config);
+            } else if (item->kind == KIND_VIDEO) {
+                video_index++;
+                printf("\n[%zu/%zu] Encoding: %s\n", video_index, video_count, item->name);
+                fflush(stdout);
+                process_video(item, &config);
+            } else if (item->kind == KIND_ARCHIVE) {
+                extract_archive(item, &config);
+            } else if (item->state == STATE_INCOMING) {
+                if (mkdir_p(item->dst_dir) == 0 &&
+                    copy_file(item->src_path, item->dst_path) == 0) {
+                    item->state = STATE_OUTGOING;
                 }
             }
-        } else if (item->kind == KIND_IMAGE) process_image(item, &config);
-        else if (item->kind == KIND_VIDEO) process_video(item, &config);
-        else if (item->kind == KIND_ARCHIVE) extract_archive(item, &config);
-        else if (item->state == STATE_INCOMING) {
-            if (mkdir_p(item->dst_dir) == 0 && copy_file(item->src_path, item->dst_path) == 0) item->state = STATE_OUTGOING;
-        }
-        if (unlink_sources && item->state == STATE_OUTGOING) {
-            if (unlink(item->src_path) == 0) item->state = STATE_DELETED;
+            unlink_source_if_requested(item, unlink_sources);
         }
     }
     {

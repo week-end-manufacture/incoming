@@ -16,7 +16,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-#define INCOMING_VERSION "1.0.0"
+#define INCOMING_VERSION "1.0.2"
 #define MAX_PATH_LEN 4096
 
 typedef enum { KIND_VIDEO, KIND_IMAGE, KIND_ARCHIVE, KIND_OTHER } Kind;
@@ -257,7 +257,8 @@ static void scan_directory(const char *source, const char *destination,
     closedir(directory);
 }
 
-static int setting_string(const char *json, const char *key, char *out, size_t out_size)
+static int setting_string_in_range(const char *json, const char *limit,
+                                   const char *key, char *out, size_t out_size)
 {
     char pattern[128];
     const char *start;
@@ -265,15 +266,60 @@ static int setting_string(const char *json, const char *key, char *out, size_t o
     int written;
     snprintf(pattern, sizeof(pattern), "\"%s\"", key);
     start = strstr(json, pattern);
-    if (start == NULL) return -1;
+    if (start == NULL || (limit != NULL && start >= limit)) return -1;
     start = strchr(start + strlen(pattern), ':');
-    if (start == NULL) return -1;
+    if (start == NULL || (limit != NULL && start >= limit)) return -1;
     start = strchr(start, '"');
-    if (start == NULL) return -1;
+    if (start == NULL || (limit != NULL && start >= limit)) return -1;
     end = strchr(start + 1, '"');
-    if (end == NULL) return -1;
+    if (end == NULL || (limit != NULL && end >= limit)) return -1;
     written = snprintf(out, out_size, "%.*s", (int)(end - start - 1), start + 1);
     return written >= 0 && (size_t)written < out_size ? 0 : -1;
+}
+
+static int setting_string(const char *json, const char *key, char *out, size_t out_size)
+{
+    return setting_string_in_range(json, NULL, key, out, out_size);
+}
+
+static int setting_string_in_object(const char *json, const char *object_key,
+                                   const char *key, char *out, size_t out_size)
+{
+    char pattern[128];
+    const char *object;
+    const char *open;
+    const char *cursor;
+    const char *close = NULL;
+    int depth = 0;
+    int in_string = 0;
+    int escaped = 0;
+
+    snprintf(pattern, sizeof(pattern), "\"%s\"", object_key);
+    object = strstr(json, pattern);
+    if (object == NULL) return -1;
+    open = strchr(object + strlen(pattern), '{');
+    if (open == NULL) return -1;
+
+    for (cursor = open; *cursor != '\0'; cursor++) {
+        if (in_string) {
+            if (escaped) {
+                escaped = 0;
+            } else if (*cursor == '\\') {
+                escaped = 1;
+            } else if (*cursor == '"') {
+                in_string = 0;
+            }
+        } else if (*cursor == '"') {
+            in_string = 1;
+        } else if (*cursor == '{') {
+            depth++;
+        } else if (*cursor == '}' && --depth == 0) {
+            close = cursor;
+            break;
+        }
+    }
+    if (close == NULL) return -1;
+    return setting_string_in_range(open, close, key, out, out_size);
 }
 
 static int setting_bool(const char *json, const char *key, int fallback)
@@ -325,7 +371,11 @@ static void apply_preset_file(Config *config, const char *path)
     config->process_hidden = setting_bool(preset, "process_hidden_files_toggle", config->process_hidden);
     config->remove_all_exif = setting_bool(preset, "remove_all_exif_data", config->remove_all_exif);
     config->remove_gps_exif = setting_bool(preset, "remove_only_gps_exif_data", config->remove_gps_exif);
-    setting_string(preset, "output_ext", config->output_image_ext, sizeof(config->output_image_ext));
+    if (setting_string_in_object(preset, "image_process", "output_ext",
+                                 config->output_image_ext,
+                                 sizeof(config->output_image_ext)) != 0) {
+        log_message("WARNING", "Image output_ext is missing from preset");
+    }
     setting_string(preset, "output_video_ext", config->output_video_ext, sizeof(config->output_video_ext));
     setting_string(preset, "HandBrake_presets_path", config->handbrake_preset, sizeof(config->handbrake_preset));
     free(preset);

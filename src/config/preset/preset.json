@@ -15,12 +15,9 @@
     "output_video_ext":".mp4",
     "ffmpeg":{
         "use_ffmpeg_toggle":false,
-
         "custom_batch_command_input_toggle":false,
-
         "-y":false,
         "-i":null,
-
         "-ss":"",
         "-t":"",
         "-vcodec_copy":false,
@@ -36,7 +33,6 @@
         "-r":"",
         "-s":"",
         "-strict":"",
-
         "output_ext":".mp4"
     }
 

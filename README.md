@@ -178,14 +178,17 @@ The C implementation reads these preset keys:
 | `image_process_toggle` | boolean | `true` | Enable image conversion |
 | `video_process_toggle` | boolean | `true` | Enable video conversion |
 | `process_hidden_files_toggle` | boolean | `true` | Include files and directories whose names start with `.` |
-| `output_ext` | string | `.jpg` | Image output extension |
-| `output_video_ext` | string | `.mp4` | Video output extension |
+| `image_process.output_ext` | string | `.jpg` | Image output extension |
+| `video_process.output_video_ext` | string | `.mp4` | Video output extension |
 | `remove_all_exif_data` | boolean | `false` | Remove EXIF with ImageMagick `-strip` |
 | `remove_only_gps_exif_data` | boolean | `false` | Read but not applied by the current implementation |
 | `HandBrake_presets_path` | string | none | HandBrake preset JSON path |
 
 Image quality uses the code default of `85`. The current implementation does
 not read `output_quality` from the JSON configuration.
+
+The `output_ext` inside `video_process.ffmpeg` is an ffmpeg-specific setting
+and is not used as the image output extension.
 
 If the HandBrake preset path is relative, `$HOME` is prepended. An example
 preset is included at:

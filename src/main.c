@@ -61,6 +61,15 @@ typedef struct {
 
 static FILE *log_file;
 
+static void format_current_timestamp(char *out, size_t out_size)
+{
+    time_t now = time(NULL);
+    struct tm tm_now;
+
+    localtime_r(&now, &tm_now);
+    strftime(out, out_size, "%Y-%m-%d %H:%M:%S", &tm_now);
+}
+
 static void log_message(const char *level, const char *format, ...)
 {
     char timestamp[32];
@@ -495,7 +504,11 @@ static int run_handbrake_with_progress(char *const argv[])
     }
     fclose(output);
     if (waitpid(child, &status, 0) < 0) return -1;
-    printf("\r  ╰─  DONE%44s\n", "");
+    {
+        char completed_at[32];
+        format_current_timestamp(completed_at, sizeof(completed_at));
+        printf("\r  ╰─  DONE [%s]%29s\n", completed_at, "");
+    }
     fflush(stdout);
     if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
         log_message("ERROR", "HandBrake process failed: %s", last_status);
@@ -655,7 +668,9 @@ static void print_progressbar(size_t iteration, size_t total)
 
 static void print_job_done(void)
 {
-    printf("\n╰─ DONE\n\n");
+    char completed_at[32];
+    format_current_timestamp(completed_at, sizeof(completed_at));
+    printf("\n╰─ DONE [%s]\n\n", completed_at);
     fflush(stdout);
 }
 
@@ -692,15 +707,18 @@ static void print_result(off_t incoming, off_t outgoing)
 {
     char incoming_size[64];
     char outgoing_size[64];
+    char completed_at[32];
 
     format_size(incoming, incoming_size, sizeof(incoming_size));
     format_size(outgoing, outgoing_size, sizeof(outgoing_size));
+    format_current_timestamp(completed_at, sizeof(completed_at));
     printf("=IC END OF PROGRAM=================\n"
            "=RESULT============================\n"
+           "=COMPLETED AT:[%s]=================\n"
            "=INCOMING SIZE:[%s]================\n"
            "=OUTGOING SIZE:[%s]================\n"
            "===================================\n",
-           incoming_size, outgoing_size);
+           completed_at, incoming_size, outgoing_size);
 }
 
 static void print_usage(void)

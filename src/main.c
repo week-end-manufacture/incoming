@@ -16,7 +16,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-#define INCOMING_VERSION "1.0.2"
+#define INCOMING_VERSION "1.0.3"
 #define MAX_PATH_LEN 4096
 
 typedef enum { KIND_VIDEO, KIND_IMAGE, KIND_ARCHIVE, KIND_OTHER } Kind;
@@ -91,6 +91,30 @@ static void log_message(const char *level, const char *format, ...)
         fflush(log_file);
         va_end(args);
     }
+}
+
+static int get_monotonic_time(struct timespec *out)
+{
+    if (clock_gettime(CLOCK_MONOTONIC, out) != 0) {
+        log_message("ERROR", "Unable to read monotonic clock: %s", strerror(errno));
+        return -1;
+    }
+    return 0;
+}
+
+static void format_elapsed_time(const struct timespec *started_at,
+                                const struct timespec *completed_at,
+                                char *out,
+                                size_t out_size)
+{
+    time_t seconds = completed_at->tv_sec - started_at->tv_sec;
+
+    if (completed_at->tv_nsec < started_at->tv_nsec) seconds--;
+    if (seconds < 0) seconds = 0;
+    snprintf(out, out_size, "%02lld:%02lld:%02lld",
+             (long long)(seconds / 3600),
+             (long long)((seconds % 3600) / 60),
+             (long long)(seconds % 60));
 }
 
 static char *duplicate_string(const char *value)
@@ -451,11 +475,14 @@ static int run_handbrake_with_progress(char *const argv[])
     int pipe_fds[2];
     pid_t child;
     FILE *output;
+    struct timespec started_at;
+    struct timespec completed_at;
     char line[1024];
     char last_status[128] = "Starting";
     unsigned int loader_index = 0;
     int status;
 
+    if (get_monotonic_time(&started_at) != 0) return -1;
     if (pipe(pipe_fds) != 0) return -1;
     child = fork();
     if (child < 0) {
@@ -504,10 +531,14 @@ static int run_handbrake_with_progress(char *const argv[])
     }
     fclose(output);
     if (waitpid(child, &status, 0) < 0) return -1;
+    if (get_monotonic_time(&completed_at) != 0) return -1;
     {
-        char completed_at[32];
-        format_current_timestamp(completed_at, sizeof(completed_at));
-        printf("\r  ╰─  DONE [%s]%29s\n", completed_at, "");
+        char completed_timestamp[32];
+        char processing_time[32];
+        format_current_timestamp(completed_timestamp, sizeof(completed_timestamp));
+        format_elapsed_time(&started_at, &completed_at, processing_time, sizeof(processing_time));
+        printf("\r  ╰─  DONE [%s] (processing time: %s)%12s\n",
+               completed_timestamp, processing_time, "");
     }
     fflush(stdout);
     if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
@@ -666,12 +697,19 @@ static void print_progressbar(size_t iteration, size_t total)
     fflush(stdout);
 }
 
-static void print_job_done(void)
+static int print_job_done(const struct timespec *started_at)
 {
-    char completed_at[32];
-    format_current_timestamp(completed_at, sizeof(completed_at));
-    printf("\n╰─ DONE [%s]\n\n", completed_at);
+    char completed_timestamp[32];
+    char processing_time[32];
+    struct timespec completed_at;
+
+    if (get_monotonic_time(&completed_at) != 0) return -1;
+    format_current_timestamp(completed_timestamp, sizeof(completed_timestamp));
+    format_elapsed_time(started_at, &completed_at, processing_time, sizeof(processing_time));
+    printf("\n╰─ DONE [%s] (processing time: %s)\n\n",
+           completed_timestamp, processing_time);
     fflush(stdout);
+    return 0;
 }
 
 static void unlink_source_if_requested(Item *item, int unlink_sources)
@@ -832,7 +870,13 @@ int main(int argc, char **argv)
     {
         size_t image_count = 0;
         size_t image_index = 0;
+        struct timespec image_started_at;
 
+        if (get_monotonic_time(&image_started_at) != 0) {
+            free_items(&list);
+            if (log_file != NULL) fclose(log_file);
+            return EXIT_FAILURE;
+        }
         for (i = 0; (size_t)i < list.count; i++) {
             if (list.items[i].kind == KIND_IMAGE) image_count++;
         }
@@ -856,7 +900,11 @@ int main(int argc, char **argv)
             print_progressbar(image_index, image_count);
             unlink_source_if_requested(item, unlink_sources);
         }
-        print_job_done();
+        if (print_job_done(&image_started_at) != 0) {
+            free_items(&list);
+            if (log_file != NULL) fclose(log_file);
+            return EXIT_FAILURE;
+        }
     }
     {
         size_t video_count = 0;

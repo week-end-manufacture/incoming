@@ -28,6 +28,10 @@ At the end of each run, a report is written to
 successfully outgoing file's input/output format, input/output size, processing
 time, total processing time, and average processing time.
 
+If the process receives `SIGTERM` or `SIGINT`, it stops after the active
+external conversion is terminated and reaped, writes a partial report for the
+files completed so far, and exits with a non-zero status.
+
 The image and video paths invoke the same class of external tools used by the
 legacy program: ImageMagick (`magick` or `convert`) for images, HandBrakeCLI
 for the default video path, and `ffmpeg` when that path is selected. ZIP,

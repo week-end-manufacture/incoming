@@ -6,6 +6,7 @@
 #include <limits.h>
 #include <stdarg.h>
 #include <stdbool.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -62,6 +63,33 @@ typedef struct {
 } Config;
 
 static FILE *log_file;
+static volatile sig_atomic_t terminate_requested;
+static volatile sig_atomic_t active_child = -1;
+
+static void log_message(const char *level, const char *format, ...);
+
+static void handle_termination_signal(int signal_number)
+{
+    terminate_requested = signal_number;
+    if (active_child > 0) {
+        kill((pid_t)active_child, SIGTERM);
+    }
+}
+
+static int install_signal_handlers(void)
+{
+    struct sigaction action;
+
+    memset(&action, 0, sizeof(action));
+    action.sa_handler = handle_termination_signal;
+    sigemptyset(&action.sa_mask);
+    if (sigaction(SIGTERM, &action, NULL) != 0 ||
+        sigaction(SIGINT, &action, NULL) != 0) {
+        log_message("ERROR", "Unable to install termination signal handlers: %s", strerror(errno));
+        return -1;
+    }
+    return 0;
+}
 
 static void format_current_timestamp(char *out, size_t out_size)
 {
@@ -276,6 +304,7 @@ static void scan_directory(const char *source, const char *destination,
         return;
     }
     while ((entry = readdir(directory)) != NULL) {
+        if (terminate_requested) break;
         if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) continue;
         if (strncmp(entry->d_name, "._", 2) == 0) continue;
         if (!config->process_hidden && entry->d_name[0] == '.') continue;
@@ -475,7 +504,16 @@ static int run_process(char *const argv[])
         perror(argv[0]);
         _exit(127);
     }
-    if (waitpid(child, &status, 0) < 0) return -1;
+    active_child = child;
+    if (terminate_requested) kill(child, SIGTERM);
+    for (;;) {
+        if (waitpid(child, &status, 0) >= 0) break;
+        if (errno != EINTR) {
+            active_child = -1;
+            return -1;
+        }
+    }
+    active_child = -1;
     return WIFEXITED(status) ? WEXITSTATUS(status) : -1;
 }
 
@@ -520,10 +558,13 @@ static int run_handbrake_with_progress(char *const argv[])
         _exit(127);
     }
     close(pipe_fds[1]);
+    active_child = child;
+    if (terminate_requested) kill(child, SIGTERM);
     output = fdopen(pipe_fds[0], "r");
     if (output == NULL) {
         close(pipe_fds[0]);
-        waitpid(child, &status, 0);
+        while (waitpid(child, &status, 0) < 0 && errno == EINTR) {}
+        active_child = -1;
         return -1;
     }
     while (fgets(line, sizeof(line), output) != NULL) {
@@ -539,7 +580,13 @@ static int run_handbrake_with_progress(char *const argv[])
         }
     }
     fclose(output);
-    if (waitpid(child, &status, 0) < 0) return -1;
+    while (waitpid(child, &status, 0) < 0) {
+        if (errno != EINTR) {
+            active_child = -1;
+            return -1;
+        }
+    }
+    active_child = -1;
     if (get_monotonic_time(&completed_at) != 0) return -1;
     {
         char completed_timestamp[32];
@@ -585,6 +632,7 @@ static int process_image(Item *item, const Config *config)
         argv[5] = NULL;
     }
     if (run_process(argv) != 0) {
+        if (terminate_requested) return -1;
         argv[0] = "convert";
         if (run_process(argv) != 0) {
             log_message("ERROR", "Image conversion failed for '%s' (install ImageMagick)", item->src_path);
@@ -885,6 +933,10 @@ int main(int argc, char **argv)
         path_join(log_path, sizeof(log_path), log_dir, "ic_log.log");
         log_file = fopen(log_path, "a");
     }
+    if (install_signal_handlers() != 0) {
+        if (log_file != NULL) fclose(log_file);
+        return EXIT_FAILURE;
+    }
     if (load_config(&config) != 0) return EXIT_FAILURE;
     for (i = 1; i < argc; i++) {
         if ((strcmp(argv[i], "-i") == 0 || strcmp(argv[i], "--src_dir_path") == 0) && i + 1 < argc) snprintf(config.src_dir, sizeof(config.src_dir), "%s", argv[++i]);
@@ -960,10 +1012,10 @@ int main(int argc, char **argv)
             if (log_file != NULL) fclose(log_file);
             return EXIT_FAILURE;
         }
-        for (i = 0; (size_t)i < list.count; i++) {
+        for (i = 0; (size_t)i < list.count && !terminate_requested; i++) {
             if (list.items[i].kind == KIND_IMAGE) image_count++;
         }
-        for (i = 0; (size_t)i < list.count; i++) {
+        for (i = 0; (size_t)i < list.count && !terminate_requested; i++) {
             Item *item = &list.items[i];
             struct timespec item_started_at;
             struct timespec item_completed_at;
@@ -1008,11 +1060,11 @@ int main(int argc, char **argv)
         size_t video_count = 0;
         size_t video_index = 0;
 
-        for (i = 0; (size_t)i < list.count; i++) {
+        for (i = 0; (size_t)i < list.count && !terminate_requested; i++) {
             if (list.items[i].kind == KIND_VIDEO) video_count++;
         }
         printf("🎬 Video Process (total: %zu)\n", video_count);
-        for (i = 0; (size_t)i < list.count; i++) {
+        for (i = 0; (size_t)i < list.count && !terminate_requested; i++) {
             Item *item = &list.items[i];
             struct timespec item_started_at;
             struct timespec item_completed_at;
@@ -1072,6 +1124,9 @@ int main(int argc, char **argv)
             incoming += list.items[i].incoming_size;
             if (list.items[i].outgoing_completed) outgoing += list.items[i].outgoing_size;
         }
+        if (terminate_requested) {
+            log_message("WARNING", "Termination requested; writing partial report");
+        }
         print_result(incoming, outgoing);
         log_message("INFO", "Result incoming=%lld outgoing=%lld",
                     (long long)incoming, (long long)outgoing);
@@ -1083,5 +1138,5 @@ int main(int argc, char **argv)
     }
     free_items(&list);
     if (log_file != NULL) fclose(log_file);
-    return 0;
+    return terminate_requested ? 128 + terminate_requested : 0;
 }

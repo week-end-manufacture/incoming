@@ -4,7 +4,7 @@
 a single file), converts images and videos, extracts archives, and copies other
 files to an output directory.
 
-- Version: **1.0.0**
+- Version: **1.0.4**
 - Implementation: C11
 - License: [MIT](./LICENSE)
 - Repository: <https://github.com/week-end-manufacture/incoming>

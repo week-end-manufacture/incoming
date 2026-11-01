@@ -6,6 +6,7 @@
 #include <limits.h>
 #include <stdarg.h>
 #include <stdbool.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -33,6 +34,8 @@ typedef struct {
     State state;
     off_t incoming_size;
     off_t outgoing_size;
+    double processing_seconds;
+    int outgoing_completed;
 } Item;
 
 typedef struct {
@@ -60,6 +63,33 @@ typedef struct {
 } Config;
 
 static FILE *log_file;
+static volatile sig_atomic_t terminate_requested;
+static volatile sig_atomic_t active_child = -1;
+
+static void log_message(const char *level, const char *format, ...);
+
+static void handle_termination_signal(int signal_number)
+{
+    terminate_requested = signal_number;
+    if (active_child > 0) {
+        kill((pid_t)active_child, SIGTERM);
+    }
+}
+
+static int install_signal_handlers(void)
+{
+    struct sigaction action;
+
+    memset(&action, 0, sizeof(action));
+    action.sa_handler = handle_termination_signal;
+    sigemptyset(&action.sa_mask);
+    if (sigaction(SIGTERM, &action, NULL) != 0 ||
+        sigaction(SIGINT, &action, NULL) != 0) {
+        log_message("ERROR", "Unable to install termination signal handlers: %s", strerror(errno));
+        return -1;
+    }
+    return 0;
+}
 
 static void format_current_timestamp(char *out, size_t out_size)
 {
@@ -115,6 +145,13 @@ static void format_elapsed_time(const struct timespec *started_at,
              (long long)(seconds / 3600),
              (long long)((seconds % 3600) / 60),
              (long long)(seconds % 60));
+}
+
+static double elapsed_seconds(const struct timespec *started_at,
+                              const struct timespec *completed_at)
+{
+    return (double)(completed_at->tv_sec - started_at->tv_sec) +
+           (double)(completed_at->tv_nsec - started_at->tv_nsec) / 1000000000.0;
 }
 
 static char *duplicate_string(const char *value)
@@ -250,7 +287,7 @@ static void list_add(ItemList *list, const char *src_dir, const char *dst_dir,
     item->kind = kind;
     item->state = state;
     item->incoming_size = size;
-    item->outgoing_size = size;
+    item->outgoing_size = 0;
 }
 
 static void scan_directory(const char *source, const char *destination,
@@ -267,6 +304,7 @@ static void scan_directory(const char *source, const char *destination,
         return;
     }
     while ((entry = readdir(directory)) != NULL) {
+        if (terminate_requested) break;
         if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) continue;
         if (strncmp(entry->d_name, "._", 2) == 0) continue;
         if (!config->process_hidden && entry->d_name[0] == '.') continue;
@@ -466,7 +504,16 @@ static int run_process(char *const argv[])
         perror(argv[0]);
         _exit(127);
     }
-    if (waitpid(child, &status, 0) < 0) return -1;
+    active_child = child;
+    if (terminate_requested) kill(child, SIGTERM);
+    for (;;) {
+        if (waitpid(child, &status, 0) >= 0) break;
+        if (errno != EINTR) {
+            active_child = -1;
+            return -1;
+        }
+    }
+    active_child = -1;
     return WIFEXITED(status) ? WEXITSTATUS(status) : -1;
 }
 
@@ -511,10 +558,13 @@ static int run_handbrake_with_progress(char *const argv[])
         _exit(127);
     }
     close(pipe_fds[1]);
+    active_child = child;
+    if (terminate_requested) kill(child, SIGTERM);
     output = fdopen(pipe_fds[0], "r");
     if (output == NULL) {
         close(pipe_fds[0]);
-        waitpid(child, &status, 0);
+        while (waitpid(child, &status, 0) < 0 && errno == EINTR) {}
+        active_child = -1;
         return -1;
     }
     while (fgets(line, sizeof(line), output) != NULL) {
@@ -530,7 +580,13 @@ static int run_handbrake_with_progress(char *const argv[])
         }
     }
     fclose(output);
-    if (waitpid(child, &status, 0) < 0) return -1;
+    while (waitpid(child, &status, 0) < 0) {
+        if (errno != EINTR) {
+            active_child = -1;
+            return -1;
+        }
+    }
+    active_child = -1;
     if (get_monotonic_time(&completed_at) != 0) return -1;
     {
         char completed_timestamp[32];
@@ -576,6 +632,7 @@ static int process_image(Item *item, const Config *config)
         argv[5] = NULL;
     }
     if (run_process(argv) != 0) {
+        if (terminate_requested) return -1;
         argv[0] = "convert";
         if (run_process(argv) != 0) {
             log_message("ERROR", "Image conversion failed for '%s' (install ImageMagick)", item->src_path);
@@ -585,7 +642,11 @@ static int process_image(Item *item, const Config *config)
     item->state = STATE_OUTGOING;
     item->outgoing_size = 0;
     struct stat info;
-    if (stat(output_path, &info) == 0) item->outgoing_size = info.st_size;
+    if (stat(output_path, &info) == 0) {
+        item->outgoing_size = info.st_size;
+        item->outgoing_completed = 1;
+    }
+    snprintf(item->dst_path, MAX_PATH_LEN, "%s", output_path);
     return 0;
 }
 
@@ -616,7 +677,11 @@ static int process_video(Item *item, const Config *config)
     }
     item->state = STATE_OUTGOING;
     struct stat info;
-    item->outgoing_size = stat(output_path, &info) == 0 ? info.st_size : 0;
+    if (stat(output_path, &info) == 0) {
+        item->outgoing_size = info.st_size;
+        item->outgoing_completed = 1;
+    }
+    snprintf(item->dst_path, MAX_PATH_LEN, "%s", output_path);
     return 0;
 }
 
@@ -759,6 +824,72 @@ static void print_result(off_t incoming, off_t outgoing)
            completed_at, incoming_size, outgoing_size);
 }
 
+static int write_report(const char *log_dir, const ItemList *list,
+                        off_t incoming, off_t outgoing)
+{
+    char report_path[MAX_PATH_LEN];
+    char timestamp[32];
+    char generated_at[32];
+    FILE *report;
+    double total_seconds = 0.0;
+    size_t outgoing_count = 0;
+    size_t i;
+
+    format_current_timestamp(generated_at, sizeof(generated_at));
+    {
+        time_t now = time(NULL);
+        struct tm tm_now;
+        localtime_r(&now, &tm_now);
+        strftime(timestamp, sizeof(timestamp), "%Y%m%d_%H%M%S", &tm_now);
+    }
+    if (snprintf(report_path, sizeof(report_path), "%s/report_%s.txt", log_dir, timestamp) >=
+        (int)sizeof(report_path)) {
+        log_message("ERROR", "Report path is too long");
+        return -1;
+    }
+    report = fopen(report_path, "w");
+    if (report == NULL) {
+        log_message("ERROR", "Unable to write report '%s': %s", report_path, strerror(errno));
+        return -1;
+    }
+    fprintf(report, "Incoming report\n");
+    fprintf(report, "Generated at: %s\n", generated_at);
+    fprintf(report, "Incoming size: %lld bytes\n", (long long)incoming);
+    fprintf(report, "Outgoing size: %lld bytes\n", (long long)outgoing);
+    fprintf(report, "\nOutgoing files\n");
+    fprintf(report, "===============\n");
+    for (i = 0; i < list->count; i++) {
+        const Item *item = &list->items[i];
+        const char *incoming_extension;
+        const char *outgoing_extension;
+
+        if (!item->outgoing_completed) continue;
+        incoming_extension = item->extension[0] == '\0' ? "(none)" : item->extension;
+        outgoing_extension = extension_of(item->dst_path);
+        if (*outgoing_extension == '\0') outgoing_extension = "(none)";
+        fprintf(report, "Source: %s\n", item->src_path);
+        fprintf(report, "Outgoing: %s\n", item->dst_path);
+        fprintf(report, "Format: %s -> %s\n", incoming_extension, outgoing_extension);
+        fprintf(report, "Size: %lld -> %lld bytes\n",
+                (long long)item->incoming_size, (long long)item->outgoing_size);
+        fprintf(report, "Processing time: %.3f seconds\n\n", item->processing_seconds);
+        total_seconds += item->processing_seconds;
+        outgoing_count++;
+    }
+    fprintf(report, "Summary\n");
+    fprintf(report, "=======\n");
+    fprintf(report, "Outgoing file count: %zu\n", outgoing_count);
+    fprintf(report, "Total processing time: %.3f seconds\n", total_seconds);
+    fprintf(report, "Average processing time: %.3f seconds\n",
+            outgoing_count == 0 ? 0.0 : total_seconds / (double)outgoing_count);
+    if (fclose(report) != 0) {
+        log_message("ERROR", "Unable to finish report '%s': %s", report_path, strerror(errno));
+        return -1;
+    }
+    log_message("INFO", "Report written: %s", report_path);
+    return 0;
+}
+
 static void print_usage(void)
 {
     puts("Usage: incoming [options]");
@@ -801,6 +932,10 @@ int main(int argc, char **argv)
         char log_path[MAX_PATH_LEN];
         path_join(log_path, sizeof(log_path), log_dir, "ic_log.log");
         log_file = fopen(log_path, "a");
+    }
+    if (install_signal_handlers() != 0) {
+        if (log_file != NULL) fclose(log_file);
+        return EXIT_FAILURE;
     }
     if (load_config(&config) != 0) return EXIT_FAILURE;
     for (i = 1; i < argc; i++) {
@@ -877,12 +1012,19 @@ int main(int argc, char **argv)
             if (log_file != NULL) fclose(log_file);
             return EXIT_FAILURE;
         }
-        for (i = 0; (size_t)i < list.count; i++) {
+        for (i = 0; (size_t)i < list.count && !terminate_requested; i++) {
             if (list.items[i].kind == KIND_IMAGE) image_count++;
         }
-        for (i = 0; (size_t)i < list.count; i++) {
+        for (i = 0; (size_t)i < list.count && !terminate_requested; i++) {
             Item *item = &list.items[i];
+            struct timespec item_started_at;
+            struct timespec item_completed_at;
             if (item->kind != KIND_IMAGE) continue;
+            if (get_monotonic_time(&item_started_at) != 0) {
+                free_items(&list);
+                if (log_file != NULL) fclose(log_file);
+                return EXIT_FAILURE;
+            }
             if (dummy && item->state == STATE_INCOMING) {
                 if (mkdir_p(item->dst_dir) == 0 &&
                     copy_file("/dev/null", item->dst_path) == 0) {
@@ -895,6 +1037,14 @@ int main(int argc, char **argv)
                 }
             } else {
                 process_image(item, &config);
+            }
+            if (item->outgoing_completed) {
+                if (get_monotonic_time(&item_completed_at) != 0) {
+                    free_items(&list);
+                    if (log_file != NULL) fclose(log_file);
+                    return EXIT_FAILURE;
+                }
+                item->processing_seconds = elapsed_seconds(&item_started_at, &item_completed_at);
             }
             image_index++;
             print_progressbar(image_index, image_count);
@@ -910,13 +1060,20 @@ int main(int argc, char **argv)
         size_t video_count = 0;
         size_t video_index = 0;
 
-        for (i = 0; (size_t)i < list.count; i++) {
+        for (i = 0; (size_t)i < list.count && !terminate_requested; i++) {
             if (list.items[i].kind == KIND_VIDEO) video_count++;
         }
         printf("🎬 Video Process (total: %zu)\n", video_count);
-        for (i = 0; (size_t)i < list.count; i++) {
+        for (i = 0; (size_t)i < list.count && !terminate_requested; i++) {
             Item *item = &list.items[i];
+            struct timespec item_started_at;
+            struct timespec item_completed_at;
             if (item->kind == KIND_IMAGE) continue;
+            if (get_monotonic_time(&item_started_at) != 0) {
+                free_items(&list);
+                if (log_file != NULL) fclose(log_file);
+                return EXIT_FAILURE;
+            }
             if (dummy && item->state == STATE_INCOMING) {
                 if (mkdir_p(item->dst_dir) == 0) {
                     if (copy_file("/dev/null", item->dst_path) == 0) {
@@ -941,7 +1098,22 @@ int main(int argc, char **argv)
                 if (mkdir_p(item->dst_dir) == 0 &&
                     copy_file(item->src_path, item->dst_path) == 0) {
                     item->state = STATE_OUTGOING;
+                    {
+                        struct stat info;
+                        if (stat(item->dst_path, &info) == 0) {
+                            item->outgoing_size = info.st_size;
+                            item->outgoing_completed = 1;
+                        }
+                    }
                 }
+            }
+            if (item->outgoing_completed) {
+                if (get_monotonic_time(&item_completed_at) != 0) {
+                    free_items(&list);
+                    if (log_file != NULL) fclose(log_file);
+                    return EXIT_FAILURE;
+                }
+                item->processing_seconds = elapsed_seconds(&item_started_at, &item_completed_at);
             }
             unlink_source_if_requested(item, unlink_sources);
         }
@@ -950,13 +1122,21 @@ int main(int argc, char **argv)
         off_t incoming = 0, outgoing = 0;
         for (i = 0; (size_t)i < list.count; i++) {
             incoming += list.items[i].incoming_size;
-            outgoing += list.items[i].outgoing_size;
+            if (list.items[i].outgoing_completed) outgoing += list.items[i].outgoing_size;
+        }
+        if (terminate_requested) {
+            log_message("WARNING", "Termination requested; writing partial report");
         }
         print_result(incoming, outgoing);
         log_message("INFO", "Result incoming=%lld outgoing=%lld",
                     (long long)incoming, (long long)outgoing);
+        if (write_report(log_dir, &list, incoming, outgoing) != 0) {
+            free_items(&list);
+            if (log_file != NULL) fclose(log_file);
+            return EXIT_FAILURE;
+        }
     }
     free_items(&list);
     if (log_file != NULL) fclose(log_file);
-    return 0;
+    return terminate_requested ? 128 + terminate_requested : 0;
 }

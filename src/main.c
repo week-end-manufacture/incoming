@@ -13,11 +13,12 @@
 #include <strings.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <poll.h>
 #include <time.h>
 #include <unistd.h>
 #include <sys/wait.h>
 
-#define INCOMING_VERSION "1.0.3"
+#define INCOMING_VERSION "1.0.5"
 #define MAX_PATH_LEN 4096
 
 typedef enum { KIND_VIDEO, KIND_IMAGE, KIND_ARCHIVE, KIND_OTHER } Kind;
@@ -49,6 +50,8 @@ typedef struct {
     char dst_dir[MAX_PATH_LEN];
     char default_preset[MAX_PATH_LEN];
     char handbrake_preset[MAX_PATH_LEN];
+    char log_filename[MAX_PATH_LEN];
+    char custom_log_file_path[MAX_PATH_LEN];
     char image_ext[MAX_PATH_LEN];
     char video_ext[MAX_PATH_LEN];
     char output_image_ext[32];
@@ -60,6 +63,7 @@ typedef struct {
     int remove_gps_exif;
     int use_handbrake;
     int process_hidden;
+    int create_log_dst_dir;
 } Config;
 
 static FILE *log_file;
@@ -176,6 +180,20 @@ static int path_join(char *out, size_t out_size, const char *left, const char *r
 {
     int written = snprintf(out, out_size, "%s/%s", left, right);
     return written >= 0 && (size_t)written < out_size ? 0 : -1;
+}
+
+static int path_parent(char *out, size_t out_size, const char *path)
+{
+    const char *slash = strrchr(path, '/');
+    size_t length;
+
+    if (slash == NULL) return snprintf(out, out_size, ".") < (int)out_size ? 0 : -1;
+    if (slash == path) return snprintf(out, out_size, "/") < (int)out_size ? 0 : -1;
+    length = (size_t)(slash - path);
+    if (length >= out_size) return -1;
+    memcpy(out, path, length);
+    out[length] = '\0';
+    return 0;
 }
 
 static const char *extension_of(const char *name)
@@ -481,16 +499,14 @@ static int load_config(Config *config)
     config->output_quality = 85;
     config->remove_all_exif = setting_bool(json, "remove_all_exif_data", 0);
     config->remove_gps_exif = setting_bool(json, "remove_only_gps_exif_data", 0);
+    snprintf(config->log_filename, sizeof(config->log_filename), "ic_log.log");
+    setting_string_in_object(json, "logging", "log_filename",
+                             config->log_filename, sizeof(config->log_filename));
+    setting_string_in_object(json, "logging", "custom_log_file_path",
+                             config->custom_log_file_path,
+                             sizeof(config->custom_log_file_path));
+    config->create_log_dst_dir = setting_bool(json, "create_log_dst_dir_toggle", 1);
     free(json);
-    {
-        char preset_path[MAX_PATH_LEN];
-        if (config->default_preset[0] == '/') {
-            snprintf(preset_path, sizeof(preset_path), "%s", config->default_preset);
-        } else {
-            snprintf(preset_path, sizeof(preset_path), "%s/%s", home, config->default_preset);
-        }
-        apply_preset_file(config, preset_path);
-    }
     return 0;
 }
 
@@ -521,12 +537,17 @@ static int run_handbrake_with_progress(char *const argv[])
 {
     int pipe_fds[2];
     pid_t child;
-    FILE *output;
     struct timespec started_at;
     struct timespec completed_at;
+    struct timespec last_refresh;
+    struct timespec now;
     char line[1024];
+    char chunk[1024];
     char last_status[128] = "Starting";
+    size_t line_length = 0;
     unsigned int loader_index = 0;
+    int pipe_eof = 0;
+    int read_error = 0;
     int status;
 
     if (get_monotonic_time(&started_at) != 0) return -1;
@@ -537,6 +558,7 @@ static int run_handbrake_with_progress(char *const argv[])
         close(pipe_fds[1]);
         return -1;
     }
+
     if (child == 0) {
         const char *executable = argv[0];
         char *child_argv[16];
@@ -547,46 +569,104 @@ static int run_handbrake_with_progress(char *const argv[])
             _exit(127);
         }
         close(pipe_fds[1]);
+
         while (argv[argument_count] != NULL && argument_count < sizeof(child_argv) / sizeof(child_argv[0]) - 1) {
             child_argv[argument_count] = argv[argument_count];
             argument_count++;
         }
+
         child_argv[0] = "incoming";
         child_argv[argument_count] = NULL;
         execvp(executable, child_argv);
         dprintf(STDERR_FILENO, "%s: %s\n", executable, strerror(errno));
+
         _exit(127);
     }
+
     close(pipe_fds[1]);
     active_child = child;
+
     if (terminate_requested) kill(child, SIGTERM);
-    output = fdopen(pipe_fds[0], "r");
-    if (output == NULL) {
-        close(pipe_fds[0]);
-        while (waitpid(child, &status, 0) < 0 && errno == EINTR) {}
-        active_child = -1;
-        return -1;
-    }
-    while (fgets(line, sizeof(line), output) != NULL) {
-        char *end = line + strlen(line);
-        char *progress = strstr(line, "Encoding: task");
-        while (end > line && (end[-1] == '\n' || end[-1] == '\r')) *--end = '\0';
-        if (progress != NULL) {
-            snprintf(last_status, sizeof(last_status), "%.127s", progress);
+    last_refresh = started_at;
+
+    while (!pipe_eof) {
+        struct pollfd output_fd = {pipe_fds[0], POLLIN, 0};
+        long elapsed_ms;
+        int poll_timeout;
+        int poll_result;
+
+        if (clock_gettime(CLOCK_MONOTONIC, &now) != 0) {
+            read_error = 1;
+            break;
+        }
+        elapsed_ms = (now.tv_sec - last_refresh.tv_sec) * 1000L +
+                     (now.tv_nsec - last_refresh.tv_nsec) / 1000000L;
+        poll_timeout = elapsed_ms >= 250 ? 0 : (int)(250 - elapsed_ms);
+        poll_result = poll(&output_fd, 1, poll_timeout);
+        if (poll_result < 0) {
+            if (errno == EINTR) continue;
+            read_error = 1;
+            break;
+        }
+
+        if (poll_result > 0 && (output_fd.revents & (POLLIN | POLLHUP | POLLERR))) {
+            ssize_t bytes_read = read(pipe_fds[0], chunk, sizeof(chunk));
+            if (bytes_read > 0) {
+                ssize_t index;
+                for (index = 0; index < bytes_read; index++) {
+                    char character = chunk[index];
+                    if (character == '\r' || character == '\n') {
+                        if (line_length > 0) {
+                            char *progress;
+                            line[line_length] = '\0';
+                            progress = strstr(line, "Encoding: task");
+                            if (progress != NULL) {
+                                snprintf(last_status, sizeof(last_status), "%.127s", progress);
+                            } else {
+                                snprintf(last_status, sizeof(last_status), "%.127s", line);
+                            }
+                            line_length = 0;
+                        }
+                    } else if (line_length < sizeof(line) - 1) {
+                        line[line_length++] = character;
+                    }
+                }
+            } else if (bytes_read == 0) {
+                pipe_eof = 1;
+            } else if (errno != EINTR && errno != EAGAIN) {
+                read_error = 1;
+                break;
+            }
+        }
+
+        if (clock_gettime(CLOCK_MONOTONIC, &now) != 0) {
+            read_error = 1;
+            break;
+        }
+        elapsed_ms = (now.tv_sec - last_refresh.tv_sec) * 1000L +
+                     (now.tv_nsec - last_refresh.tv_nsec) / 1000000L;
+        if (elapsed_ms >= 250) {
             printf("\r  ╰─  %c   [%-30.30s]", "\\|/-"[loader_index++ % 4], last_status);
             fflush(stdout);
-        } else if (*line != '\0') {
-            snprintf(last_status, sizeof(last_status), "%.127s", line);
+            last_refresh = now;
         }
     }
-    fclose(output);
+
+    if (line_length > 0) {
+        line[line_length] = '\0';
+        snprintf(last_status, sizeof(last_status), "%.127s", line);
+    }
+    close(pipe_fds[0]);
+
     while (waitpid(child, &status, 0) < 0) {
         if (errno != EINTR) {
             active_child = -1;
             return -1;
         }
     }
+
     active_child = -1;
+
     if (get_monotonic_time(&completed_at) != 0) return -1;
     {
         char completed_timestamp[32];
@@ -596,11 +676,19 @@ static int run_handbrake_with_progress(char *const argv[])
         printf("\r  ╰─  DONE [%s] (processing time: %s)%12s\n",
                completed_timestamp, processing_time, "");
     }
+    
     fflush(stdout);
+    
     if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
         log_message("ERROR", "HandBrake process failed: %s", last_status);
         return -1;
     }
+
+    if (read_error) {
+        log_message("ERROR", "Unable to read HandBrake output");
+        return -1;
+    }
+
     return 0;
 }
 
@@ -867,7 +955,7 @@ static int write_report(const char *log_dir, const ItemList *list,
         incoming_extension = item->extension[0] == '\0' ? "(none)" : item->extension;
         outgoing_extension = extension_of(item->dst_path);
         if (*outgoing_extension == '\0') outgoing_extension = "(none)";
-        fprintf(report, "Source: %s\n", item->src_path);
+        fprintf(report, "Incoming: %s\n", item->src_path);
         fprintf(report, "Outgoing: %s\n", item->dst_path);
         fprintf(report, "Format: %s -> %s\n", incoming_extension, outgoing_extension);
         fprintf(report, "Size: %lld -> %lld bytes\n",
@@ -914,6 +1002,7 @@ int main(int argc, char **argv)
     int i;
     struct stat source_info;
     char log_dir[MAX_PATH_LEN];
+    char log_path[MAX_PATH_LEN];
     const char *home = getenv("HOME");
 
     for (i = 1; i < argc; i++) {
@@ -926,18 +1015,54 @@ int main(int argc, char **argv)
             return 0;
         }
     }
-    if (home != NULL) {
+    if (load_config(&config) != 0) return EXIT_FAILURE;
+    if (home == NULL) return EXIT_FAILURE;
+    if (config.custom_log_file_path[0] != '\0') {
+        if (config.custom_log_file_path[0] == '/') {
+            if (snprintf(log_path, sizeof(log_path), "%s", config.custom_log_file_path) >=
+                (int)sizeof(log_path)) {
+                fprintf(stderr, "Custom log file path is too long\n");
+                return EXIT_FAILURE;
+            }
+        } else if (snprintf(log_path, sizeof(log_path), "%s/%s", home,
+                            config.custom_log_file_path) >= (int)sizeof(log_path)) {
+            fprintf(stderr, "Custom log file path is too long\n");
+            return EXIT_FAILURE;
+        }
+    } else {
         snprintf(log_dir, sizeof(log_dir), "%s/.config/incoming/log", home);
-        mkdir_p(log_dir);
-        char log_path[MAX_PATH_LEN];
-        path_join(log_path, sizeof(log_path), log_dir, "ic_log.log");
-        log_file = fopen(log_path, "a");
+        if (path_join(log_path, sizeof(log_path), log_dir,
+                      config.log_filename[0] == '\0' ? "ic_log.log" : config.log_filename) != 0) {
+            fprintf(stderr, "Log file path is too long\n");
+            return EXIT_FAILURE;
+        }
     }
-    if (install_signal_handlers() != 0) {
-        if (log_file != NULL) fclose(log_file);
+    if (path_parent(log_dir, sizeof(log_dir), log_path) != 0) {
+        fprintf(stderr, "Log directory path is too long\n");
         return EXIT_FAILURE;
     }
-    if (load_config(&config) != 0) return EXIT_FAILURE;
+    if (config.create_log_dst_dir && mkdir_p(log_dir) != 0) {
+        fprintf(stderr, "Unable to create log directory '%s': %s\n", log_dir, strerror(errno));
+        return EXIT_FAILURE;
+    }
+    log_file = fopen(log_path, "a");
+    if (log_file == NULL) {
+        fprintf(stderr, "Unable to open log file '%s': %s\n", log_path, strerror(errno));
+        return EXIT_FAILURE;
+    }
+    if (install_signal_handlers() != 0) {
+        fclose(log_file);
+        return EXIT_FAILURE;
+    }
+    {
+        char preset_path[MAX_PATH_LEN];
+        if (config.default_preset[0] == '/') {
+            snprintf(preset_path, sizeof(preset_path), "%s", config.default_preset);
+        } else {
+            snprintf(preset_path, sizeof(preset_path), "%s/%s", home, config.default_preset);
+        }
+        apply_preset_file(&config, preset_path);
+    }
     for (i = 1; i < argc; i++) {
         if ((strcmp(argv[i], "-i") == 0 || strcmp(argv[i], "--src_dir_path") == 0) && i + 1 < argc) snprintf(config.src_dir, sizeof(config.src_dir), "%s", argv[++i]);
         else if ((strcmp(argv[i], "-o") == 0 || strcmp(argv[i], "--dst_dir_path") == 0) && i + 1 < argc) snprintf(config.dst_dir, sizeof(config.dst_dir), "%s", argv[++i]);

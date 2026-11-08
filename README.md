@@ -4,7 +4,7 @@
 a single file), converts images and videos, extracts archives, and copies other
 files to an output directory.
 
-- Version: **1.0.4**
+- Version: **1.0.5**
 - Implementation: C11
 - License: [MIT](./LICENSE)
 - Repository: <https://github.com/week-end-manufacture/incoming>
@@ -162,6 +162,20 @@ Minimal example:
 If `default_preset_path` starts with `/`, it is treated as an absolute path.
 Otherwise, `$HOME` is prepended.
 
+### Logging
+
+The optional `logging` settings control the log file and report destination:
+
+| Key | Type | Default | Description |
+| --- | --- | --- | --- |
+| `log_filename` | string | `incoming.log` | Log filename used when no custom path is set |
+| `custom_log_file_path` | string | empty | Full path to the log file; relative paths are resolved from `$HOME` |
+| `create_log_dst_dir_toggle` | boolean | `true` | Create the log file's parent directory when it does not exist |
+
+When `custom_log_file_path` is empty, the log is written under
+`~/.config/incoming/log/`. The report is written in the same directory as the
+log file.
+
 ### Image and Video Presets
 
 The default preset is the JSON file referenced by `default_preset_path`.
@@ -294,10 +308,11 @@ preset.
 
 ## Logs and Errors
 
-The log file is appended at:
+The log file is appended at the configured path. By default, the example
+settings use:
 
 ```text
-~/.config/incoming/log/ic_log.log
+~/.config/incoming/log/incoming.log
 ```
 
 Progress and error messages are also written to standard error. The program

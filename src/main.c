@@ -50,6 +50,8 @@ typedef struct {
     char dst_dir[MAX_PATH_LEN];
     char default_preset[MAX_PATH_LEN];
     char handbrake_preset[MAX_PATH_LEN];
+    char log_filename[MAX_PATH_LEN];
+    char custom_log_file_path[MAX_PATH_LEN];
     char image_ext[MAX_PATH_LEN];
     char video_ext[MAX_PATH_LEN];
     char output_image_ext[32];
@@ -61,6 +63,7 @@ typedef struct {
     int remove_gps_exif;
     int use_handbrake;
     int process_hidden;
+    int create_log_dst_dir;
 } Config;
 
 static FILE *log_file;
@@ -177,6 +180,20 @@ static int path_join(char *out, size_t out_size, const char *left, const char *r
 {
     int written = snprintf(out, out_size, "%s/%s", left, right);
     return written >= 0 && (size_t)written < out_size ? 0 : -1;
+}
+
+static int path_parent(char *out, size_t out_size, const char *path)
+{
+    const char *slash = strrchr(path, '/');
+    size_t length;
+
+    if (slash == NULL) return snprintf(out, out_size, ".") < (int)out_size ? 0 : -1;
+    if (slash == path) return snprintf(out, out_size, "/") < (int)out_size ? 0 : -1;
+    length = (size_t)(slash - path);
+    if (length >= out_size) return -1;
+    memcpy(out, path, length);
+    out[length] = '\0';
+    return 0;
 }
 
 static const char *extension_of(const char *name)
@@ -482,16 +499,14 @@ static int load_config(Config *config)
     config->output_quality = 85;
     config->remove_all_exif = setting_bool(json, "remove_all_exif_data", 0);
     config->remove_gps_exif = setting_bool(json, "remove_only_gps_exif_data", 0);
+    snprintf(config->log_filename, sizeof(config->log_filename), "ic_log.log");
+    setting_string_in_object(json, "logging", "log_filename",
+                             config->log_filename, sizeof(config->log_filename));
+    setting_string_in_object(json, "logging", "custom_log_file_path",
+                             config->custom_log_file_path,
+                             sizeof(config->custom_log_file_path));
+    config->create_log_dst_dir = setting_bool(json, "create_log_dst_dir_toggle", 1);
     free(json);
-    {
-        char preset_path[MAX_PATH_LEN];
-        if (config->default_preset[0] == '/') {
-            snprintf(preset_path, sizeof(preset_path), "%s", config->default_preset);
-        } else {
-            snprintf(preset_path, sizeof(preset_path), "%s/%s", home, config->default_preset);
-        }
-        apply_preset_file(config, preset_path);
-    }
     return 0;
 }
 
@@ -987,6 +1002,7 @@ int main(int argc, char **argv)
     int i;
     struct stat source_info;
     char log_dir[MAX_PATH_LEN];
+    char log_path[MAX_PATH_LEN];
     const char *home = getenv("HOME");
 
     for (i = 1; i < argc; i++) {
@@ -999,18 +1015,54 @@ int main(int argc, char **argv)
             return 0;
         }
     }
-    if (home != NULL) {
+    if (load_config(&config) != 0) return EXIT_FAILURE;
+    if (home == NULL) return EXIT_FAILURE;
+    if (config.custom_log_file_path[0] != '\0') {
+        if (config.custom_log_file_path[0] == '/') {
+            if (snprintf(log_path, sizeof(log_path), "%s", config.custom_log_file_path) >=
+                (int)sizeof(log_path)) {
+                fprintf(stderr, "Custom log file path is too long\n");
+                return EXIT_FAILURE;
+            }
+        } else if (snprintf(log_path, sizeof(log_path), "%s/%s", home,
+                            config.custom_log_file_path) >= (int)sizeof(log_path)) {
+            fprintf(stderr, "Custom log file path is too long\n");
+            return EXIT_FAILURE;
+        }
+    } else {
         snprintf(log_dir, sizeof(log_dir), "%s/.config/incoming/log", home);
-        mkdir_p(log_dir);
-        char log_path[MAX_PATH_LEN];
-        path_join(log_path, sizeof(log_path), log_dir, "ic_log.log");
-        log_file = fopen(log_path, "a");
+        if (path_join(log_path, sizeof(log_path), log_dir,
+                      config.log_filename[0] == '\0' ? "ic_log.log" : config.log_filename) != 0) {
+            fprintf(stderr, "Log file path is too long\n");
+            return EXIT_FAILURE;
+        }
     }
-    if (install_signal_handlers() != 0) {
-        if (log_file != NULL) fclose(log_file);
+    if (path_parent(log_dir, sizeof(log_dir), log_path) != 0) {
+        fprintf(stderr, "Log directory path is too long\n");
         return EXIT_FAILURE;
     }
-    if (load_config(&config) != 0) return EXIT_FAILURE;
+    if (config.create_log_dst_dir && mkdir_p(log_dir) != 0) {
+        fprintf(stderr, "Unable to create log directory '%s': %s\n", log_dir, strerror(errno));
+        return EXIT_FAILURE;
+    }
+    log_file = fopen(log_path, "a");
+    if (log_file == NULL) {
+        fprintf(stderr, "Unable to open log file '%s': %s\n", log_path, strerror(errno));
+        return EXIT_FAILURE;
+    }
+    if (install_signal_handlers() != 0) {
+        fclose(log_file);
+        return EXIT_FAILURE;
+    }
+    {
+        char preset_path[MAX_PATH_LEN];
+        if (config.default_preset[0] == '/') {
+            snprintf(preset_path, sizeof(preset_path), "%s", config.default_preset);
+        } else {
+            snprintf(preset_path, sizeof(preset_path), "%s/%s", home, config.default_preset);
+        }
+        apply_preset_file(&config, preset_path);
+    }
     for (i = 1; i < argc; i++) {
         if ((strcmp(argv[i], "-i") == 0 || strcmp(argv[i], "--src_dir_path") == 0) && i + 1 < argc) snprintf(config.src_dir, sizeof(config.src_dir), "%s", argv[++i]);
         else if ((strcmp(argv[i], "-o") == 0 || strcmp(argv[i], "--dst_dir_path") == 0) && i + 1 < argc) snprintf(config.dst_dir, sizeof(config.dst_dir), "%s", argv[++i]);

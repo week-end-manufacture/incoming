@@ -9,6 +9,10 @@ legacy command-line options and reads the same configuration layout:
 ~/.config/incoming/handbrake_preset.json
 ```
 
+The settings and selected preset files must exist and be readable; otherwise the
+program reports the failing path and exits. Source files and generated output
+files are also checked before they are processed or reported.
+
 Build:
 
 ```sh

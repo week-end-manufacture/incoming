@@ -18,7 +18,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-#define INCOMING_VERSION "1.0.5"
+#define INCOMING_VERSION "1.0.6"
 #define MAX_PATH_LEN 4096
 
 typedef enum { KIND_VIDEO, KIND_IMAGE, KIND_ARCHIVE, KIND_OTHER } Kind;
@@ -253,9 +253,14 @@ static int copy_file(const char *source, const char *destination)
     char buffer[1024 * 128];
     ssize_t read_count;
 
-    if (input < 0) return -1;
+    if (input < 0) {
+        log_message("ERROR", "Unable to open source file '%s': %s", source, strerror(errno));
+        return -1;
+    }
     output = open(destination, O_WRONLY | O_CREAT | O_TRUNC, 0644);
     if (output < 0) {
+        log_message("ERROR", "Unable to create destination file '%s': %s",
+                    destination, strerror(errno));
         close(input);
         return -1;
     }
@@ -264,6 +269,8 @@ static int copy_file(const char *source, const char *destination)
         while (offset < read_count) {
             ssize_t written = write(output, buffer + offset, (size_t)(read_count - offset));
             if (written <= 0) {
+                log_message("ERROR", "Unable to write destination file '%s': %s",
+                            destination, strerror(errno));
                 close(input);
                 close(output);
                 return -1;
@@ -271,9 +278,39 @@ static int copy_file(const char *source, const char *destination)
             offset += written;
         }
     }
-    close(input);
-    close(output);
+    if (read_count < 0) {
+        log_message("ERROR", "Unable to read source file '%s': %s", source, strerror(errno));
+    }
+    if (close(input) != 0) {
+        log_message("ERROR", "Unable to close source file '%s': %s", source, strerror(errno));
+        return -1;
+    }
+    if (close(output) != 0) {
+        log_message("ERROR", "Unable to close destination file '%s': %s",
+                    destination, strerror(errno));
+        return -1;
+    }
     return read_count == 0 ? 0 : -1;
+}
+
+static int write_dummy_file(const char *path)
+{
+    FILE *file = fopen(path, "w");
+
+    if (file == NULL) {
+        log_message("ERROR", "Unable to create dummy file '%s': %s", path, strerror(errno));
+        return -1;
+    }
+    if (fputs("ic-dummy", file) == EOF) {
+        log_message("ERROR", "Unable to write dummy file '%s': %s", path, strerror(errno));
+        fclose(file);
+        return -1;
+    }
+    if (fclose(file) != 0) {
+        log_message("ERROR", "Unable to close dummy file '%s': %s", path, strerror(errno));
+        return -1;
+    }
+    return 0;
 }
 
 static void list_add(ItemList *list, const char *src_dir, const char *dst_dir,
@@ -331,7 +368,11 @@ static void scan_directory(const char *source, const char *destination,
             log_message("ERROR", "Path is too long while scanning '%s'", source);
             continue;
         }
-        if (lstat(source_path, &info) != 0) continue;
+        if (lstat(source_path, &info) != 0) {
+            log_message("WARNING", "Unable to inspect '%s': %s",
+                        source_path, strerror(errno));
+            continue;
+        }
         if (S_ISDIR(info.st_mode)) {
             char nested_destination[MAX_PATH_LEN];
             if (path_join(nested_destination, sizeof(nested_destination), destination, entry->d_name) == 0)
@@ -428,32 +469,69 @@ static int setting_bool(const char *json, const char *key, int fallback)
     return fallback;
 }
 
+static int require_regular_file(const char *path, const char *purpose, struct stat *info)
+{
+    if (stat(path, info) != 0) {
+        log_message("ERROR", "Unable to access %s '%s': %s",
+                    purpose, path, strerror(errno));
+        return -1;
+    }
+    if (!S_ISREG(info->st_mode)) {
+        log_message("ERROR", "%s is not a regular file: '%s'", purpose, path);
+        return -1;
+    }
+    return 0;
+}
+
 static int read_file(const char *path, char **contents)
 {
-    FILE *file = fopen(path, "rb");
+    struct stat info;
+    FILE *file;
     long length;
-    if (file == NULL) return -1;
+
+    if (require_regular_file(path, "configuration file", &info) != 0) return -1;
+    file = fopen(path, "rb");
+    if (file == NULL) {
+        log_message("ERROR", "Unable to open file '%s': %s", path, strerror(errno));
+        return -1;
+    }
     if (fseek(file, 0, SEEK_END) != 0 || (length = ftell(file)) < 0 || fseek(file, 0, SEEK_SET) != 0) {
+        log_message("ERROR", "Unable to determine size of file '%s': %s", path, strerror(errno));
         fclose(file);
         return -1;
     }
     *contents = malloc((size_t)length + 1);
-    if (*contents == NULL || fread(*contents, 1, (size_t)length, file) != (size_t)length) {
+    if (*contents == NULL) {
+        log_message("ERROR", "Unable to allocate memory for file '%s'", path);
+        fclose(file);
+        return -1;
+    }
+    if (fread(*contents, 1, (size_t)length, file) != (size_t)length) {
+        if (ferror(file)) {
+            log_message("ERROR", "Unable to read file '%s': %s", path, strerror(errno));
+        } else {
+            log_message("ERROR", "Unexpected end of file while reading '%s'", path);
+        }
         free(*contents);
+        *contents = NULL;
         fclose(file);
         return -1;
     }
     (*contents)[length] = '\0';
-    fclose(file);
+    if (fclose(file) != 0) {
+        log_message("ERROR", "Unable to close file '%s': %s", path, strerror(errno));
+        free(*contents);
+        *contents = NULL;
+        return -1;
+    }
     return 0;
 }
 
-static void apply_preset_file(Config *config, const char *path)
+static int apply_preset_file(Config *config, const char *path)
 {
     char *preset = NULL;
     if (read_file(path, &preset) != 0) {
-        log_message("WARNING", "Cannot read preset: %s", path);
-        return;
+        return -1;
     }
     config->image_enabled = setting_bool(preset, "image_process_toggle", config->image_enabled);
     config->video_enabled = setting_bool(preset, "video_process_toggle", config->video_enabled);
@@ -468,6 +546,7 @@ static void apply_preset_file(Config *config, const char *path)
     setting_string(preset, "output_video_ext", config->output_video_ext, sizeof(config->output_video_ext));
     setting_string(preset, "HandBrake_presets_path", config->handbrake_preset, sizeof(config->handbrake_preset));
     free(preset);
+    return 0;
 }
 
 static int load_config(Config *config)
@@ -475,10 +554,16 @@ static int load_config(Config *config)
     const char *home = getenv("HOME");
     char settings_path[MAX_PATH_LEN];
     char *json = NULL;
-    if (home == NULL) return -1;
-    snprintf(settings_path, sizeof(settings_path), "%s/.config/incoming/settings.json", home);
+    if (home == NULL || home[0] == '\0') {
+        log_message("ERROR", "HOME environment variable is not set");
+        return -1;
+    }
+    if (snprintf(settings_path, sizeof(settings_path), "%s/.config/incoming/settings.json", home) >=
+        (int)sizeof(settings_path)) {
+        log_message("ERROR", "Settings file path is too long");
+        return -1;
+    }
     if (read_file(settings_path, &json) != 0) {
-        log_message("ERROR", "Cannot read settings: %s", settings_path);
         return -1;
     }
     memset(config, 0, sizeof(*config));
@@ -696,10 +781,12 @@ static int process_image(Item *item, const Config *config)
 {
     char output_name[MAX_PATH_LEN];
     char output_path[MAX_PATH_LEN];
+    struct stat info;
     const char *base = strrchr(item->name, '/');
     char *dot;
     char *argv[16];
     if (!config->image_enabled) return 0;
+    if (require_regular_file(item->src_path, "image source", &info) != 0) return -1;
     snprintf(output_name, sizeof(output_name), "%s", base == NULL ? item->name : base + 1);
     dot = strrchr(output_name, '.');
     if (dot != NULL) *dot = '\0';
@@ -727,13 +814,10 @@ static int process_image(Item *item, const Config *config)
             return -1;
         }
     }
+    if (require_regular_file(output_path, "image output", &info) != 0) return -1;
     item->state = STATE_OUTGOING;
-    item->outgoing_size = 0;
-    struct stat info;
-    if (stat(output_path, &info) == 0) {
-        item->outgoing_size = info.st_size;
-        item->outgoing_completed = 1;
-    }
+    item->outgoing_size = info.st_size;
+    item->outgoing_completed = 1;
     snprintf(item->dst_path, MAX_PATH_LEN, "%s", output_path);
     return 0;
 }
@@ -742,9 +826,11 @@ static int process_video(Item *item, const Config *config)
 {
     char output_name[MAX_PATH_LEN];
     char output_path[MAX_PATH_LEN];
+    struct stat info;
     char *dot;
     char *argv[10];
     if (!config->video_enabled) return 0;
+    if (require_regular_file(item->src_path, "video source", &info) != 0) return -1;
     snprintf(output_name, sizeof(output_name), "%s", item->name);
     dot = strrchr(output_name, '.');
     if (dot != NULL) *dot = '\0';
@@ -752,6 +838,13 @@ static int process_video(Item *item, const Config *config)
     if (mkdir_p(item->dst_dir) != 0 || path_join(output_path, sizeof(output_path), item->dst_dir, output_name) != 0) return -1;
     printf("%s ==> %s via incoming\n", item->name, config->output_video_ext);
     if (config->use_handbrake) {
+        if (config->handbrake_preset[0] == '\0' ||
+            require_regular_file(config->handbrake_preset, "HandBrake preset", &info) != 0) {
+            if (config->handbrake_preset[0] == '\0') {
+                log_message("ERROR", "HandBrake preset path is not configured");
+            }
+            return -1;
+        }
         argv[0] = "HandBrakeCLI"; argv[1] = "-i"; argv[2] = item->src_path;
         argv[3] = "-o"; argv[4] = output_path; argv[5] = "--preset-import-file";
         argv[6] = (char *)config->handbrake_preset; argv[7] = NULL;
@@ -763,12 +856,10 @@ static int process_video(Item *item, const Config *config)
         log_message("ERROR", "Video conversion failed for '%s'", item->src_path);
         return -1;
     }
+    if (require_regular_file(output_path, "video output", &info) != 0) return -1;
     item->state = STATE_OUTGOING;
-    struct stat info;
-    if (stat(output_path, &info) == 0) {
-        item->outgoing_size = info.st_size;
-        item->outgoing_completed = 1;
-    }
+    item->outgoing_size = info.st_size;
+    item->outgoing_completed = 1;
     snprintf(item->dst_path, MAX_PATH_LEN, "%s", output_path);
     return 0;
 }
@@ -777,9 +868,11 @@ static int extract_archive(Item *item, const Config *config)
 {
     char directory[MAX_PATH_LEN];
     char name[MAX_PATH_LEN];
+    struct stat info;
     char *dot;
     char *argv[8];
     (void)config;
+    if (require_regular_file(item->src_path, "archive source", &info) != 0) return -1;
     snprintf(name, sizeof(name), "%s", item->name);
     dot = strrchr(name, '.');
     if (dot != NULL) *dot = '\0';
@@ -1057,11 +1150,22 @@ int main(int argc, char **argv)
     {
         char preset_path[MAX_PATH_LEN];
         if (config.default_preset[0] == '/') {
-            snprintf(preset_path, sizeof(preset_path), "%s", config.default_preset);
-        } else {
-            snprintf(preset_path, sizeof(preset_path), "%s/%s", home, config.default_preset);
+            if (snprintf(preset_path, sizeof(preset_path), "%s", config.default_preset) >=
+                (int)sizeof(preset_path)) {
+                log_message("ERROR", "Default preset path is too long");
+                fclose(log_file);
+                return EXIT_FAILURE;
+            }
+        } else if (snprintf(preset_path, sizeof(preset_path), "%s/%s", home,
+                            config.default_preset) >= (int)sizeof(preset_path)) {
+            log_message("ERROR", "Default preset path is too long");
+            fclose(log_file);
+            return EXIT_FAILURE;
         }
-        apply_preset_file(&config, preset_path);
+        if (apply_preset_file(&config, preset_path) != 0) {
+            fclose(log_file);
+            return EXIT_FAILURE;
+        }
     }
     for (i = 1; i < argc; i++) {
         if ((strcmp(argv[i], "-i") == 0 || strcmp(argv[i], "--src_dir_path") == 0) && i + 1 < argc) snprintf(config.src_dir, sizeof(config.src_dir), "%s", argv[++i]);
@@ -1096,25 +1200,49 @@ int main(int argc, char **argv)
         }
     }
     if (stat(config.src_dir, &source_info) != 0) {
-        log_message("WARNING", "INVALID PATH");
-        return 1;
+        log_message("ERROR", "Unable to access source path '%s': %s",
+                    config.src_dir, strerror(errno));
+        fclose(log_file);
+        return EXIT_FAILURE;
+    }
+    if (!S_ISREG(source_info.st_mode) && !S_ISDIR(source_info.st_mode)) {
+        log_message("ERROR", "Source path is neither a regular file nor a directory: '%s'",
+                    config.src_dir);
+        fclose(log_file);
+        return EXIT_FAILURE;
     }
     if (mkdir_p(config.dst_dir) != 0) {
-        log_message("ERROR", "Unable to create destination '%s'", config.dst_dir);
-        return 1;
+        log_message("ERROR", "Unable to create destination '%s': %s",
+                    config.dst_dir, strerror(errno));
+        fclose(log_file);
+        return EXIT_FAILURE;
     }
-    if (user_preset != NULL && home != NULL) {
-        snprintf(config.default_preset, sizeof(config.default_preset), "%s/.config/incoming/preset/%s.json", home, user_preset);
-        apply_preset_file(&config, config.default_preset);
+    if (user_preset != NULL) {
+        if (snprintf(config.default_preset, sizeof(config.default_preset),
+                     "%s/.config/incoming/preset/%s.json", home, user_preset) >=
+            (int)sizeof(config.default_preset)) {
+            log_message("ERROR", "User preset path is too long");
+            fclose(log_file);
+            return EXIT_FAILURE;
+        }
+        if (apply_preset_file(&config, config.default_preset) != 0) {
+            fclose(log_file);
+            return EXIT_FAILURE;
+        }
     }
     config.use_handbrake = 1;
-    if (config.handbrake_preset[0] != '/') {
+    if (config.handbrake_preset[0] != '/' && config.handbrake_preset[0] != '\0') {
         char preset_path[MAX_PATH_LEN];
-        snprintf(preset_path, sizeof(preset_path), "%s/%s", home == NULL ? "." : home, config.handbrake_preset);
+        if (snprintf(preset_path, sizeof(preset_path), "%s/%s", home,
+                     config.handbrake_preset) >= (int)sizeof(preset_path)) {
+            log_message("ERROR", "HandBrake preset path is too long");
+            fclose(log_file);
+            return EXIT_FAILURE;
+        }
         snprintf(config.handbrake_preset, sizeof(config.handbrake_preset), "%s", preset_path);
     }
     print_process_start(&config);
-    if (stat(config.src_dir, &source_info) == 0 && S_ISREG(source_info.st_mode)) {
+    if (S_ISREG(source_info.st_mode)) {
         char *name = strrchr(config.src_dir, '/');
         char parent[MAX_PATH_LEN];
         snprintf(parent, sizeof(parent), "%s", config.src_dir);
@@ -1152,13 +1280,8 @@ int main(int argc, char **argv)
             }
             if (dummy && item->state == STATE_INCOMING) {
                 if (mkdir_p(item->dst_dir) == 0 &&
-                    copy_file("/dev/null", item->dst_path) == 0) {
-                    FILE *dummy_file = fopen(item->dst_path, "w");
-                    if (dummy_file != NULL) {
-                        fputs("ic-dummy", dummy_file);
-                        fclose(dummy_file);
-                        item->state = STATE_DUMMY;
-                    }
+                    write_dummy_file(item->dst_path) == 0) {
+                    item->state = STATE_DUMMY;
                 }
             } else {
                 process_image(item, &config);
@@ -1200,15 +1323,9 @@ int main(int argc, char **argv)
                 return EXIT_FAILURE;
             }
             if (dummy && item->state == STATE_INCOMING) {
-                if (mkdir_p(item->dst_dir) == 0) {
-                    if (copy_file("/dev/null", item->dst_path) == 0) {
-                        FILE *dummy_file = fopen(item->dst_path, "w");
-                        if (dummy_file != NULL) {
-                            fputs("ic-dummy", dummy_file);
-                            fclose(dummy_file);
-                            item->state = STATE_DUMMY;
-                        }
-                    }
+                if (mkdir_p(item->dst_dir) == 0 &&
+                    write_dummy_file(item->dst_path) == 0) {
+                    item->state = STATE_DUMMY;
                 }
             } else if (item->kind == KIND_IMAGE) {
                 process_image(item, &config);
@@ -1220,16 +1337,13 @@ int main(int argc, char **argv)
             } else if (item->kind == KIND_ARCHIVE) {
                 extract_archive(item, &config);
             } else if (item->state == STATE_INCOMING) {
+                struct stat info;
                 if (mkdir_p(item->dst_dir) == 0 &&
-                    copy_file(item->src_path, item->dst_path) == 0) {
+                    copy_file(item->src_path, item->dst_path) == 0 &&
+                    require_regular_file(item->dst_path, "copied output", &info) == 0) {
                     item->state = STATE_OUTGOING;
-                    {
-                        struct stat info;
-                        if (stat(item->dst_path, &info) == 0) {
-                            item->outgoing_size = info.st_size;
-                            item->outgoing_completed = 1;
-                        }
-                    }
+                    item->outgoing_size = info.st_size;
+                    item->outgoing_completed = 1;
                 }
             }
             if (item->outgoing_completed) {

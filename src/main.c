@@ -13,11 +13,12 @@
 #include <strings.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <poll.h>
 #include <time.h>
 #include <unistd.h>
 #include <sys/wait.h>
 
-#define INCOMING_VERSION "1.0.3"
+#define INCOMING_VERSION "1.0.5"
 #define MAX_PATH_LEN 4096
 
 typedef enum { KIND_VIDEO, KIND_IMAGE, KIND_ARCHIVE, KIND_OTHER } Kind;
@@ -521,12 +522,17 @@ static int run_handbrake_with_progress(char *const argv[])
 {
     int pipe_fds[2];
     pid_t child;
-    FILE *output;
     struct timespec started_at;
     struct timespec completed_at;
+    struct timespec last_refresh;
+    struct timespec now;
     char line[1024];
+    char chunk[1024];
     char last_status[128] = "Starting";
+    size_t line_length = 0;
     unsigned int loader_index = 0;
+    int pipe_eof = 0;
+    int read_error = 0;
     int status;
 
     if (get_monotonic_time(&started_at) != 0) return -1;
@@ -537,6 +543,7 @@ static int run_handbrake_with_progress(char *const argv[])
         close(pipe_fds[1]);
         return -1;
     }
+
     if (child == 0) {
         const char *executable = argv[0];
         char *child_argv[16];
@@ -547,46 +554,104 @@ static int run_handbrake_with_progress(char *const argv[])
             _exit(127);
         }
         close(pipe_fds[1]);
+
         while (argv[argument_count] != NULL && argument_count < sizeof(child_argv) / sizeof(child_argv[0]) - 1) {
             child_argv[argument_count] = argv[argument_count];
             argument_count++;
         }
+
         child_argv[0] = "incoming";
         child_argv[argument_count] = NULL;
         execvp(executable, child_argv);
         dprintf(STDERR_FILENO, "%s: %s\n", executable, strerror(errno));
+
         _exit(127);
     }
+
     close(pipe_fds[1]);
     active_child = child;
+
     if (terminate_requested) kill(child, SIGTERM);
-    output = fdopen(pipe_fds[0], "r");
-    if (output == NULL) {
-        close(pipe_fds[0]);
-        while (waitpid(child, &status, 0) < 0 && errno == EINTR) {}
-        active_child = -1;
-        return -1;
-    }
-    while (fgets(line, sizeof(line), output) != NULL) {
-        char *end = line + strlen(line);
-        char *progress = strstr(line, "Encoding: task");
-        while (end > line && (end[-1] == '\n' || end[-1] == '\r')) *--end = '\0';
-        if (progress != NULL) {
-            snprintf(last_status, sizeof(last_status), "%.127s", progress);
+    last_refresh = started_at;
+
+    while (!pipe_eof) {
+        struct pollfd output_fd = {pipe_fds[0], POLLIN, 0};
+        long elapsed_ms;
+        int poll_timeout;
+        int poll_result;
+
+        if (clock_gettime(CLOCK_MONOTONIC, &now) != 0) {
+            read_error = 1;
+            break;
+        }
+        elapsed_ms = (now.tv_sec - last_refresh.tv_sec) * 1000L +
+                     (now.tv_nsec - last_refresh.tv_nsec) / 1000000L;
+        poll_timeout = elapsed_ms >= 250 ? 0 : (int)(250 - elapsed_ms);
+        poll_result = poll(&output_fd, 1, poll_timeout);
+        if (poll_result < 0) {
+            if (errno == EINTR) continue;
+            read_error = 1;
+            break;
+        }
+
+        if (poll_result > 0 && (output_fd.revents & (POLLIN | POLLHUP | POLLERR))) {
+            ssize_t bytes_read = read(pipe_fds[0], chunk, sizeof(chunk));
+            if (bytes_read > 0) {
+                ssize_t index;
+                for (index = 0; index < bytes_read; index++) {
+                    char character = chunk[index];
+                    if (character == '\r' || character == '\n') {
+                        if (line_length > 0) {
+                            char *progress;
+                            line[line_length] = '\0';
+                            progress = strstr(line, "Encoding: task");
+                            if (progress != NULL) {
+                                snprintf(last_status, sizeof(last_status), "%.127s", progress);
+                            } else {
+                                snprintf(last_status, sizeof(last_status), "%.127s", line);
+                            }
+                            line_length = 0;
+                        }
+                    } else if (line_length < sizeof(line) - 1) {
+                        line[line_length++] = character;
+                    }
+                }
+            } else if (bytes_read == 0) {
+                pipe_eof = 1;
+            } else if (errno != EINTR && errno != EAGAIN) {
+                read_error = 1;
+                break;
+            }
+        }
+
+        if (clock_gettime(CLOCK_MONOTONIC, &now) != 0) {
+            read_error = 1;
+            break;
+        }
+        elapsed_ms = (now.tv_sec - last_refresh.tv_sec) * 1000L +
+                     (now.tv_nsec - last_refresh.tv_nsec) / 1000000L;
+        if (elapsed_ms >= 250) {
             printf("\r  ╰─  %c   [%-30.30s]", "\\|/-"[loader_index++ % 4], last_status);
             fflush(stdout);
-        } else if (*line != '\0') {
-            snprintf(last_status, sizeof(last_status), "%.127s", line);
+            last_refresh = now;
         }
     }
-    fclose(output);
+
+    if (line_length > 0) {
+        line[line_length] = '\0';
+        snprintf(last_status, sizeof(last_status), "%.127s", line);
+    }
+    close(pipe_fds[0]);
+
     while (waitpid(child, &status, 0) < 0) {
         if (errno != EINTR) {
             active_child = -1;
             return -1;
         }
     }
+
     active_child = -1;
+
     if (get_monotonic_time(&completed_at) != 0) return -1;
     {
         char completed_timestamp[32];
@@ -596,11 +661,19 @@ static int run_handbrake_with_progress(char *const argv[])
         printf("\r  ╰─  DONE [%s] (processing time: %s)%12s\n",
                completed_timestamp, processing_time, "");
     }
+    
     fflush(stdout);
+    
     if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
         log_message("ERROR", "HandBrake process failed: %s", last_status);
         return -1;
     }
+
+    if (read_error) {
+        log_message("ERROR", "Unable to read HandBrake output");
+        return -1;
+    }
+
     return 0;
 }
 
@@ -867,7 +940,7 @@ static int write_report(const char *log_dir, const ItemList *list,
         incoming_extension = item->extension[0] == '\0' ? "(none)" : item->extension;
         outgoing_extension = extension_of(item->dst_path);
         if (*outgoing_extension == '\0') outgoing_extension = "(none)";
-        fprintf(report, "Source: %s\n", item->src_path);
+        fprintf(report, "Incoming: %s\n", item->src_path);
         fprintf(report, "Outgoing: %s\n", item->dst_path);
         fprintf(report, "Format: %s -> %s\n", incoming_extension, outgoing_extension);
         fprintf(report, "Size: %lld -> %lld bytes\n",

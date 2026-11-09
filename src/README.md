@@ -32,7 +32,8 @@ subdirectories beneath the configured source directory are then removed; the
 configured source directory itself is preserved.
 
 At the end of each run, a report is written to
-`~/.config/incoming/log/report_YYYYMMDD_HHMMSS.txt`. The report lists each
+`~/.config/log/report_YYYYMMDD_HHMMSS.txt` by default. When
+`custom_log_file_path` is set, the report is written to that directory. The report lists each
 successfully outgoing file's input/output format, input/output size, processing
 time, total processing time, and average processing time.
 

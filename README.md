@@ -169,11 +169,11 @@ The optional `logging` settings control the log file and report destination:
 | Key | Type | Default | Description |
 | --- | --- | --- | --- |
 | `log_filename` | string | `incoming.log` | Log filename used when no custom path is set |
-| `custom_log_file_path` | string | empty | Full path to the log file; relative paths are resolved from `$HOME` |
-| `create_log_dst_dir_toggle` | boolean | `true` | Create the log file's parent directory when it does not exist |
+| `custom_log_file_path` | string | empty | Log directory; relative paths are resolved from `$HOME`, and `log_filename` is appended |
+| `create_log_dst_dir_toggle` | boolean | `true` | Create the log directory when it does not exist |
 
 When `custom_log_file_path` is empty, the log is written under
-`~/.config/incoming/log/`. The report is written in the same directory as the
+`~/.config/log/`. The report is written in the same directory as the
 log file.
 
 ### Image and Video Presets
@@ -312,7 +312,7 @@ The log file is appended at the configured path. By default, the example
 settings use:
 
 ```text
-~/.config/incoming/log/incoming.log
+~/.config/log/incoming.log
 ```
 
 Progress and error messages are also written to standard error. The program

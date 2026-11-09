@@ -182,20 +182,6 @@ static int path_join(char *out, size_t out_size, const char *left, const char *r
     return written >= 0 && (size_t)written < out_size ? 0 : -1;
 }
 
-static int path_parent(char *out, size_t out_size, const char *path)
-{
-    const char *slash = strrchr(path, '/');
-    size_t length;
-
-    if (slash == NULL) return snprintf(out, out_size, ".") < (int)out_size ? 0 : -1;
-    if (slash == path) return snprintf(out, out_size, "/") < (int)out_size ? 0 : -1;
-    length = (size_t)(slash - path);
-    if (length >= out_size) return -1;
-    memcpy(out, path, length);
-    out[length] = '\0';
-    return 0;
-}
-
 static const char *extension_of(const char *name)
 {
     const char *slash = strrchr(name, '/');
@@ -1141,6 +1127,7 @@ int main(int argc, char **argv)
     char log_path[MAX_PATH_LEN];
     const char *home = getenv("HOME");
     const char *source_root = NULL;
+    const char *log_filename;
 
     for (i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--version") == 0) {
@@ -1156,30 +1143,29 @@ int main(int argc, char **argv)
     if (home == NULL) return EXIT_FAILURE;
     if (config.custom_log_file_path[0] != '\0') {
         if (config.custom_log_file_path[0] == '/') {
-            if (snprintf(log_path, sizeof(log_path), "%s", config.custom_log_file_path) >=
-                (int)sizeof(log_path)) {
-                fprintf(stderr, "Custom log file path is too long\n");
+            if (snprintf(log_dir, sizeof(log_dir), "%s", config.custom_log_file_path) >=
+                (int)sizeof(log_dir)) {
+                fprintf(stderr, "Custom log directory path is too long\n");
                 return EXIT_FAILURE;
             }
-        } else if (snprintf(log_path, sizeof(log_path), "%s/%s", home,
-                            config.custom_log_file_path) >= (int)sizeof(log_path)) {
-            fprintf(stderr, "Custom log file path is too long\n");
+        } else if (snprintf(log_dir, sizeof(log_dir), "%s/%s", home,
+                            config.custom_log_file_path) >= (int)sizeof(log_dir)) {
+            fprintf(stderr, "Custom log directory path is too long\n");
             return EXIT_FAILURE;
         }
     } else {
-        snprintf(log_dir, sizeof(log_dir), "%s/.config/incoming/log", home);
-        if (path_join(log_path, sizeof(log_path), log_dir,
-                      config.log_filename[0] == '\0' ? "ic_log.log" : config.log_filename) != 0) {
-            fprintf(stderr, "Log file path is too long\n");
+        if (snprintf(log_dir, sizeof(log_dir), "%s/.config/log", home) >= (int)sizeof(log_dir)) {
+            fprintf(stderr, "Log directory path is too long\n");
             return EXIT_FAILURE;
         }
     }
-    if (path_parent(log_dir, sizeof(log_dir), log_path) != 0) {
-        fprintf(stderr, "Log directory path is too long\n");
-        return EXIT_FAILURE;
-    }
     if (config.create_log_dst_dir && mkdir_p(log_dir) != 0) {
         fprintf(stderr, "Unable to create log directory '%s': %s\n", log_dir, strerror(errno));
+        return EXIT_FAILURE;
+    }
+    log_filename = config.log_filename[0] == '\0' ? "ic_log.log" : config.log_filename;
+    if (path_join(log_path, sizeof(log_path), log_dir, log_filename) != 0) {
+        fprintf(stderr, "Log file path is too long\n");
         return EXIT_FAILURE;
     }
     log_file = fopen(log_path, "a");

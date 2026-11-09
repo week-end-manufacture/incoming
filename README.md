@@ -169,11 +169,11 @@ The optional `logging` settings control the log file and report destination:
 | Key | Type | Default | Description |
 | --- | --- | --- | --- |
 | `log_filename` | string | `incoming.log` | Log filename used when no custom path is set |
-| `custom_log_file_path` | string | empty | Full path to the log file; relative paths are resolved from `$HOME` |
-| `create_log_dst_dir_toggle` | boolean | `true` | Create the log file's parent directory when it does not exist |
+| `custom_log_file_path` | string | empty | Log directory; relative paths are resolved from `$HOME`, and `log_filename` is appended |
+| `create_log_dst_dir_toggle` | boolean | `true` | Create the log directory when it does not exist |
 
 When `custom_log_file_path` is empty, the log is written under
-`~/.config/incoming/log/`. The report is written in the same directory as the
+`~/.config/log/`. The report is written in the same directory as the
 log file.
 
 ### Image and Video Presets
@@ -193,13 +193,11 @@ The C implementation reads these preset keys:
 | `video_process_toggle` | boolean | `true` | Enable video conversion |
 | `process_hidden_files_toggle` | boolean | `true` | Include files and directories whose names start with `.` |
 | `image_process.output_ext` | string | `.jpg` | Image output extension |
+| `image_process.output_quality` | integer | `85` | ImageMagick output quality from `0` to `100` |
 | `video_process.output_video_ext` | string | `.mp4` | Video output extension |
 | `remove_all_exif_data` | boolean | `false` | Remove EXIF with ImageMagick `-strip` |
 | `remove_only_gps_exif_data` | boolean | `false` | Read but not applied by the current implementation |
 | `HandBrake_presets_path` | string | none | HandBrake preset JSON path |
-
-Image quality uses the code default of `85`. The current implementation does
-not read `output_quality` from the JSON configuration.
 
 The `output_ext` inside `video_process.ffmpeg` is an ffmpeg-specific setting
 and is not used as the image output extension.
@@ -312,7 +310,7 @@ The log file is appended at the configured path. By default, the example
 settings use:
 
 ```text
-~/.config/incoming/log/incoming.log
+~/.config/log/incoming.log
 ```
 
 Progress and error messages are also written to standard error. The program

@@ -9,6 +9,10 @@ legacy command-line options and reads the same configuration layout:
 ~/.config/incoming/handbrake_preset.json
 ```
 
+The settings and selected preset files must exist and be readable; otherwise the
+program reports the failing path and exits. Source files and generated output
+files are also checked before they are processed or reported.
+
 Build:
 
 ```sh
@@ -23,8 +27,13 @@ Run:
 ./cadv --unlink -i INPUT -o OUTPUT
 ```
 
+With `--unlink`, successfully processed source files are deleted. Empty
+subdirectories beneath the configured source directory are then removed; the
+configured source directory itself is preserved.
+
 At the end of each run, a report is written to
-`~/.config/incoming/log/report_YYYYMMDD_HHMMSS.txt`. The report lists each
+`~/.config/log/report_YYYYMMDD_HHMMSS.txt` by default. When
+`custom_log_file_path` is set, the report is written to that directory. The report lists each
 successfully outgoing file's input/output format, input/output size, processing
 time, total processing time, and average processing time.
 

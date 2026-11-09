@@ -438,6 +438,72 @@ static int setting_string_in_object(const char *json, const char *object_key,
     return setting_string_in_range(open, close, key, out, out_size);
 }
 
+static int setting_int_in_object(const char *json, const char *object_key,
+                                 const char *key, int *out)
+{
+    char pattern[128];
+    const char *object;
+    const char *open;
+    const char *cursor;
+    const char *close = NULL;
+    const char *value;
+    char *end;
+    long parsed;
+    int depth = 0;
+    int in_string = 0;
+    int escaped = 0;
+
+    snprintf(pattern, sizeof(pattern), "\"%s\"", object_key);
+    object = strstr(json, pattern);
+    if (object == NULL) return 1;
+    open = strchr(object + strlen(pattern), '{');
+    if (open == NULL) return -1;
+
+    for (cursor = open; *cursor != '\0'; cursor++) {
+        if (in_string) {
+            if (escaped) {
+                escaped = 0;
+            } else if (*cursor == '\\') {
+                escaped = 1;
+            } else if (*cursor == '"') {
+                in_string = 0;
+            }
+        } else if (*cursor == '"') {
+            in_string = 1;
+        } else if (*cursor == '{') {
+            depth++;
+        } else if (*cursor == '}' && --depth == 0) {
+            close = cursor;
+            break;
+        }
+    }
+    if (close == NULL) return -1;
+
+    snprintf(pattern, sizeof(pattern), "\"%s\"", key);
+    value = strstr(open, pattern);
+    if (value == NULL || value >= close) return 1;
+    value = strchr(value + strlen(pattern), ':');
+    if (value == NULL || value >= close) return -1;
+    value++;
+    while (value < close && (*value == ' ' || *value == '\t' ||
+                             *value == '\r' || *value == '\n')) {
+        value++;
+    }
+    if (value >= close || *value < '0' || *value > '9') return -1;
+
+    errno = 0;
+    parsed = strtol(value, &end, 10);
+    if (errno == ERANGE || parsed > 100) return -1;
+    while (end < close && (*end == ' ' || *end == '\t' ||
+                           *end == '\r' || *end == '\n')) {
+        end++;
+    }
+    if (end >= close || (*end != ',' && *end != '}')) return -1;
+
+    *out = (int)parsed;
+    return 0;
+}
+
 static int setting_bool(const char *json, const char *key, int fallback)
 {
     char pattern[128];
@@ -528,6 +594,16 @@ static int apply_preset_file(Config *config, const char *path)
                                  config->output_image_ext,
                                  sizeof(config->output_image_ext)) != 0) {
         log_message("WARNING", "Image output_ext is missing from preset");
+    }
+    {
+        int result = setting_int_in_object(preset, "image_process",
+                                           "output_quality",
+                                           &config->output_quality);
+        if (result < 0) {
+            log_message("WARNING",
+                        "Image output_quality in preset is invalid; using %d",
+                        config->output_quality);
+        }
     }
     setting_string(preset, "output_video_ext", config->output_video_ext, sizeof(config->output_video_ext));
     setting_string(preset, "HandBrake_presets_path", config->handbrake_preset, sizeof(config->handbrake_preset));

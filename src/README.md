@@ -27,6 +27,10 @@ Run:
 ./cadv --unlink -i INPUT -o OUTPUT
 ```
 
+With `--unlink`, successfully processed source files are deleted. Empty
+subdirectories beneath the configured source directory are then removed; the
+configured source directory itself is preserved.
+
 At the end of each run, a report is written to
 `~/.config/incoming/log/report_YYYYMMDD_HHMMSS.txt`. The report lists each
 successfully outgoing file's input/output format, input/output size, processing

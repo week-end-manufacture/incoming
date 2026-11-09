@@ -958,6 +958,46 @@ static int print_job_done(const struct timespec *started_at)
     return 0;
 }
 
+static void remove_empty_source_directories(const char *directory, int remove_current)
+{
+    DIR *dir = opendir(directory);
+    struct dirent *entry;
+    char child_path[MAX_PATH_LEN];
+
+    if (dir == NULL) {
+        log_message("WARNING", "Unable to inspect source directory '%s': %s",
+                    directory, strerror(errno));
+        return;
+    }
+    while ((entry = readdir(dir)) != NULL) {
+        struct stat info;
+
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) continue;
+        if (path_join(child_path, sizeof(child_path), directory, entry->d_name) != 0) {
+            log_message("WARNING", "Source path is too long under '%s'", directory);
+            continue;
+        }
+        if (lstat(child_path, &info) != 0) {
+            log_message("WARNING", "Unable to inspect '%s': %s",
+                        child_path, strerror(errno));
+            continue;
+        }
+        if (S_ISDIR(info.st_mode)) {
+            remove_empty_source_directories(child_path, 1);
+        }
+    }
+    if (closedir(dir) != 0) {
+        log_message("WARNING", "Unable to finish inspecting source directory '%s': %s",
+                    directory, strerror(errno));
+    }
+    if (remove_current && rmdir(directory) == 0) {
+        log_message("INFO", "Removed empty source directory '%s'", directory);
+    } else if (remove_current && errno != ENOTEMPTY && errno != EEXIST && errno != ENOENT) {
+        log_message("WARNING", "Unable to remove empty source directory '%s': %s",
+                    directory, strerror(errno));
+    }
+}
+
 static void unlink_source_if_requested(Item *item, int unlink_sources)
 {
     if (!unlink_sources || item->state != STATE_OUTGOING) return;
@@ -965,6 +1005,9 @@ static void unlink_source_if_requested(Item *item, int unlink_sources)
         item->state = STATE_DELETED;
         printf("✓ Unlinked successfully: %s\n", item->src_path);
         fflush(stdout);
+    } else {
+        log_message("ERROR", "Unable to unlink source file '%s': %s",
+                    item->src_path, strerror(errno));
     }
 }
 
@@ -1097,6 +1140,7 @@ int main(int argc, char **argv)
     char log_dir[MAX_PATH_LEN];
     char log_path[MAX_PATH_LEN];
     const char *home = getenv("HOME");
+    const char *source_root = NULL;
 
     for (i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--version") == 0) {
@@ -1210,6 +1254,9 @@ int main(int argc, char **argv)
                     config.src_dir);
         fclose(log_file);
         return EXIT_FAILURE;
+    }
+    if (S_ISDIR(source_info.st_mode)) {
+        source_root = config.src_dir;
     }
     if (mkdir_p(config.dst_dir) != 0) {
         log_message("ERROR", "Unable to create destination '%s': %s",
@@ -1356,6 +1403,9 @@ int main(int argc, char **argv)
             }
             unlink_source_if_requested(item, unlink_sources);
         }
+    }
+    if (unlink_sources && source_root != NULL) {
+        remove_empty_source_directories(source_root, 0);
     }
     {
         off_t incoming = 0, outgoing = 0;

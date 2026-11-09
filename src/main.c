@@ -592,8 +592,10 @@ static int apply_preset_file(Config *config, const char *path)
     config->remove_gps_exif = setting_bool(preset, "remove_only_gps_exif_data", config->remove_gps_exif);
     if (setting_string_in_object(preset, "image_process", "output_ext",
                                  config->output_image_ext,
-                                 sizeof(config->output_image_ext)) != 0) {
-        log_message("WARNING", "Image output_ext is missing from preset");
+                                 sizeof(config->output_image_ext)) != 0 ||
+        config->output_image_ext[0] == '\0') {
+        snprintf(config->output_image_ext, sizeof(config->output_image_ext), ".jpg");
+        log_message("WARNING", "Image output_ext is missing or empty in preset; using .jpg");
     }
     {
         int result = setting_int_in_object(preset, "image_process",

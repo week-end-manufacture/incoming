@@ -62,6 +62,18 @@ preserving their relative directory structure.
 
 ## Requirements
 
+### Discord Pull Request Notifications
+
+Pull requests targeting `master` are announced in Discord when opened, updated,
+reopened, or marked ready for review. The message uses the PR title and body as
+release notes, so include a user-facing summary of the changes in the PR
+description.
+
+Add a repository Actions secret named `DISCORD_WEBHOOK_URL` containing the
+Discord channel's webhook URL. GitHub does not provide repository secrets to
+workflows triggered by pull requests from forks, so those PRs cannot be
+announced by this workflow.
+
 ### Operating System
 
 The program uses POSIX APIs and is intended for macOS or Linux-like systems.

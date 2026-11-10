@@ -1,0 +1,65 @@
+name: Discord PR Release Notes
+
+on:
+  pull_request:
+    branches:
+      - master
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - edited
+      - ready_for_review
+
+permissions: {}
+
+jobs:
+  send-release-notes:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send release notes to Discord
+        uses: actions/github-script@v7
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        with:
+          script: |
+            const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+            if (!webhookUrl) {
+              core.setFailed("Set the DISCORD_WEBHOOK_URL repository secret to enable Discord notifications.");
+              return;
+            }
+
+            const pullRequest = context.payload.pull_request;
+            const title = `릴리즈 노트 | #${pullRequest.number} ${pullRequest.title}`;
+            const body = pullRequest.body?.trim() || "PR 본문에 변경 내용이 작성되지 않았습니다.";
+            const releaseNotes = `### 변경 내용\n${body}`;
+            const truncationNotice = "… (내용이 길어 일부 생략됨)";
+            const description = releaseNotes.length > 4096
+              ? `${releaseNotes.slice(0, 4096 - truncationNotice.length)}${truncationNotice}`
+              : releaseNotes;
+            const payload = {
+              allowed_mentions: { parse: [] },
+              embeds: [{
+                title: title.slice(0, 256),
+                url: pullRequest.html_url,
+                description,
+                color: 5814783,
+                fields: [
+                  { name: "대상 브랜치", value: `\`${pullRequest.base.ref}\``, inline: true },
+                  { name: "작업 브랜치", value: `\`${pullRequest.head.ref}\``, inline: true },
+                  { name: "작성자", value: pullRequest.user.login, inline: true },
+                ],
+                footer: { text: `${context.repo.owner}/${context.repo.repo}` },
+                timestamp: pullRequest.updated_at,
+              }],
+            };
+
+            const response = await fetch(webhookUrl, {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify(payload),
+            });
+            if (!response.ok) {
+              core.setFailed(`Discord webhook returned HTTP ${response.status}.`);
+            }

@@ -1000,7 +1000,7 @@ static void print_progressbar(size_t iteration, size_t total)
     if (total == 0) return;
     filled_length = length * iteration / total;
     percent = 100.0 * (double)iteration / (double)total;
-    printf("\r🏞️ Image Process: [");
+    printf("\rImage Process: [");
     for (i = 0; i < filled_length; i++) fputs("█", stdout);
     for (i = filled_length; i < length; i++) putchar('-');
     printf("] %.1f%%", percent);
@@ -1069,6 +1069,7 @@ static void unlink_source_if_requested(Item *item, int unlink_sources)
         item->state = STATE_DELETED;
         printf("✓ Unlinked successfully: %s\n", item->src_path);
         fflush(stdout);
+        log_message("INFO", "Unlinked source file '%s'", item->src_path);
     } else {
         log_message("ERROR", "Unable to unlink source file '%s': %s",
                     item->src_path, strerror(errno));
@@ -1077,13 +1078,13 @@ static void unlink_source_if_requested(Item *item, int unlink_sources)
 
 static void print_process_start(const Config *config)
 {
-    printf("\n⚙️ Process start"
+    printf("\nProcess start"
            "\n- incoming:  [%s]"
            "\n- outgoing:  [%s]"
            "\n- preset:    [%s]"
            "\n\t- image process: %s"
            "\n\t\t%s"
-           "\n\t\t==> %s (with PIL quality = %d)"
+           "\n\t\t==> %s (with ImageMagick quality = %d)"
            "\n\t- video process: %s"
            "\n\t\t%s"
            "\n\t\t==> %s (with incoming and preset [%s])\n\n",
@@ -1366,6 +1367,11 @@ int main(int argc, char **argv)
     } else {
         scan_directory(config.src_dir, config.dst_dir, &config, &list);
     }
+    log_message("INFO", "Incoming list (%zu files)", list.count);
+    for (i = 0; (size_t)i < list.count; i++) {
+        log_message("INFO", "Incoming: '%s' (%lld bytes)",
+                    list.items[i].src_path, (long long)list.items[i].incoming_size);
+    }
     {
         size_t image_count = 0;
         size_t image_index = 0;
@@ -1422,7 +1428,7 @@ int main(int argc, char **argv)
         for (i = 0; (size_t)i < list.count && !terminate_requested; i++) {
             if (list.items[i].kind == KIND_VIDEO) video_count++;
         }
-        printf("🎬 Video Process (total: %zu)\n", video_count);
+        printf("Video Process (total: %zu)\n", video_count);
         for (i = 0; (size_t)i < list.count && !terminate_requested; i++) {
             Item *item = &list.items[i];
             struct timespec item_started_at;
@@ -1466,6 +1472,20 @@ int main(int argc, char **argv)
                 item->processing_seconds = elapsed_seconds(&item_started_at, &item_completed_at);
             }
             unlink_source_if_requested(item, unlink_sources);
+        }
+    }
+    {
+        size_t outgoing_count = 0;
+
+        for (i = 0; (size_t)i < list.count; i++) {
+            if (list.items[i].outgoing_completed) outgoing_count++;
+        }
+        log_message("INFO", "Outgoing list (%zu files)", outgoing_count);
+        for (i = 0; (size_t)i < list.count; i++) {
+            const Item *item = &list.items[i];
+            if (!item->outgoing_completed) continue;
+            log_message("INFO", "Outgoing: '%s' (from '%s', %lld bytes)",
+                        item->dst_path, item->src_path, (long long)item->outgoing_size);
         }
     }
     if (unlink_sources && source_root != NULL) {
